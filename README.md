@@ -1,88 +1,154 @@
 # Plugin Duodeal pour Claude
 
-Duodeal dans Claude, sur le modèle du plugin Make : **5 skills** de connaissance +
-**1 serveur MCP** (57 outils) branché sur `https://api.duodeal.app/api`.
+**Pilotez Duodeal en langage naturel.** Ce plugin connecte Claude à votre compte
+Duodeal : créez des deals et des devis, personnalisez-les jusqu'au design de la
+selling page, récupérez les liens à envoyer à vos prospects — en une conversation.
 
-## Contenu
+Il réunit deux choses :
 
-| Composant | Rôle |
-|---|---|
-| Skill `duodeal-api-reference` | Toute l'API : conventions, ~80 opérations, filtres, erreurs (+ `references/`) |
-| Skill `duodeal-quote-building` | Créer un devis de A à Z : tenant → client → deal → lignes → liens |
-| Skill `duodeal-quote-design` | Devis design en HTML (qualité selling page) : design system, structure narrative, squelettes de blocs inline-first, check-list de livraison |
-| Skill `duodeal-v2-blocks` | Le système de blocs V2 (builderVersion 2) et sa manipulation sûre |
-| Skill `duodeal-mcp-reference` | Configurer la connexion (profils multi-tenant) et dépanner |
-| Serveur MCP `duodeal` | 57 outils : deals, quotations, lignes, blocs V2, clients, catalogue, médias, templates, custom fields, deal views, users, webhooks + `api_call` libre |
+- **Un serveur MCP** : 57 outils branchés sur l'API Duodeal (deals, devis, lignes,
+  blocs V2, clients, catalogue, médias, modèles, webhooks…), avec garde-fous
+  intégrés — impossible d'écraser par accident le travail fait dans l'éditeur.
+- **5 skills** : le savoir-faire Duodeal que Claude charge au bon moment — référence
+  complète de l'API, méthode de création d'un devis de A à Z, **création de devis
+  design en HTML** (qualité selling page), système de blocs V2, configuration de la
+  connexion.
+
+## Exemples de ce que vous pouvez demander
+
+> « Crée un devis pour Acme à partir de mon template Site vitrine, mets Jeanne
+> Dupont en contact, et donne-moi le lien à lui envoyer. »
+
+> « Transforme le devis Q-2026-0042 en proposition design : intro avec nos deux
+> logos, points de valeur, FAQ, et un récap avec l'abonnement mensuel. »
+
+> « Liste mes devis signés ce mois-ci. »
+
+> « Ajoute une remise de 10 % sur la ligne Maintenance du devis 4512. »
+
+> « Sur quel compte Duodeal suis-je connecté ? »
 
 ## Installation
 
-Dans un terminal (ou en collant ces commandes à Claude Code) :
+> ℹ️ Ce dépôt est **privé** : votre compte GitHub doit avoir été invité par
+> l'équipe Duodeal, et git doit être connecté à ce compte sur votre machine.
+
+Deux commandes, dans un terminal (ou collées telles quelles à Claude Code) :
 
 ```bash
 claude plugin marketplace add DuodealTeam/duodeal-plugin
 claude plugin install duodeal@duodeal-marketplace
 ```
 
-Mise à jour vers la dernière version :
+**Prérequis** : [Claude Code](https://claude.com/claude-code) (CLI ou app de bureau)
+et Node.js ≥ 18. Le serveur MCP est **sans aucune dépendance** : rien d'autre à
+installer.
+
+## Première connexion
+
+Le plugin démarre sans clé et vous guide. Le plus simple : demandez à Claude
+
+> « Configure ma connexion Duodeal. »
+
+Il créera pour vous `~/.duodeal/config.json`, avec votre clé API stockée dans un
+**fichier local** — jamais dans la conversation, jamais dans une config en clair :
+
+```json
+{
+  "activeProfile": "production",
+  "profiles": {
+    "production": { "apiKeyFile": "/chemin/vers/votre/fichier_cle_api" }
+  }
+}
+```
+
+Plusieurs comptes (production, test…) ? Déclarez un profil par compte et changez à
+la volée : « passe sur le profil test » (`use_profile`). Vérifiez à tout moment le
+compte actif : « sur quel compte suis-je ? » (`connection_status`).
+
+## Ce qu'il y a dedans
+
+### Les 5 skills
+
+| Skill | Ce que Claude sait faire grâce à lui |
+|---|---|
+| `duodeal-api-reference` | Toute l'API Duodeal : ~80 opérations, conventions, filtres, erreurs connues et leurs corrections |
+| `duodeal-quote-building` | La méthode complète d'un devis : client → deal → lignes → branding → CGV → les 2 liens à livrer |
+| `duodeal-quote-design` | Les devis **design** : design system à vos couleurs, structure narrative (accroche → problème → solution → preuve → prix → action), squelettes HTML éprouvés, check-list de livraison |
+| `duodeal-v2-blocks` | Le système de blocs V2 des selling pages, et sa manipulation sans risque |
+| `duodeal-mcp-reference` | La configuration de la connexion, les profils multi-comptes, le dépannage |
+
+### Les 57 outils du serveur MCP
+
+| Domaine | Outils |
+|---|---|
+| Connexion | `connection_status` · `list_profiles` · `use_profile` |
+| Deals | lister, lire, créer, modifier, cloner (templates), supprimer |
+| Devis | lister, lire, modifier, cloner, supprimer + `get_links` (lien client + lien édition) |
+| Lignes | lister, créer, modifier, supprimer (sections, remises, options, images) |
+| Blocs V2 | lire (résumé ou complet), ajouter, modifier, réordonner, éditer un texte ciblé, supprimer |
+| Clients | contacts et entreprises clientes : lister, créer, modifier |
+| Catalogue | produits, prix, catégories de prix, taxes, unités (créations **idempotentes** : jamais de doublon) |
+| Médias | upload d'images sécurisé (logo, cover, images de lignes) |
+| Modèles | CGV, mentions légales, emails (`ensure_template`) |
+| Champs personnalisés | définitions + visibilité dans les vues |
+| Équipe | profil du compte, utilisateurs, création d'utilisateur |
+| Webhooks | lister, créer, modifier, supprimer |
+| Passe-partout | `api_call` : n'importe quel endpoint de l'API, avec les mêmes protections |
+
+## Sécurité et garde-fous
+
+- **Votre clé API ne circule jamais** : lue depuis un fichier local, masquée dans
+  toutes les réponses, jamais écrite dans les logs ni la conversation.
+- **Mode lecture seule** disponible par profil (`"readOnly": true`) : toutes les
+  écritures sont alors refusées — utile pour explorer sans risque.
+- **Anti-écrasement** : les champs personnalisés et les blocs V2 sont toujours
+  relus puis **fusionnés** avant écriture. Le travail fait en parallèle dans
+  l'éditeur Duodeal est préservé.
+- **Robustesse** : nouvelles tentatives automatiques en cas d'erreur réseau ou de
+  saturation (backoff progressif), limitation du débit côté client (~4 requêtes/s),
+  délai d'attente de 30 s, messages d'erreur avec le diagnostic et la correction (💡).
+
+## Mise à jour
 
 ```bash
 claude plugin marketplace update duodeal-marketplace
 ```
 
-## Prérequis
+## Dépannage express
 
-- Node ≥ 18 (serveur **zéro dépendance** — rien à installer).
+| Symptôme | Que faire |
+|---|---|
+| « Aucune clé API Duodeal configurée » | Demander à Claude : « configure ma connexion Duodeal » |
+| Erreur 401 | La clé est l'UUID brut, sans préfixe. Vérifier avec « sur quel compte suis-je ? » |
+| « Mode lecture seule actif » | Voulu : retirer `"readOnly": true` du profil pour écrire |
+| Le serveur n'apparaît pas | Vérifier `node --version` (≥ 18), puis relancer la session |
 
-## Configuration de la clé (première utilisation)
+Le skill `duodeal-mcp-reference` contient le guide complet — demandez simplement à
+Claude ce qui ne va pas.
 
-Le serveur démarre sans clé et explique quoi faire. Recommandé : créer
-`~/.duodeal/config.json` avec un profil par tenant — modèle complet dans le skill
-`duodeal-mcp-reference`. La clé vit dans un **fichier** (ex.
-`…/demo-kit-automated-v3/.secrets/duodeal_api_key`), jamais en clair dans une config.
+## Sous le capot (pour les développeurs)
 
-```json
-{
-  "activeProfile": "demo",
-  "profiles": {
-    "demo": { "apiKeyFile": "/chemin/vers/duodeal_api_key" }
-  }
-}
+```
+duodeal-plugin/
+├── .claude-plugin/          # manifeste + marketplace
+├── .mcp.json                # déclaration du serveur MCP
+├── mcp-server/
+│   ├── index.mjs            # entrée stdio JSON-RPC (zéro dépendance, Node ≥ 18)
+│   ├── lib/                 # transport, config multi-profils, client HTTP
+│   │                        #   (retries, rate limiting), validation, utilitaires
+│   ├── tools/               # 57 outils, groupés par domaine métier
+│   └── test/                # tests unitaires + intégration stdio
+└── skills/                  # 5 skills (SKILL.md + références détaillées)
 ```
 
-Changer de tenant : outil `use_profile`, vérification : `connection_status`.
-
-## Sécurité
-
-- Clés lues depuis des fichiers, masquées dans toutes les réponses, jamais loggées.
-- `readOnly: true` par profil (ou `DUODEAL_READ_ONLY=1`) : écritures refusées —
-  recommandé pour tout tenant client réel.
-- Garde-fous d'écriture : `customFields` et blocs V2 fusionnés avec l'existant
-  (jamais d'écrasement aveugle), `fields` de deal-view forcés en strings.
-
-## Robustesse
-
-Retries (réseau/429/5xx, backoff + jitter), rate limiting client (~4 req/s),
-timeout 30 s, pagination automatique (`all: true`), erreurs enrichies de diagnostics
-éprouvés (💡).
-
-## Tests
+Lancer les tests (aucun réseau, aucune clé nécessaires) :
 
 ```bash
 node --test mcp-server/test/run-tests.mjs
 ```
 
-16 tests (unitaires + intégration stdio réelle), sans réseau ni clé.
+## Support
 
-## Architecture
-
-```
-duodeal-plugin/
-├── .claude-plugin/plugin.json      # manifeste
-├── .mcp.json                       # déclaration du serveur (node …/mcp-server/index.mjs)
-├── mcp-server/
-│   ├── index.mjs                   # entrée stdio JSON-RPC
-│   ├── lib/                        # rpc, config (profils), http (retries/rate limit), validate, util
-│   ├── tools/                      # outils par domaine (deals, quotations, blocks, …)
-│   └── test/run-tests.mjs
-└── skills/                         # 4 skills (SKILL.md + references/)
-```
+Une question, un souci d'installation ? Contactez votre interlocuteur Duodeal
+habituel.
