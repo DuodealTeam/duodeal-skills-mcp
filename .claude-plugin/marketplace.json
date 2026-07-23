@@ -1,0 +1,13 @@
+{
+  "name": "duodeal-marketplace",
+  "owner": {
+    "name": "Duodeal"
+  },
+  "plugins": [
+    {
+      "name": "duodeal",
+      "source": "./",
+      "description": "Duodeal pour Claude — serveur MCP (57 outils API) + 5 skills (référence API, création de devis, devis design HTML, blocs V2, configuration MCP)."
+    }
+  ]
+}
