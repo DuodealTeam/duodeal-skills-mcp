@@ -1,7 +1,7 @@
 {
   "name": "duodeal",
   "version": "0.1.0",
-  "description": "Duodeal pour Claude — serveur MCP (API complète : deals, devis, lignes, blocs V2, clients, catalogue, médias) + skills (référence API, création de devis, devis design HTML, blocs V2, configuration MCP). Auth par X-API-KEY avec profils multi-tenant.",
+  "description": "Duodeal pour Claude — 5 skills de savoir-faire (référence API, création de devis, devis design HTML, blocs V2, connexion). Les outils Duodeal sont fournis par le connecteur MCP officiel (OAuth).",
   "author": {
     "name": "Duodeal"
   },

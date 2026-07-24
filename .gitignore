@@ -1,2 +1,7 @@
 .DS_Store
 node_modules/
+
+# Serveur MCP local : hors dépôt (le git ne porte que les skills ; les outils viennent
+# du connecteur MCP officiel Duodeal). Conservé sur le disque comme repli.
+mcp-server/
+.mcp.json
