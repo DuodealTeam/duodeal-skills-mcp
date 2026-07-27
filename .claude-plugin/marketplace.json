@@ -7,7 +7,7 @@
     {
       "name": "duodeal",
       "source": "./",
-      "description": "Duodeal pour Claude — 5 skills de savoir-faire (référence API, création de devis, devis design HTML, blocs V2, connexion), à utiliser avec le connecteur MCP officiel Duodeal (OAuth)."
+      "description": "Duodeal pour Claude — 5 skills de savoir-faire V2 (référence API, création de devis, devis design HTML, blocs V2, bonnes pratiques), à utiliser avec le connecteur MCP officiel Duodeal (OAuth)."
     }
   ]
 }

@@ -5,9 +5,9 @@ description: Système de blocs V2 des quotations Duodeal (builderVersion 2) — 
 
 # Blocs V2 des quotations Duodeal
 
-En V2, une quotation n'est plus rendue via deal-view + customFields mais comme une
-**liste ordonnée de `blocks`** (`builderVersion: 2`), éditée dans l'éditeur par blocs.
-Contrat vérifié empiriquement — **rien n'est dans openapi.yaml** (spec antérieure à la V2).
+Une quotation V2 est une **liste ordonnée de `blocks`** (`builderVersion: 2`), éditée
+dans l'éditeur par blocs. Contrat vérifié empiriquement — **rien n'est dans openapi.yaml**
+(spec antérieure à la V2).
 
 ## Modèle de données
 
@@ -56,8 +56,8 @@ gallery, accept, signstamp, pagebreak.
   **premier** bloc pricing — indispensable seulement avec plusieurs blocs pricing. Si on
   remplace le bloc pricing, re-rattacher les lignes.
 - Un devis créé par l'API naît `builderVersion: 1, blocks: null` ; le premier écrit de
-  bloc le bascule en V2. Passer en V2 ne casse pas le rendu V1 (coexistence).
-- `quotation.shareLinks` = remplaçant des DealView/DealViewLink en V2 (vue filtrée des blocs).
+  bloc le bascule en V2 — toujours poser `builderVersion: 2` dès la création.
+- `quotation.shareLinks` = liens de partage V2 (vue filtrée des blocs).
 
 ## API JS des blocs `html` (micro-apps)
 

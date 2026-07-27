@@ -75,14 +75,11 @@ create_product_price {productId, priceCategoryId, price}   → 1 seul prix par c
 
 Puis référencer dans les lignes : `product {id}`, `productPrice {id}`.
 
-## 4. Custom fields (rendu V1 / données structurées)
+## 4. Custom fields (données structurées)
 
-1. `create_custom_field {name, label, type, scope}` — pour un CF quotation visible :
-   `payload.options.display` ∈ `quotation_informations` (haut) / `quotation` (corps) /
-   `quotation_validation` (signature).
+1. `create_custom_field {name, label, type, scope}` — champ de données sur deal / customer / product / quotation.
 2. Valeurs : `update_quotation {payload: {customFields: {clé: valeur}}}` — fusion automatique.
-3. Visibilité dans la vue : `update_deal_view_fields` — **strings uniquement**
-   (`custom_fields_quotation_<name>`), l'ordre de la liste = ordre d'affichage.
+3. Affichage dans le devis : via le bloc **`customfields`** V2 (liste de noms de CF) — voir **duodeal-v2-blocks**.
 
 ## 5. Livraison — toujours les 2 liens
 
@@ -90,10 +87,9 @@ Puis référencer dans les lignes : `product {id}`, `productPrice {id}`.
 
 - **clientLink** `…/quotations/deal/{uid}` — la selling page envoyée au prospect (default link)
 - **editionLink** `…/app/quotations/{dealId}/{quotationId}` — l'éditeur V2 interne
-  (⚠️ jamais `/app/deals/…` : c'est l'éditeur V1)
+  (⚠️ jamais `/app/deals/…`)
 
-Ne pas confondre avec le share link (`/quotations/share/{uuid}`) ni le view link
-(`create_deal_view_link` → `/deals/{uuid}/{uuid}`) — trois choses différentes.
+Partage alternatif : share link V2 `…/quotations/share/{shareUuid}` (vue filtrée des blocs).
 
 ## 6. Vérification finale
 

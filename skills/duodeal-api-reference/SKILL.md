@@ -15,7 +15,7 @@ l'outil `api_call` couvre tout endpoint.
 - **Base URL** : `https://api.duodeal.app/api` (override : env `DUODEAL_BASE_URL`)
 - **Auth** : header `X-API-KEY: <uuid>` — l'UUID BRUT, **jamais** de préfixe `Bearer`
 - **Content-Type** : `application/json` pour tous les POST/PUT
-- **IDs** : entiers pour les ressources ; **UUID v7** pour les liens publics (deal `uid`, quotation `uuid`, deal-view-link `uuid`, pins)
+- **IDs** : entiers pour les ressources ; **UUID v7** pour les liens publics (deal `uid`, quotation `uuid`, pins)
 - **Connexion** : gérée par le serveur MCP (profils multi-tenant) — vérifier avec l'outil `connection_status`, jamais afficher une clé
 
 ## Conventions de payload (valables partout)
@@ -40,7 +40,6 @@ l'outil `api_call` couvre tout endpoint.
 | Custom fields | `/custom-fields` | `list/create_custom_field` |
 | Médias | `/medias` | `upload_media` |
 | Modèles | `/templates` (types `cgv`/`notice`/`email`) | `list_templates`, `ensure_template` |
-| Partage | `/deal-view-links`, `/deal-views` | `list_deal_views`, `update_deal_view_fields`, `create_deal_view_link` |
 | Org | `/users`, `/user-groups`, `/filter-views` | `get_me`, `list_users`, `create_user` |
 | Webhooks | `/webhooks` (hors spec, vérifié 23/07/2026) | `list/get/create/update/delete_webhook` |
 | Collab | `/pins`, `/comments/{uuid}` | via `api_call` |
@@ -66,10 +65,9 @@ Erreurs récurrentes, règles de suppression, médias, logos : lire
 
 | Lien | URL | Usage |
 |---|---|---|
-| **Édition** (interne) | `https://duodeal.app/app/quotations/{dealId}/{quotationId}` | Éditeur **V2**. ⚠️ `/app/deals/…` = V1, mauvais éditeur |
+| **Édition** (interne) | `https://duodeal.app/app/quotations/{dealId}/{quotationId}` | Éditeur **V2** (⚠️ pas `/app/deals/…`) |
 | **Client / selling page** (défaut) | `https://duodeal.app/quotations/deal/{deal.uid}` | Envoyé au prospect ; le `deal.uid` suffit |
-| Share link | `https://duodeal.app/quotations/share/{shareUuid}` | Partage alternatif |
-| View link | `https://duodeal.app/deals/{uuid}/{uuid}` | Via `create_deal_view_link` |
+| Share link (V2) | `https://duodeal.app/quotations/share/{shareUuid}` | Partage alternatif (vue filtrée des blocs) |
 
 Quand un devis est livré : **toujours donner les 2 liens** (client + édition) — l'outil
 `get_links` les construit.

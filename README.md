@@ -29,7 +29,7 @@ claude plugin install duodeal@duodeal-marketplace
 | `duodeal-quote-building` | Créer un devis de A à Z : client → deal → lignes → branding → CGV → les 2 liens à livrer |
 | `duodeal-quote-design` | Devis **design** en HTML : design system, structure narrative, squelettes de blocs, check-list de livraison (+ `references/`) |
 | `duodeal-v2-blocks` | Le système de blocs V2 des selling pages et sa manipulation sans risque |
-| `duodeal-mcp-reference` | La connexion Duodeal et le dépannage |
+| `duodeal-mcp-best-practices` | Règles d'or et check-list de rendu : garder header + contacts natifs, blocs qui survivent à l'éditeur & au PDF, prix/devises, garde-fous d'écriture |
 
 ## Les outils (connecteur MCP officiel)
 
@@ -46,3 +46,6 @@ Repositionnement en cours : ce paquet est passé de « serveur MCP local + skill
 côté client). Les mentions d'outils dans les skills seront alignées sur les noms exacts
 du connecteur officiel. Un serveur MCP local (à clé) reste disponible hors dépôt comme
 repli pour Claude Code en ligne de commande.
+
+Les skills couvrent **uniquement la V2** (éditeur à blocs, selling pages) ; l'ancien
+rendu V1 (deal-views, customFields d'affichage) a été retiré.

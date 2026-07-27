@@ -15,7 +15,7 @@ Format : `MÉTHODE /path` — résumé. **Req** = champs requis ; **Opt** = opti
 - `GET|PUT|DELETE /custom-fields/{id}` — PUT opt: `label, required, weight` (+ autres) ; changer `type`/`scope` peut casser des données.
 - **Types** : `Text, MultilineText, RichText, Number, Date, datetime, Select, MultiSelect, Image, User, Formula, Html, System` (+ `HtmlSimple` toléré, rendu HTML).
 - **Scopes** : `deal, customer, customer-company, product, quotation, quotation-line`.
-- **Zones d'affichage** (`options.display`, scope quotation) : `quotation_informations` (bloc « Informations » en haut), `quotation` (corps / sous le tableau), `quotation_validation` (fenêtre de signature).
+- **Valeurs** : posées via `update_quotation {customFields:{clé:valeur}}` ; affichées dans un devis V2 par le bloc `customfields` (voir duodeal-v2-blocks).
 
 ## Customer Companies
 
@@ -34,7 +34,7 @@ Format : `MÉTHODE /path` — résumé. **Req** = champs requis ; **Opt** = opti
 - `GET /deals` — paginé : `page, itemsPerPage(def 10), archived, template, search` + filtres. ⚠️ le filtre `?template=1` est parfois ignoré par l'API : revérifier le flag `template` sur chaque résultat.
 - `POST /deals` — **Req**: `name`. Opt: `customer{id}, owner{id}, archived, template, autoSave(def true), language("fr"/"en"), displayCurrencyFormat`. **Query `?createquotation=1`** → crée une quotation vide en même temps. Un deal **sans quotation n'apparaît PAS** dans la liste.
 - `POST /deals/clone/{id}` — clone deal + quotations + lignes (+ blocs V2, ids de blocs préservés).
-- `GET /deals/{id}` — Resp: `id, uid(UUID v7), number(D-YYYY-N), name, owner, customer, company, archived, template, language, contactFullName, opportunityAmountHt/Ttc, primaryQuotationId, primaryQuotationUuid, quotations[], dealViewLinks[], presentations[]`.
+- `GET /deals/{id}` — Resp: `id, uid(UUID v7), number(D-YYYY-N), name, owner, customer, company, archived, template, language, contactFullName, opportunityAmountHt/Ttc, primaryQuotationId, primaryQuotationUuid, quotations[], presentations[]`.
 - `PUT /deals/{id}` · `DELETE /deals/{id}` (soft delete).
 - **Publics** : `GET /deals/uuid/{uuid}`, `GET /deals/custom-fields/{uuid}`, `GET /deals/pdf/{uuid}`.
 
@@ -75,10 +75,9 @@ Format : `MÉTHODE /path` — résumé. **Req** = champs requis ; **Opt** = opti
 - `GET /templates` — query `type` + `filters[type][eq]`. Resp: `id, title, type, content, subject, byDefaultSendDeal`.
 - `POST /templates` — **Req**: `title, type(email|notice|cgv), content(HTML)`. Opt: `subject (email), byDefaultSendDeal`. Variables : `{{quotation.reference}}`, `{{customer.firstName}}`, `{{customer.lastName}}`, `{{company.name}}`…
 
-## Deal Views / Deal View Links
+## Partage (V2)
 
-- `GET /deal-views` — Resp: `id, name, fields, byDefault`. PUT : ⚠️ `fields` = **liste de STRINGS** (`custom_fields_<scope>_<name>` pour les CF, noms natifs sinon : `line_image`, `line_unit_price`, `deal_cgv`, `quote_total`…). Les dicts `{name, visible}` sont stockés mais **ignorés** par le front. L'ordre de la liste = ordre d'affichage.
-- `POST /deal-view-links` — **Req**: `deal{id}, dealView{id}` → `uuid` (lien public). `GET /deal-view-links/deal/{id}` = liens d'un deal. DELETE deal-view → cascade sur ses links.
+- Le partage d'un devis V2 passe par la selling page par défaut (`/quotations/deal/{deal.uid}`) et par les `shareLinks` de la quotation (vue filtrée des blocs).
 
 ## Medias
 
