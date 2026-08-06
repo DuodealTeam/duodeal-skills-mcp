@@ -18,6 +18,7 @@ Un point en échec = devis à refaire.
 5. **Chaque bloc HTML se termine par `DuoDeal.autoResize()`** et reste présentable une fois ses `<style>` retirés (tout en style inline, aucun `<script>` séparé).
 6. **`builderVersion` 2 active**, langue et devise posées au niveau du deal, sans toucher aux réglages du compte.
 7. **Aucun placeholder `{{...}}` ni tiret cadratin restant**, rendu vérifié sur la vue client + export PDF réels (pas la seule lecture du code).
+8. **La quotation livrée est marquée primary** (`primaryQuotation: true`) — sinon elle n'apparaît PAS dans le tableau du dashboard client, qui ne liste que les devis primary.
 
 ## Structure du devis et blocs natifs (contrat de rendu)
 
@@ -34,6 +35,7 @@ Les blocs natifs portent l'identité de l'émetteur, la signature et les mention
 - Regrouper mentions légales et CGV dans le bloc `legalnotice` natif, une seule fois, tous les champs structurés renseignés (au minimum le nom de la société émettrice) ; ⚠️ un champ vide retombe sur le nom du COMPTE.
 - Unique CTA = bouton natif « Accepter et signer » ; ⚠️ jamais de faux bouton HTML (ne déclenche pas la signature).
 - Passer tout devis en `builderVersion` 2 dès sa création.
+- ⚠️ **Marquer la quotation en primary** (`update_quotation {primaryQuotation: true}`) : le tableau du dashboard client n'affiche QUE les devis primary. Une quotation créée sans ce flag existe mais reste **invisible** pour le client (bug récurrent). Si on remplace un devis par une nouvelle quotation, basculer le flag primary sur la nouvelle.
 - Structurer en blocs dédiés (un sujet = un bloc), en privilégiant les blocs natifs (header, contacts, pricing, legalnotice, attachments).
 - Identité visuelle cohérente : une police de référence, une palette fixe à rôles définis (fond, accent, primaire, contraste).
 

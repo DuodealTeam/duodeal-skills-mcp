@@ -23,7 +23,7 @@ avec le skill **duodeal-quote-design** après l'étape de création.
 3. create_customer_company {name}       → entreprise cliente
 4. create_customer {customerCompanyId, firstName, lastName, email}
 5. create_deal {name, customerId}       → deal + quotation vide (createQuotation par défaut)
-6. update_quotation                     → title, validUntil, customFields, logo/cover, legalNoticeText…
+6. update_quotation                     → title, validUntil, customFields, logo/cover, legalNoticeText…, primaryQuotation: true
 7. create_quotation_line (×N)           → lignes : title / normal / subtotal, avec weight croissant
 8. ensure_template (cgv, notice)        → CGV + mentions légales réutilisables
 9. get_links {dealId}                   → les 2 liens à livrer
@@ -82,6 +82,8 @@ Puis référencer dans les lignes : `product {id}`, `productPrice {id}`.
 3. Affichage dans le devis : via le bloc **`customfields`** V2 (liste de noms de CF) — voir **duodeal-v2-blocks**.
 
 ## 5. Livraison — toujours les 2 liens
+
+⚠️ **Avant de livrer, marquer la quotation en primary** : `update_quotation {payload: {primaryQuotation: true}}`. Sinon elle n'apparaît PAS dans le dashboard du client (le tableau ne liste que les devis primary) — bug récurrent. En cas de refonte, basculer le flag primary sur la nouvelle quotation.
 
 `get_links {dealId}` renvoie :
 
