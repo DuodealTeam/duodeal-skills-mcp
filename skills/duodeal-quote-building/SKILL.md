@@ -23,7 +23,7 @@ the **duodeal-quote-design** skill after the creation step.
 3. create_customer_company {name}       → client company
 4. create_customer {customerCompanyId, firstName, lastName, email}
 5. create_deal {name, customerId}       → deal + empty quotation (createQuotation by default)
-6. update_quotation                     → title, validUntil, customFields, logo/cover, legalNoticeText…, primaryQuotation: true
+6. update_quotation                     → title, validUntil, customFields (+ primary: see §5)
 7. create_quotation_line (×N)           → lines: title / normal / subtotal, increasing weight
 8. ensure_template (cgv, notice)        → reusable T&Cs + legal notice
 9. get_links {dealId}                   → the 2 links to deliver
@@ -83,7 +83,7 @@ Then reference them in the lines: `product {id}`, `productPrice {id}`.
 
 ## 5. Delivery — always the 2 links
 
-⚠️ **Before delivering, mark the quotation as primary**: `update_quotation {payload: {primaryQuotation: true}}`. Otherwise it does NOT appear in the customer dashboard (the table only lists primary quotes) — recurring bug. On a rework, switch the primary flag to the new quotation.
+⚠️ **Before delivering, mark the quotation as primary.** Otherwise it does NOT appear in the customer dashboard (the table only lists primary quotes) — recurring bug. On a rework, switch the primary flag to the new quotation. **Not settable through the official connector** → `PUT /quotations/{id} {primaryQuotation: true}` on the REST API when a key is configured, otherwise hand the step to the user in the Duodeal interface and flag it as pending.
 
 `get_links {dealId}` returns:
 
