@@ -1,107 +1,107 @@
 ---
 name: duodeal-quote-building
-description: Flow complet de création d'un devis Duodeal de A à Z avec les outils MCP duodeal — setup du tenant, client, deal + quotation, lignes (sections, remises, options), branding, CGV/mentions légales, liens à livrer. Utiliser dès qu'il faut créer, dupliquer ou livrer un devis / une selling page Duodeal, partir d'un template, ou monter un catalogue produits.
+description: End-to-end flow for building a Duodeal quote from A to Z with the duodeal MCP tools — tenant setup, customer, deal + quotation, lines (sections, discounts, options), branding, T&Cs / legal notice, links to deliver. Use whenever you need to create, duplicate or deliver a Duodeal quote or selling page, start from a template, clone a deal, add a second quotation, or set up a product catalog.
 ---
 
-# Créer un devis Duodeal de A à Z
+# Build a Duodeal quote from A to Z
 
-Séquence éprouvée, avec les outils MCP du serveur `duodeal`. Deux points de départ :
-**de zéro** (§1) ou **depuis un template** (§2 — préférer quand un template existe).
-Pour un devis visuellement premium (selling page design, blocs HTML soignés), enchaîner
-avec le skill **duodeal-quote-design** après l'étape de création.
+Proven sequence, with the MCP tools of the `duodeal` server. Two starting points:
+**from scratch** (§1) or **from a template** (§2 — prefer this when a template exists).
+For a visually premium quote (design selling page, polished HTML blocks), chain
+the **duodeal-quote-design** skill after the creation step.
 
-## 0. Avant tout
+## 0. Before anything
 
-1. `connection_status` — vérifier le tenant actif (company). Écritures : compte de test/démo uniquement.
-2. `list_taxes` + `list_unities` (+ `list_price_categories` si catalogue) — récupérer les **ids de CE tenant**. Ne jamais recycler les ids d'un autre compte (cause n°1 de 400).
+1. `connection_status` — check the active tenant (company). Writes: test/demo account only.
+2. `list_taxes` + `list_unities` (+ `list_price_categories` if catalog) — fetch the **ids of THIS tenant**. Never reuse the ids of another account (cause #1 of 400s).
 
-## 1. Flow complet from scratch
+## 1. Full from-scratch flow
 
 ```
 1. connection_status                    → tenant OK ?
-2. list_taxes / list_unities            → ids requis
-3. create_customer_company {name}       → entreprise cliente
+2. list_taxes / list_unities            → required ids
+3. create_customer_company {name}       → client company
 4. create_customer {customerCompanyId, firstName, lastName, email}
-5. create_deal {name, customerId}       → deal + quotation vide (createQuotation par défaut)
+5. create_deal {name, customerId}       → deal + empty quotation (createQuotation by default)
 6. update_quotation                     → title, validUntil, customFields, logo/cover, legalNoticeText…, primaryQuotation: true
-7. create_quotation_line (×N)           → lignes : title / normal / subtotal, avec weight croissant
-8. ensure_template (cgv, notice)        → CGV + mentions légales réutilisables
-9. get_links {dealId}                   → les 2 liens à livrer
+7. create_quotation_line (×N)           → lines: title / normal / subtotal, increasing weight
+8. ensure_template (cgv, notice)        → reusable T&Cs + legal notice
+9. get_links {dealId}                   → the 2 links to deliver
 ```
 
-Le résultat de `create_deal` contient déjà `links` (édition + client).
+The `create_deal` result already contains `links` (edition + client).
 
-### Lignes — règles
+### Lines — rules
 
-- `weight` obligatoire et croissant (= ordre d'affichage).
-- Structure type : ligne `title` (séparateur de section, HTML inline accepté :
-  `<p><span style="font-size:18px;">Inclus dans notre offre</span></p>`), puis lignes
-  `normal` (productTitle, unitPrice, quantity, unity, description HTML), puis `subtotal`.
-- **Remises** : ligne `normal` à `unitPrice` négatif, OU `discount` + `discountType`
-  (`percentage`/`amount`) sur la ligne — `lineType: "discount"` n'existe pas.
-- `option: true` → badge « Option non incluse », exclue du total.
-- Image de ligne : `upload_media` d'abord, puis `medias: [{id}]` dans le payload.
-- Devis V2 (blocs) : passer `blockId` du bloc pricing dans le payload — voir skill
-  **duodeal-v2-blocks**.
+- `weight` is mandatory and increasing (= display order).
+- Typical structure: a `title` line (section separator, inline HTML accepted:
+  `<p><span style="font-size:18px;">Included in our offer</span></p>`), then `normal`
+  lines (productTitle, unitPrice, quantity, unity, HTML description), then `subtotal`.
+- **Discounts**: a `normal` line with a negative `unitPrice`, OR `discount` + `discountType`
+  (`percentage`/`amount`) on the line — `lineType: "discount"` does not exist.
+- `option: true` → "Option not included" badge (French deals: « Option non incluse »), excluded from the total.
+- Line image: `upload_media` first, then `medias: [{id}]` in the payload.
+- V2 quotes (blocks): pass the pricing block's `blockId` in the payload — see the
+  **duodeal-v2-blocks** skill.
 
-### Branding de la quotation
+### Quotation branding
 
-- `upload_media {url}` → `update_quotation {payload: {logo: {id}}}` (idem `cover`).
-- `noLogo`/`noCover: true` seulement s'il n'y a RIEN à montrer (sinon conflit).
+- `upload_media {url}` → `update_quotation {payload: {logo: {id}}}` (same for `cover`).
+- `noLogo`/`noCover: true` only if there is NOTHING to show (otherwise conflict).
 
-## 2. Partir d'un template (recommandé quand il existe)
-
-```
-1. list_deals {template: true, search: "..."}   → trouver le template (revérifier le flag
-                                                  template sur chaque résultat, le filtre
-                                                  API est parfois ignoré)
-2. clone_deal {dealId}                          → copie complète (quotations, lignes, blocs V2)
-3. update_deal {name, customerId}               → renommer, poser le client, template: false
-4. update_quotation / outils blocs              → personnalisation
-5. get_links                                    → livraison
-```
-
-**2ᵉ quotation sur un deal existant** : `clone_quotation` d'une quotation du deal,
-puis `update_quotation` sur le clone (`title`, `primaryQuotation`…). `POST /quotations`
-nu échoue (500).
-
-## 3. Catalogue produits (si demandé)
+## 2. Start from a template (recommended when one exists)
 
 ```
-create_price_category {name}            → idempotent (paliers volume : 1 catégorie/palier)
-create_product {name, payload}          → fiche produit
-create_product_price {productId, priceCategoryId, price}   → 1 seul prix par couple
+1. list_deals {template: true, search: "..."}   → find the template (re-check the template
+                                                  flag on each result, the API filter is
+                                                  sometimes ignored)
+2. clone_deal {dealId}                          → full copy (quotations, lines, V2 blocks)
+3. update_deal {name, customerId}               → rename, set the customer, template: false
+4. update_quotation / block tools               → customization
+5. get_links                                    → delivery
 ```
 
-Puis référencer dans les lignes : `product {id}`, `productPrice {id}`.
+**2nd quotation on an existing deal**: `clone_quotation` from a quotation of the deal,
+then `update_quotation` on the clone (`title`, `primaryQuotation`…). A bare `POST /quotations`
+fails (500).
 
-## 4. Custom fields (données structurées)
+## 3. Product catalog (if requested)
 
-1. `create_custom_field {name, label, type, scope}` — champ de données sur deal / customer / product / quotation.
-2. Valeurs : `update_quotation {payload: {customFields: {clé: valeur}}}` — fusion automatique.
-3. Affichage dans le devis : via le bloc **`customfields`** V2 (liste de noms de CF) — voir **duodeal-v2-blocks**.
+```
+create_price_category {name}            → idempotent (volume tiers: 1 category per tier)
+create_product {name, payload}          → product record
+create_product_price {productId, priceCategoryId, price}   → only 1 price per pair
+```
 
-## 5. Livraison — toujours les 2 liens
+Then reference them in the lines: `product {id}`, `productPrice {id}`.
 
-⚠️ **Avant de livrer, marquer la quotation en primary** : `update_quotation {payload: {primaryQuotation: true}}`. Sinon elle n'apparaît PAS dans le dashboard du client (le tableau ne liste que les devis primary) — bug récurrent. En cas de refonte, basculer le flag primary sur la nouvelle quotation.
+## 4. Custom fields (structured data)
 
-`get_links {dealId}` renvoie :
+1. `create_custom_field {name, label, type, scope}` — data field on deal / customer / product / quotation.
+2. Values: `update_quotation {payload: {customFields: {key: value}}}` — automatic merge.
+3. Display in the quote: via the V2 **`customfields`** block (list of CF names) — see **duodeal-v2-blocks**.
 
-- **clientLink** `…/quotations/deal/{uid}` — la selling page envoyée au prospect (default link)
-- **editionLink** `…/app/quotations/{dealId}/{quotationId}` — l'éditeur V2 interne
-  (⚠️ jamais `/app/deals/…`)
+## 5. Delivery — always the 2 links
 
-Partage alternatif : share link V2 `…/quotations/share/{shareUuid}` (vue filtrée des blocs).
+⚠️ **Before delivering, mark the quotation as primary**: `update_quotation {payload: {primaryQuotation: true}}`. Otherwise it does NOT appear in the customer dashboard (the table only lists primary quotes) — recurring bug. On a rework, switch the primary flag to the new quotation.
 
-## 6. Vérification finale
+`get_links {dealId}` returns:
 
-- `get_quotation {quotationId}` — relire le devis (blocs résumés par défaut).
-- `list_quotation_lines {quotationId}` — contrôler ordre (weight), totaux, options.
-- Un devis n'est « terminé » qu'après vérification visuelle réelle de la selling page
-  (ouvrir le clientLink), pas sur la seule lecture de l'API.
+- **clientLink** `…/quotations/deal/{uid}` — the selling page sent to the prospect (default link)
+- **editionLink** `…/app/quotations/{dealId}/{quotationId}` — the internal V2 editor
+  (⚠️ never `/app/deals/…`)
 
-## Modèles CGV / mentions légales / email
+Alternative sharing: V2 share link `…/quotations/share/{shareUuid}` (filtered view of the blocks).
 
-`ensure_template {title, type: cgv|notice|email, content}` — idempotent (match par titre,
-PUT si contenu différent). Variables : `{{quotation.reference}}`, `{{customer.firstName}}`,
-`{{company.name}}`… Les emails portent `subject` + `byDefaultSendDeal`.
+## 6. Final check
+
+- `get_quotation {quotationId}` — re-read the quote (blocks summarized by default).
+- `list_quotation_lines {quotationId}` — check order (weight), totals, options.
+- A quote is only "done" after a real visual check of the selling page
+  (open the clientLink), not from reading the API alone.
+
+## T&Cs / legal notice / email templates
+
+`ensure_template {title, type: cgv|notice|email, content}` — idempotent (matched by title,
+PUT if the content differs). Variables: `{{quotation.reference}}`, `{{customer.firstName}}`,
+`{{company.name}}`… Emails carry `subject` + `byDefaultSendDeal`.

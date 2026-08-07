@@ -1,105 +1,106 @@
 ---
 name: duodeal-mcp-best-practices
-description: Règles d'or, contrat de rendu et check-list pour générer, modifier ou livrer un devis Duodeal (selling page HTML) via le connecteur MCP officiel. Utiliser avant de générer, modifier ou livrer un devis Duodeal, ou quand on parle de « bonnes pratiques », « règles d'or », « check-list devis », « contrat de rendu » ou « selling page ». Couvre la structure des blocs natifs, les blocs HTML qui survivent à l'éditeur visuel et au PDF, les prix et devises, le contenu/copie, et les garde-fous d'écriture API.
+description: Golden rules, render contract and checklist for generating, editing or delivering a Duodeal quote (HTML selling page) through the official MCP connector. Use before generating, editing or delivering a Duodeal quote, and whenever the user talks about "best practices", "golden rules", "quote checklist", "render contract", "selling page", "design quote", "premium proposal", "V2 blocks" or the Duodeal API reference. Covers the structure of native blocks, the HTML blocks that survive the visual editor and the PDF, prices and currencies, content/copy, and API write guardrails.
 ---
 
-# Bonnes pratiques — devis Duodeal (via le MCP)
+# Best practices — Duodeal quotes (via MCP)
 
-Ces règles s'appliquent dès que tu génères, modifies ou livres un devis via le connecteur MCP Duodeal officiel. Le contexte du client est déjà connu : applique-les directement, sans recherche préalable. Pour le savoir-faire détaillé, voir aussi **duodeal-quote-building**, **duodeal-quote-design** et **duodeal-v2-blocks**.
+These rules apply as soon as you generate, edit or deliver a quote through the official Duodeal MCP connector. The client context is already known: apply them directly, with no prior research. For the detailed know-how, see also **duodeal-quote-building**, **duodeal-quote-design** and **duodeal-v2-blocks**.
 
-## Check-list bloquante (avant toute livraison)
+## Blocking checklist (before any delivery)
 
-Un point en échec = devis à refaire.
+One failed item = redo the quote.
 
-1. **Header natif rempli** avec logo + cover de l'émetteur, jamais masqué ni recodé en HTML.
-2. **Bloc contacts natif présent**, émetteur (owner dédié et nommé) ET destinataire renseignés.
-3. **Chaque bloc porte un `title` non vide** (sinon l'interface affiche « html » à la place du titre).
-4. **Chaque ligne produit a une image** carrée centrée, attachée aux médias de la LIGNE (pas du produit lié).
-5. **Chaque bloc HTML se termine par `DuoDeal.autoResize()`** et reste présentable une fois ses `<style>` retirés (tout en style inline, aucun `<script>` séparé).
-6. **`builderVersion` 2 active**, langue et devise posées au niveau du deal, sans toucher aux réglages du compte.
-7. **Aucun placeholder `{{...}}` ni tiret cadratin restant**, rendu vérifié sur la vue client + export PDF réels (pas la seule lecture du code).
-8. **La quotation livrée est marquée primary** (`primaryQuotation: true`) — sinon elle n'apparaît PAS dans le tableau du dashboard client, qui ne liste que les devis primary.
+1. **Native header filled in** with the sender's logo + cover, never hidden nor recoded in HTML.
+2. **Native contacts block present**, sender (dedicated, named owner) AND recipient filled in.
+3. **Every block carries a non-empty `title`** (otherwise the interface displays "html" instead of the title).
+4. **Every product line has an image**, square and centered, attached to the media of the LINE (not of the linked product).
+5. **Every HTML block ends with `DuoDeal.autoResize()`** and stays presentable once its `<style>` tags are stripped (everything styled inline, no separate `<script>`).
+6. **`builderVersion` 2 enabled**, language and currency set at deal level, without touching the account settings.
+7. **No `{{...}}` placeholder and no em dash left**, rendering verified on the real client view + PDF export (not on code reading alone).
+8. **The delivered quotation is marked primary** (`primaryQuotation: true`) — otherwise it does NOT appear in the client dashboard table, which only lists primary quotes.
 
-## Structure du devis et blocs natifs (contrat de rendu)
+## Quote structure and native blocks (render contract)
 
-Les blocs natifs portent l'identité de l'émetteur, la signature et les mentions légales : garde-les remplis et bien renseignés.
+Native blocks carry the sender's identity, the signature and the legal notices: keep them filled in and properly populated.
 
-- ⚠️ **Header natif** : logo + cover de l'émetteur, jamais vide ni recodé en HTML (le vider ou le refaire casse le rendu et impose une refonte).
-- ⚠️ **Bloc contacts natif** (émetteur + destinataire), jamais recréé en HTML ; vérifier la présence du destinataire (sinon info désynchronisée, livraison non conforme).
-- Donner un `title` non vide à chaque bloc ; si le titre visible vit dans le HTML, garder le `title` et poser `showTitle:false`.
-- Image sur chaque ligne produit, sur les médias de la LIGNE, carrée, centrée sur le sujet (`object-fit: cover`).
-- Logos cohérents (même format, fond, taille) sur tous les devis d'un même compte.
-- Owner du deal = utilisateur émetteur dédié et nommé (personne + fonction) avec sa vraie photo, jamais la société ni un compte générique.
-- Choisir pour l'owner une adresse de login plausible : la carte émetteur affiche l'email de LOGIN.
-- Poser langue et devise au niveau du deal (per-deal), sans toucher au compte.
-- Regrouper mentions légales et CGV dans le bloc `legalnotice` natif, une seule fois, tous les champs structurés renseignés (au minimum le nom de la société émettrice) ; ⚠️ un champ vide retombe sur le nom du COMPTE.
-- Unique CTA = bouton natif « Accepter et signer » ; ⚠️ jamais de faux bouton HTML (ne déclenche pas la signature).
-- Passer tout devis en `builderVersion` 2 dès sa création.
-- ⚠️ **Marquer la quotation en primary** (`update_quotation {primaryQuotation: true}`) : le tableau du dashboard client n'affiche QUE les devis primary. Une quotation créée sans ce flag existe mais reste **invisible** pour le client (bug récurrent). Si on remplace un devis par une nouvelle quotation, basculer le flag primary sur la nouvelle.
-- Structurer en blocs dédiés (un sujet = un bloc), en privilégiant les blocs natifs (header, contacts, pricing, legalnotice, attachments).
-- Identité visuelle cohérente : une police de référence, une palette fixe à rôles définis (fond, accent, primaire, contraste).
+- ⚠️ **Native header**: the sender's logo + cover, never empty nor recoded in HTML (emptying it or rebuilding it breaks the rendering and forces a rework).
+- ⚠️ **Native contacts block** (sender + recipient), never rebuilt in HTML; check that the recipient is present (otherwise the information is out of sync and the delivery is non-compliant).
+- Give every block a non-empty `title`; if the visible title lives in the HTML, keep the `title` and set `showTitle:false`.
+- An image on every product line, on the media of the LINE, square, centered on the subject (`object-fit: cover`).
+- Consistent logos (same format, background, size) across all quotes of the same account.
+- Deal owner = a dedicated, named sender user (person + job title) with their real photo, never the company nor a generic account.
+- Choose a plausible login address for the owner: the sender card displays the LOGIN email.
+- Set language and currency at deal level (per-deal), without touching the account.
+- Group legal notices and terms & conditions in the native `legalnotice` block, only once, with every structured field filled in (at minimum the name of the issuing company); ⚠️ an empty field falls back to the ACCOUNT name.
+- Single CTA = the native "Accept & sign" button (French deals: « Accepter et signer »); ⚠️ never a fake HTML button (it does not trigger the signature).
+- ⚠️ **Always pair the signature with its stamp**: whenever you add an `accept` block (or enable `data.showAcceptButton` on the `pricing` block), add a `signstamp` block next to it. Once the quote is signed the `accept` button **disappears**, and `signstamp` is the only thing that shows the signature (signed date, signer, email, validation custom fields) — without it, a signed quote displays no trace of the signature at all. Before signing, `signstamp` renders nothing on the client side (dashed placeholder in the editor only), so adding it costs nothing.
+- Switch every quote to `builderVersion` 2 as soon as it is created.
+- ⚠️ **Mark the quotation as primary** (`update_quotation {primaryQuotation: true}`): the client dashboard table shows ONLY primary quotes. A quotation created without this flag exists but stays **invisible** to the client (recurring bug). If a quote is replaced by a new quotation, move the primary flag to the new one.
+- Structure into dedicated blocks (one topic = one block), favoring native blocks (header, contacts, pricing, legalnotice, attachments).
+- Consistent visual identity: one reference font, one fixed palette with defined roles (background, accent, primary, contrast).
 
-## Blocs HTML : survivre à l'éditeur visuel et au PDF
+## HTML blocks: surviving the visual editor and the PDF
 
-⚠️ L'éditeur visuel supprime les `<style>` et neutralise les `<script>` à la première édition du commercial ; le rendu final passe aussi par un export PDF. Chaque bloc doit tenir dans ces deux états.
+⚠️ The visual editor strips `<style>` tags and neutralizes `<script>` tags the first time the sales rep edits; the final rendering also goes through a PDF export. Every block must hold up in both states.
 
-- Tout le style en inline (`style="..."`) ; aucun `<style>` sauf `@font-face`, aucun `<script>` séparé (interactivité en `onclick` inline).
-- Responsive sans media query : `flex` + `flex-wrap` + `flex:1 1 basis` (jamais `grid-template-columns`), repli une colonne sur écran étroit et à l'impression.
-- Vérifier avant livraison que chaque bloc reste présentable une fois ses `<style>` retirés : c'est l'état que verra le prospect.
-- Terminer chaque bloc par `DuoDeal.autoResize()` dans un `try/catch` ; ⚠️ sinon l'iframe garde une hauteur figée et coupe le bas.
-- Police de marque en `@font-face` base64 inline + fallback système lisible ; jamais de `<link>` CDN ni de police externe (bloquée par CORS ou absente au PDF).
-- Images/logos dans la médiathèque Duodeal, `max-width:100%; height:auto` ; jamais de hotlink externe.
-- `box-sizing:border-box` sur tout élément dimensionné ; ⚠️ son absence est la cause n°1 des débordements mobile (`width:100%` + padding).
-- `break-inside:avoid` (+ `page-break-inside:avoid`) sur cartes, étapes, panneaux, CTA ; emballer kicker + titre + contenu dans un même conteneur ; ⚠️ le moteur PDF n'honore pas `break-after:avoid`.
-- Hauteur déterminée par le contenu : pas de `height` fixe, pas de `vh`, pas de saut de page forcé.
-- ⚠️ Aucun scroller interne (`max-height` + `overflow-y:auto`) : l'auto-dimensionnement injecte des milliers de pixels de blanc en client/PDF, invisible dans l'éditeur.
-- Un override d'impression pour chaque media query mobile ; plafonner les spacers en mobile et restaurer la valeur desktop à l'impression.
-- Spacers cohérents en tête (et en bas) de chaque bloc de section, sauf le cover/intro qui suit le header ; un spacer avant le tableau de prix.
-- Namespacer toutes les classes CSS avec un préfixe court propre au bloc (évite les collisions entre blocs d'une même page).
-- Pictogrammes en SVG inline (pas de glyphes unicode exotiques → tofu), pas de texte en dégradé (`background-clip:text` → filet parasite), pas de `box-shadow` sur les blocs critiques (préférer une bordure 1px, meilleur rendu PDF).
-- ⚠️ Pas de bloc FAQ natif : il rend le HTML littéralement (les entités s'affichent telles quelles). Construire la FAQ en bloc HTML.
-- Carte flex texte + média : `min-width:0` sur la colonne texte, `overflow-wrap:anywhere` sur mots/emails longs, empiler en colonne sur écran étroit.
-- Plafonner les images larges en mobile via `width`/`max-width`, jamais `transform:scale` (ne réduit pas la largeur de layout).
-- Table à largeur minimale incompressible dans un conteneur `overflow-x:auto`, ou la faire tenir sous ~360 px.
-- Covers/full-bleed en `width:100%` et `border-radius:0`, validés contre la vue client (pas la carte de l'éditeur, qui a un rayon et un clip absents côté client).
-- Capture portrait dans un cadre paysage : `object-fit:contain` sur fond blanc, jamais `cover` (qui recadre et zoome).
-- Vidéo : vérifier l'embed autorisé, poster brandé opaque sur un iframe `about:blank`, injecter l'URL d'embed (autoplay, playsinline) au clic sur le poster.
+- All styling inline (`style="..."`); no `<style>` except `@font-face`, no separate `<script>` (interactivity through inline `onclick`).
+- Responsive without media queries: `flex` + `flex-wrap` + `flex:1 1 basis` (never `grid-template-columns`), falling back to a single column on narrow screens and in print.
+- Before delivery, check that every block stays presentable once its `<style>` tags are stripped: that is the state the prospect will see.
+- End every block with `DuoDeal.autoResize()` inside a `try/catch`; ⚠️ otherwise the iframe keeps a fixed height and cuts off the bottom.
+- Brand font as inline base64 `@font-face` + a readable system fallback; never a CDN `<link>` nor an external font (blocked by CORS or missing in the PDF).
+- Images/logos in the Duodeal media library, `max-width:100%; height:auto`; never an external hotlink.
+- `box-sizing:border-box` on every sized element; ⚠️ its absence is the number one cause of mobile overflow (`width:100%` + padding).
+- `break-inside:avoid` (+ `page-break-inside:avoid`) on cards, steps, panels, CTAs; wrap kicker + title + content in a single container; ⚠️ the PDF engine does not honor `break-after:avoid`.
+- Height determined by the content: no fixed `height`, no `vh`, no forced page break.
+- ⚠️ No internal scroller (`max-height` + `overflow-y:auto`): auto-sizing injects thousands of pixels of blank space in the client view and the PDF, invisible in the editor.
+- One print override for every mobile media query; cap spacers on mobile and restore the desktop value in print.
+- Consistent spacers at the top (and bottom) of every section block, except the cover/intro that follows the header; one spacer before the pricing table.
+- Namespace every CSS class with a short prefix specific to the block (avoids collisions between blocks on the same page).
+- Icons as inline SVG (no exotic unicode glyphs → tofu), no gradient text (`background-clip:text` → stray hairline), no `box-shadow` on critical blocks (prefer a 1px border, better PDF rendering).
+- ⚠️ No native FAQ block: it renders the HTML literally (entities show up as-is). Build the FAQ as an HTML block.
+- Flex card with text + media: `min-width:0` on the text column, `overflow-wrap:anywhere` on long words/emails, stack into a column on narrow screens.
+- Cap wide images on mobile through `width`/`max-width`, never `transform:scale` (it does not reduce the layout width).
+- Table with an incompressible minimum width inside an `overflow-x:auto` container, or make it fit under ~360 px.
+- Covers/full-bleed at `width:100%` and `border-radius:0`, validated against the client view (not the editor card, which has a radius and a clip that are absent on the client side).
+- Portrait shot in a landscape frame: `object-fit:contain` on a white background, never `cover` (which crops and zooms).
+- Video: check that the embed is allowed, opaque branded poster over an `about:blank` iframe, inject the embed URL (autoplay, playsinline) when the poster is clicked.
 
-## Prix, totaux et devises
+## Prices, totals and currencies
 
-Le tableau natif n'expose qu'UN total et la plateforme peut rescaler les montants via un change-rate.
+The native table exposes only ONE total and the platform can rescale amounts through a change rate.
 
-- ⚠️ Montants récurrents (abonnements) dans un bloc HTML de récap, jamais dans le tableau natif ; un seul total par devis (sinon total absurde).
-- Ne pas compter sur le flag « option » pour sortir un montant obligatoire du total (il affiche un badge « Option non incluse » inadapté).
-- Devise étrangère via le formatage cosmétique du deal (`displayCurrencyFormat` : symbole, position, séparateurs), sans changer la vraie devise ; saisir les montants nativement dans la devise cible.
-- ⚠️ Deal en devise différente du compte : éditer les montants ligne par ligne (jamais de PUT global), garder les totaux STATIQUES dans les blocs HTML sans lire le montant renvoyé par l'API, re-vérifier après chaque écriture — le change-rate rescale silencieusement.
+- ⚠️ Recurring amounts (subscriptions) in an HTML recap block, never in the native table; one single total per quote (otherwise the total is nonsensical).
+- Do not rely on the "option" flag to keep a mandatory amount out of the total (it displays an unsuitable "Option not included" badge; French deals: « Option non incluse »).
+- Foreign currency through the deal's cosmetic formatting (`displayCurrencyFormat`: symbol, position, separators), without changing the real currency; enter the amounts natively in the target currency.
+- ⚠️ Deal in a currency different from the account: edit the amounts line by line (never a global PUT), keep the totals STATIC in the HTML blocks without reading the amount returned by the API, re-check after every write — the change rate rescales silently.
 
-## Contenu et copie
+## Content and copy
 
-- ⚠️ Jamais de tiret cadratin « — » nulle part (le serveur tronque un `productTitle` au tiret cadratin) ; préférer « : », « ; », « · » ou la virgule.
-- Vrais fichiers de logo (SVG/PNG officiels), jamais un nom de marque tapé en texte stylisé ; ne pas l'étirer, le déformer, le recolorer ni le faire pivoter.
-- Vraie photo du commercial (portrait carré centré sur le visage) dans la carte émetteur ; monogramme d'initiales en dernier recours, jamais un visage fabriqué.
-- Aucun placeholder `{{...}}` ni contenu générique non remplacé sur la page client.
-- ⚠️ Caractères accentués en UTF-8 littéral partout ; jamais d'entités HTML dans un champ texte brut (un `&eacute;` s'affiche littéralement).
-- Descriptions de ligne du tableau natif : apostrophe courbe, pas droite (le PDF ne dessine pas l'apostrophe droite).
-- Image de cover utilisée une seule fois ; pas de réemploi en galerie ou en ligne produit.
-- Une seule couleur d'accent réservée aux détails ; uniquement les couleurs et polices du design system validé.
-- Pas de légendes de type disclaimer sous les images (alourdit et déprécie le rendu premium).
+- ⚠️ Never use an em dash "—" anywhere (the server truncates a `productTitle` at the em dash); prefer ":", ";", "·" or the comma.
+- Real logo files (official SVG/PNG), never a brand name typed as styled text; do not stretch, distort, recolor or rotate it.
+- A real photo of the sales rep (square portrait centered on the face) in the sender card; an initials monogram as a last resort, never a fabricated face.
+- No `{{...}}` placeholder and no unreplaced generic content on the client page.
+- ⚠️ Accented characters as literal UTF-8 everywhere; never HTML entities in a plain text field (an `&eacute;` shows up literally).
+- Line descriptions in the native table: curly apostrophe, not straight (the PDF does not draw the straight apostrophe).
+- Cover image used only once; no reuse in a gallery or on a product line.
+- One single accent color reserved for details; only the colors and fonts of the validated design system.
+- No disclaimer-style captions under images (they weigh the page down and cheapen the premium rendering).
 
-## Garde-fous process et écritures API
+## Process and API write guardrails
 
-L'état serveur fait foi ; les écritures sont partielles ou destructrices.
+The server state is authoritative; writes are partial or destructive.
 
-- ⚠️ Toujours un deal NEUF et une quotation NEUVE ; ne jamais modifier, supprimer, archiver ni cloner un deal, devis, utilisateur ou média existant. Une refonte s'isole sur un nouveau deal, l'ancienne version reste intacte.
-- Ne jamais écraser les réglages globaux du compte (nom, devise, logo, bannière) : toute la personnalisation dans le deal neuf (le compte est partagé entre émetteurs et devis).
-- Faire valider le design (structure, données, couleurs, police, ton) par l'humain AVANT de générer le moindre HTML.
-- État serveur (JSON de la quotation) = seule source de vérité : le relire avant toute édition, re-vérifier après chaque écriture.
-- Éditions chirurgicales bloc par bloc (remplacement de texte ciblé, PUT ligne par ligne) ; ⚠️ jamais réécrire le tableau `blocks` complet à l'aveugle (efface les éditions manuelles du commercial) — relire et fusionner.
-- Mise à jour de bloc : renvoyer l'objet `data` COMPLET (merge shallow) ; `customFields` : relire puis renvoyer toutes les sections (l'envoi remplace tout l'objet).
-- Remplacement de texte ciblé sans cible trouvée (0 remplacement) = conflit : relire l'état serveur et repartir de la version serveur, jamais forcer.
-- ⚠️ Ne jamais laisser un onglet éditeur Duodeal ouvert sur le deal pendant les écritures API : l'auto-save réécrit avec sa copie mémoire et annule le travail fait par API.
-- Avant toute écriture, vérifier que le connecteur est connecté au compte cible (`get_current_user`) ; un 403 sur un deal connu signale une connexion au mauvais compte, pas un rate-limit.
-- Ne pas lire brute une réponse `get_quotation` volumineuse (~80 Ko) : la sauvegarder puis la parser.
-- Ne jamais exposer les identifiants de connexion (clé API, token) : ni affichés, ni loggés.
-- Valider un bloc seulement après un rendu réel (export PDF + vue web live) et un test de chaque bloc isolé à une largeur mobile réelle, jamais sur la seule lecture du code.
-- Si un bloc HTML interactif fait sortir des données hors de la plateforme, le signaler ; ne jamais présenter l'hébergement, la conformité ou une validation « temps réel » comme opérationnels sur la page client (les validations de démo ne sont que des contrôles de format).
+- ⚠️ Always a NEW deal and a NEW quotation; never modify, delete, archive nor clone an existing deal, quote, user or media. A rework is isolated on a new deal, the old version stays intact.
+- Never overwrite the account's global settings (name, currency, logo, banner): all customization goes into the new deal (the account is shared between senders and quotes).
+- Have the design (structure, data, colors, font, tone) validated by the human BEFORE generating any HTML.
+- Server state (the quotation JSON) = the only source of truth: re-read it before any edit, re-check after every write.
+- Surgical edits block by block (targeted text replacement, line-by-line PUT); ⚠️ never rewrite the whole `blocks` array blindly (it wipes the sales rep's manual edits) — re-read and merge.
+- Block update: send back the COMPLETE `data` object (shallow merge); `customFields`: re-read then send back every section (sending replaces the whole object).
+- A targeted text replacement with no target found (0 replacements) = a conflict: re-read the server state and restart from the server version, never force.
+- ⚠️ Never leave a Duodeal editor tab open on the deal during API writes: auto-save rewrites with its in-memory copy and cancels the work done through the API.
+- Before any write, check that the connector is connected to the target account (`get_current_user`); a 403 on a known deal signals a connection to the wrong account, not a rate limit.
+- Do not read a large `get_quotation` response raw (~80 KB): save it, then parse it.
+- Never expose the connection credentials (API key, token): neither displayed nor logged.
+- Validate a block only after a real rendering (PDF export + live web view) and a test of each block in isolation at a real mobile width, never on code reading alone.
+- If an interactive HTML block sends data outside the platform, flag it; never present hosting, compliance or "real-time" validation as operational on the client page (demo validations are only format checks).

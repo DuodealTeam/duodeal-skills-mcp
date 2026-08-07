@@ -1,49 +1,49 @@
-# Pièges, erreurs récurrentes et règles métier
+# Gotchas, recurring errors and business rules
 
-## Erreurs récurrentes et fixes
+## Recurring errors and fixes
 
-| Symptôme | Cause | Fix |
+| Symptom | Cause | Fix |
 |---|---|---|
-| 401 Unauthorized | `X-API-KEY` vide / préfixé | juste l'UUID ; vérifier `connection_status` |
-| 400 quotation-line | `tax.id`/`unity.id` inexistant sur CE tenant | `list_taxes` / `list_unities` puis reprendre les vrais ids |
-| 400 ligne remise | `lineType:"discount"` n'existe pas | `lineType:"normal"` + `unitPrice` négatif **ou** `discount`/`discountType` |
-| 400 tax | `rate` hors [0,1] | décimal (0.20, pas 20) |
-| 409 DELETE tax | tax utilisée | ne pas supprimer / réassigner |
-| 500 `/medias` fromUrl | CDN refusé | base64 (outil `upload_media`) |
-| 500 `/medias` base64 | fichier > 4 Mo | fournir une image plus légère |
-| 500 `POST /quotations` | création nue non supportée | `create_deal` (createQuotation) ou `clone_quotation` |
-| Logo tenant ignoré | data URI au lieu de PNG brut | `PUT /companies/{id}` avec `setLogo` = PNG base64 BRUT |
-| Liste vide d'un GET | réponse `{data:[]}` non déballée | les outils MCP normalisent (`data/items/results/records/rows`) |
-| Filtre sans effet | syntaxe | `filters[champ][op]=valeur` |
+| 401 Unauthorized | `X-API-KEY` empty / prefixed | the UUID only; check `connection_status` |
+| 400 quotation-line | `tax.id`/`unity.id` does not exist on THIS tenant | `list_taxes` / `list_unities`, then use the real ids |
+| 400 discount line | `lineType:"discount"` does not exist | `lineType:"normal"` + negative `unitPrice` **or** `discount`/`discountType` |
+| 400 tax | `rate` outside [0,1] | decimal (0.20, not 20) |
+| 409 DELETE tax | tax in use | do not delete / reassign |
+| 500 `/medias` fromUrl | CDN rejected | base64 (`upload_media` tool) |
+| 500 `/medias` base64 | file > 4 MB | supply a lighter image |
+| 500 `POST /quotations` | bare creation not supported | `create_deal` (createQuotation) or `clone_quotation` |
+| Tenant logo ignored | data URI instead of raw PNG | `PUT /companies/{id}` with `setLogo` = RAW base64 PNG |
+| Empty list from a GET | `{data:[]}` response not unwrapped | the MCP tools normalize it (`data/items/results/records/rows`) |
+| Filter has no effect | syntax | `filters[champ][op]=valeur` |
 
-## Règles de suppression / dépendances
+## Deletion rules / dependencies
 
-- `isDeletable` : customer-company supprimable **sans customer lié** ; customer **sans deal lié**.
-- User non supprimable s'il **possède un deal** (réassigner / `active:false`).
-- Tax non supprimable si **utilisée** (409).
-- Cascades : price-category → ses product-prices ; product → ses product-prices ; dernier commentaire d'un pin → supprime le pin.
-- Deal **sans quotation** = invisible dans la liste.
-- DELETE `/medias/{id}` casse les références existantes (produits/devis).
+- `isDeletable`: a customer-company is deletable **if no customer is linked**; a customer **if no deal is linked**.
+- A user cannot be deleted if they **own a deal** (reassign / `active:false`).
+- A tax cannot be deleted if it is **in use** (409).
+- Cascades: price-category → its product-prices; product → its product-prices; the last comment of a pin → deletes the pin.
+- A deal **with no quotation** = invisible in the list.
+- DELETE `/medias/{id}` breaks existing references (products/quotes).
 
-## Médias — upload d'images
+## Media — image upload
 
-1. **Jamais `fromUrl`** (500 sur Cloudinary, Shopify, S3…) — télécharger puis poster en base64 data URI (l'outil `upload_media` fait tout : téléchargement UA navigateur, détection MIME, contrôle 4 Mo).
-2. Limite ~**4 Mo** ; au-delà l'API répond 500. Pas de redimensionnement automatique dans le plugin : fournir une image plus légère.
-3. MIME acceptés : png, jpeg, gif, webp, svg+xml, pdf.
+1. **Never `fromUrl`** (500 on Cloudinary, Shopify, S3…) — download the file, then post it as a base64 data URI (the `upload_media` tool does everything: download with a browser UA, MIME detection, 4 MB check).
+2. Limit ~**4 MB**; beyond that the API returns 500. No automatic resizing in the plugin: supply a lighter image.
+3. Accepted MIME types: png, jpeg, gif, webp, svg+xml, pdf.
 
-## Logo / Cover — 2 chemins distincts
+## Logo / Cover — 2 distinct paths
 
-- **Par-quotation** (affiché sur la selling page) : `upload_media` → `update_quotation {logo: {id}}` (idem `cover`). Règle `noLogo`/`noCover` : ne les mettre `true` que s'il n'y a RIEN à montrer, sinon conflit (ni logo ni cover affichés).
-- **Tenant** (Settings → Compagnie) : `PUT /companies/{id}` avec `setLogo`/`setCover` en **PNG base64 BRUT** (un data URI est silencieusement ignoré). `"setLogo": "remove"` supprime. **Ne jamais écraser un branding existant** : vérifier avant, ne définir que si absent.
+- **Per-quotation** (displayed on the selling page): `upload_media` → `update_quotation {logo: {id}}` (same for `cover`). `noLogo`/`noCover` rule: set them to `true` only if there is NOTHING to show, otherwise conflict (neither logo nor cover displayed).
+- **Tenant** (Settings → Company): `PUT /companies/{id}` with `setLogo`/`setCover` as **RAW base64 PNG** (a data URI is silently ignored). `"setLogo": "remove"` deletes it. **Never overwrite existing branding**: check first, set only if absent.
 
-## Custom fields (données)
+## Custom fields (data)
 
-- Les custom fields portent des **données** structurées ; en V2 ils s'affichent via le bloc `customfields` (liste de noms de CF), pas via l'ancienne vue.
-- Patcher les valeurs sur une quotation : `update_quotation {customFields: {clé: valeur}}` — clé = **nom** du CF (pas l'id) ; fusion automatique par l'outil.
+- Custom fields carry structured **data**; in V2 they are displayed through the `customfields` block (a list of CF names), not through the legacy view.
+- Patch the values on a quotation: `update_quotation {customFields: {key: value}}` — the key is the CF **name** (not the id); the tool merges automatically.
 
-## Sécurité / hygiène
+## Security / hygiene
 
-- Clés API : lues depuis des fichiers (`<tenant>_api_key`, `.secrets/`), jamais affichées, jamais loggées, jamais dans le `.env` d'un autre projet.
-- Écritures : compte de test/démo uniquement — jamais un tenant client réel sans demande explicite.
-- Ne jamais écraser des settings tenant existants (logo, bannière…) : ne les définir que s'ils sont absents.
-- Actions de masse (tous les templates, tous les deals…) : jamais sans validation explicite du périmètre.
+- API keys: read from files (`<tenant>_api_key`, `.secrets/`), never displayed, never logged, never in another project's `.env`.
+- Writes: test/demo account only — never a real client tenant without an explicit request.
+- Never overwrite existing tenant settings (logo, banner…): set them only if absent.
+- Mass actions (all templates, all deals…): never without explicit validation of the scope.

@@ -1,82 +1,82 @@
 ---
 name: duodeal-api-reference
-description: Référence de l'API REST Duodeal (api.duodeal.app) — auth X-API-KEY, conventions de payload, inventaire des ~80 opérations, filtres, pagination, erreurs récurrentes. Utiliser ce skill dès qu'on touche à l'API Duodeal ou aux outils MCP duodeal (POST/PUT/GET, debug 4xx/5xx, custom fields, médias, logos, templates, filtres), qu'on parle de deals, quotations, devis, selling pages ou Hot Deal Score côté API.
+description: Duodeal REST API reference (api.duodeal.app) — X-API-KEY auth, payload conventions, inventory of the ~80 operations, filters, pagination, recurring errors. Use this skill as the API reference whenever you touch the Duodeal API or the duodeal MCP tools (POST/PUT/GET, debugging a 4xx/5xx, custom fields, media, logos, templates, filters), before generating, editing or delivering a Duodeal quote or selling page, and whenever deals, quotations, quotes, V2 blocks or the Hot Deal Score come up on the API side.
 ---
 
-# API Duodeal — référence
+# Duodeal API — reference
 
-Référence opérationnelle de l'API REST Duodeal, compilée depuis l'OpenAPI officiel
-(~80 opérations) + les règles apprises sur le terrain. Le serveur MCP `duodeal` de ce
-plugin expose les opérations courantes en outils prêts à l'emploi ; pour le reste,
-l'outil `api_call` couvre tout endpoint.
+Operational reference for the Duodeal REST API, compiled from the official OpenAPI spec
+(~80 operations) + the rules learned in the field. This plugin's `duodeal` MCP server
+exposes the common operations as ready-to-use tools; for everything else,
+the `api_call` tool covers any endpoint.
 
-## Fondamentaux
+## Fundamentals
 
-- **Base URL** : `https://api.duodeal.app/api` (override : env `DUODEAL_BASE_URL`)
-- **Auth** : header `X-API-KEY: <uuid>` — l'UUID BRUT, **jamais** de préfixe `Bearer`
-- **Content-Type** : `application/json` pour tous les POST/PUT
-- **IDs** : entiers pour les ressources ; **UUID v7** pour les liens publics (deal `uid`, quotation `uuid`, pins)
-- **Connexion** : gérée par le serveur MCP (profils multi-tenant) — vérifier avec l'outil `connection_status`, jamais afficher une clé
+- **Base URL**: `https://api.duodeal.app/api` (override: env `DUODEAL_BASE_URL`)
+- **Auth**: header `X-API-KEY: <uuid>` — the RAW UUID, **never** a `Bearer` prefix
+- **Content-Type**: `application/json` for every POST/PUT
+- **IDs**: integers for resources; **UUID v7** for public links (deal `uid`, quotation `uuid`, pins)
+- **Connection**: handled by the MCP server (multi-tenant profiles) — check with the `connection_status` tool, never display a key
 
-## Conventions de payload (valables partout)
+## Payload conventions (valid everywhere)
 
-- Réfs imbriquées : `{"entity": {"id": N}}` — jamais `entity_id`
-- Dates ISO `YYYY-MM-DD` ; booléens JSON ; prix en nombre brut
-- **Taux de TVA = décimal 0–1** (0.20 = 20 %, 0.055 = 5,5 %) — hors borne → 400
-- HTML accepté dans `description`, `title`, custom fields `HtmlSimple`/`RichText` (sanitizé serveur)
-- ⚠️ `PUT /quotations/{id}` avec `customFields` **remplace tout le dict** ; même piège avec `blocks` (V2). Les outils MCP `update_quotation` et `*_quotation_block` relisent et fusionnent — ne pas les contourner par un `api_call` PUT direct.
+- Nested refs: `{"entity": {"id": N}}` — never `entity_id`
+- ISO dates `YYYY-MM-DD`; JSON booleans; prices as raw numbers
+- **VAT rate = decimal 0–1** (0.20 = 20%, 0.055 = 5.5%) — out of range → 400
+- HTML accepted in `description`, `title`, `HtmlSimple`/`RichText` custom fields (server-sanitized)
+- ⚠️ `PUT /quotations/{id}` with `customFields` **replaces the whole dict**; same trap with `blocks` (V2). The `update_quotation` and `*_quotation_block` MCP tools re-read and merge — do not bypass them with a direct `api_call` PUT.
 
-## Inventaire (vue d'ensemble)
+## Inventory (overview)
 
-| Catégorie | Endpoints | Outils MCP |
+| Category | Endpoints | MCP tools |
 |---|---|---|
-| Setup / lecture | `/taxes`, `/unities`, `/price-categories`, `/quotation-status`, `/users/me` | `list_taxes`, `list_unities`, `list_price_categories`, `get_me` |
+| Setup / read | `/taxes`, `/unities`, `/price-categories`, `/quotation-status`, `/users/me` | `list_taxes`, `list_unities`, `list_price_categories`, `get_me` |
 | Deals | `/deals` (+`/deals/clone/{id}`) | `list_deals`, `get_deal`, `create_deal`, `update_deal`, `clone_deal`, `delete_deal` |
 | Quotations | `/quotations` (+`/{id}/clone`) | `list_quotations`, `get_quotation`, `update_quotation`, `clone_quotation`, `get_links` |
-| Lignes | `/quotation-lines` (+`/quote/{id}`) | `list_quotation_lines`, `create/update/delete_quotation_line` |
-| Blocs V2 | via `PUT /quotations/{id}` (hors spec) | `get/add/update/delete_quotation_block`, `reorder_quotation_blocks`, `replace_quotation_block_text` — voir skill **duodeal-v2-blocks** |
-| Clients | `/customer-companies`, `/customers` | `list/create_customer_company`, `list/create/update_customer` |
-| Catalogue | `/products`, `/product-prices`, `/price-categories` | `list/create_product`, `create_product_price`, `create_price_category` |
+| Lines | `/quotation-lines` (+`/quote/{id}`) | `list_quotation_lines`, `create/update/delete_quotation_line` |
+| V2 blocks | via `PUT /quotations/{id}` (off-spec) | `get/add/update/delete_quotation_block`, `reorder_quotation_blocks`, `replace_quotation_block_text` — see the **duodeal-v2-blocks** skill |
+| Customers | `/customer-companies`, `/customers` | `list/create_customer_company`, `list/create/update_customer` |
+| Catalog | `/products`, `/product-prices`, `/price-categories` | `list/create_product`, `create_product_price`, `create_price_category` |
 | Custom fields | `/custom-fields` | `list/create_custom_field` |
-| Médias | `/medias` | `upload_media` |
-| Modèles | `/templates` (types `cgv`/`notice`/`email`) | `list_templates`, `ensure_template` |
+| Media | `/medias` | `upload_media` |
+| Templates | `/templates` (types `cgv`/`notice`/`email`) | `list_templates`, `ensure_template` |
 | Org | `/users`, `/user-groups`, `/filter-views` | `get_me`, `list_users`, `create_user` |
-| Webhooks | `/webhooks` (hors spec, vérifié 23/07/2026) | `list/get/create/update/delete_webhook` |
+| Webhooks | `/webhooks` (off-spec, verified 2026-07-23) | `list/get/create/update/delete_webhook` |
 | Collab | `/pins`, `/comments/{uuid}` | via `api_call` |
 
-Détail champ par champ (Req/Opt/Resp/pièges par endpoint) : lire
+Field-by-field detail (Req/Opt/Resp/traps per endpoint): read
 [references/endpoints.md](references/endpoints.md).
-Erreurs récurrentes, règles de suppression, médias, logos : lire
+Recurring errors, deletion rules, media, logos: read
 [references/gotchas.md](references/gotchas.md).
 
-## Filtres et recherche
+## Filters and search
 
-- Filtres : `filters[<champ>][<op>]=<valeur>` — op ∈ `eq|neq|contains|startsWith|endsWith|gt|gte|lt|lte|like|in`. Champs relationnels (`customerCompany.name`) et custom fields (`customFields.<clé>`) supportés. Les outils MCP prennent un objet `filters: {"champ": {"op": valeur}}`.
-- Recherche plein texte `?search=` sur Deals & Quotations (PostgreSQL FR/EN pondéré : name/number en haut, puis contact/client).
-- Pagination : `page` + `itemsPerPage` (défaut 10). Réponses tantôt `[...]`, tantôt `{data: [...], meta: {currentPage, perPage, pages, total}}` — les outils MCP normalisent ; option `all: true` pour tout récupérer.
+- Filters: `filters[<field>][<op>]=<value>` — op ∈ `eq|neq|contains|startsWith|endsWith|gt|gte|lt|lte|like|in`. Relational fields (`customerCompany.name`) and custom fields (`customFields.<key>`) are supported. The MCP tools take a `filters: {"field": {"op": value}}` object.
+- Full-text search `?search=` on Deals & Quotations (weighted PostgreSQL FR/EN: name/number on top, then contact/customer).
+- Pagination: `page` + `itemsPerPage` (default 10). Responses are sometimes `[...]`, sometimes `{data: [...], meta: {currentPage, perPage, pages, total}}` — the MCP tools normalize this; use the `all: true` option to fetch everything.
 
-## Endpoints publics (sans clé)
+## Public endpoints (no key)
 
 `GET /deals/uuid/{uuid}`, `GET /deals/custom-fields/{uuid}`, `GET /deals/pdf/{uuid}`,
 `GET /quotations/uuid/{quoteUuid}`, `GET /quotations/custom-fields/{quoteUuid}`,
 `GET /pins/quotation/{quotationUuid}`.
 
-## Vocabulaire des liens (à ne jamais confondre)
+## Link vocabulary (never confuse these)
 
-| Lien | URL | Usage |
+| Link | URL | Use |
 |---|---|---|
-| **Édition** (interne) | `https://duodeal.app/app/quotations/{dealId}/{quotationId}` | Éditeur **V2** (⚠️ pas `/app/deals/…`) |
-| **Client / selling page** (défaut) | `https://duodeal.app/quotations/deal/{deal.uid}` | Envoyé au prospect ; le `deal.uid` suffit |
-| Share link (V2) | `https://duodeal.app/quotations/share/{shareUuid}` | Partage alternatif (vue filtrée des blocs) |
+| **Edit** (internal) | `https://duodeal.app/app/quotations/{dealId}/{quotationId}` | **V2** editor (⚠️ not `/app/deals/…`) |
+| **Customer / selling page** (default) | `https://duodeal.app/quotations/deal/{deal.uid}` | Sent to the prospect; the `deal.uid` is enough |
+| Share link (V2) | `https://duodeal.app/quotations/share/{shareUuid}` | Alternative sharing (filtered view of the blocks) |
 
-Quand un devis est livré : **toujours donner les 2 liens** (client + édition) — l'outil
-`get_links` les construit.
+When a quote is delivered: **always give both links** (customer + edit) — the
+`get_links` tool builds them.
 
-## Réflexes
+## Reflexes
 
-1. Avant tout POST de ligne : `list_taxes` / `list_unities` du tenant ACTIF (les ids varient par tenant — ne jamais recycler ceux d'un autre compte).
-2. Créations idempotentes : `create_tax`/`create_unity`/`create_price_category`/`ensure_template` réutilisent l'existant par défaut (pattern list → match → create).
-3. Un deal **sans quotation n'apparaît pas** dans la liste → `create_deal` garde `createQuotation: true`.
-4. `POST /quotations` nu → 500 : les devis naissent via `create_deal` ; une 2ᵉ quotation via `clone_quotation`.
-5. Écritures : compte de test/démo uniquement, jamais un tenant client réel sans demande explicite.
-6. En cas d'erreur inexpliquée : les messages du serveur MCP embarquent le diagnostic (💡) ; sinon consulter [references/gotchas.md](references/gotchas.md).
+1. Before any line POST: `list_taxes` / `list_unities` of the ACTIVE tenant (ids vary per tenant — never reuse those of another account).
+2. Idempotent creations: `create_tax`/`create_unity`/`create_price_category`/`ensure_template` reuse the existing record by default (list → match → create pattern).
+3. A deal **with no quotation does not appear** in the list → `create_deal` keeps `createQuotation: true`.
+4. A bare `POST /quotations` → 500: quotes are born through `create_deal`; a 2nd quotation through `clone_quotation`.
+5. Writes: test/demo account only, never a real client tenant without an explicit request.
+6. On an unexplained error: the MCP server messages carry the diagnosis (💡); otherwise check [references/gotchas.md](references/gotchas.md).

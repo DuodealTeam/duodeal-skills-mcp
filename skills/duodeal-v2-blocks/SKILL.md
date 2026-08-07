@@ -1,92 +1,96 @@
 ---
 name: duodeal-v2-blocks
-description: Système de blocs V2 des quotations Duodeal (builderVersion 2) — modèle de données, types de blocs (wysiwyg, html, pricing, header, faq…), contrat REST hors spec, outils MCP de manipulation sûre, API JS DuoDeal des blocs html, check-list anti-écrasement. Utiliser dès qu'on lit/écrit des blocs, convertit un devis en V2, construit une micro-app html dans un devis, ou débogue un rendu V2.
+description: V2 block system of Duodeal quotations (builderVersion 2) — data model, block types (wysiwyg, html, pricing, header, faq…), off-spec REST contract, MCP tools for safe manipulation, DuoDeal JS API of html blocks, anti-overwrite checklist. Use whenever you read or write blocks, add/update/reorder/delete a block, convert a quote to V2, build an html micro-app inside a quote, or debug a V2 render (iframe height, autoResize, blocks array overwritten).
 ---
 
-# Blocs V2 des quotations Duodeal
+# V2 blocks of Duodeal quotations
 
-Une quotation V2 est une **liste ordonnée de `blocks`** (`builderVersion: 2`), éditée
-dans l'éditeur par blocs. Contrat vérifié empiriquement — **rien n'est dans openapi.yaml**
-(spec antérieure à la V2).
+A V2 quotation is an **ordered list of `blocks`** (`builderVersion: 2`), edited
+in the block editor. Contract verified empirically — **nothing is in openapi.yaml**
+(spec predates V2).
 
-## Modèle de données
+## Data model
 
-Sur la quotation : `builderVersion: 2`, `blocks: [...]` (+ `groupId`/`versionNumber`
-pour le versioning). Chaque bloc :
+On the quotation: `builderVersion: 2`, `blocks: [...]` (+ `groupId`/`versionNumber`
+for versioning). Each block:
 
 ```json
 {"id": "<UUID>", "type": "wysiwyg", "version": 1, "visible": true,
  "title": "", "showTitle": true, "layout": {"columns": 1, "rows": 1}, "data": {...}}
 ```
 
-`data` par type — principaux :
+`data` per type — the main ones:
 
 | Type | data | Notes |
 |---|---|---|
-| `wysiwyg` | `{columns: [html]}` | Rendu inline — équivalent V2 d'un CF HtmlSimple |
-| `html` | `{code, state}` | **iframe sandboxée**, API JS `window.DuoDeal` injectée — **finir par `DuoDeal.autoResize()`** |
+| `wysiwyg` | `{columns: [html]}` | Inline render — V2 equivalent of an HtmlSimple CF |
+| `html` | `{code, state}` | **Sandboxed iframe**, `window.DuoDeal` JS API injected — **must end with `DuoDeal.autoResize()`** |
 | `header` | `{cover, noCover, logo, noLogo}` | |
-| `pricing` | `{discountEnabled, discount, discountType, columns}` | Les lignes s'y rattachent via `blockId` |
-| `customfields` | `{fields: [noms]}` | |
+| `pricing` | `{discountEnabled, discount, discountType, columns}` | Lines attach to it via `blockId` |
+| `customfields` | `{fields: [names]}` | |
 | `legalnotice` | `{companyName, legalText, other…}` | |
-| `faq` | `{items: [{id, question, answer}]}` | **Texte BRUT** (interpolation `{{ }}`, pas de v-html) — le HTML s'affiche littéralement |
+| `faq` | `{items: [{id, question, answer}]}` | **RAW text** (`{{ }}` interpolation, no v-html) — HTML is rendered literally |
 | `contacts` | `[]` | |
+| `accept` | `{}` | "Accept & sign" button (opens the signature modal). **Disappears once signed** — always pair it with `signstamp` |
+| `signstamp` | `{}` | Signature proof (signed date, signer + email, validation CFs). Not signed → renders **nothing** client-side; signed → visible on both faces |
 
-Types connus : header, contacts, wysiwyg, html, pricing, customfields, attachments,
+Known types: header, contacts, wysiwyg, html, pricing, customfields, attachments,
 legalnotice, paymentschedule, pdfviewer, youtube, faq, pptx, googleslides, canva,
 gallery, accept, signstamp, pagebreak.
 
-## Contrat REST (hors spec) et outils MCP
+## REST contract (off-spec) and MCP tools
 
-- **Lecture** : `GET /quotations/{id}` → clé `blocks`. Outils : `get_quotation_blocks`
-  (résumés par défaut, `full: true` pour tout), `get_quotation_block` (un bloc complet).
-- **Écriture** : `PUT /quotations/{id}` avec `{builderVersion: 2, blocks: [...]}` —
-  ⚠️ **le tableau envoyé REMPLACE tout** (même piège que customFields). L'éditeur V2 est
-  utilisé en parallèle par l'équipe : un PUT aveugle écrase leur travail. **Toujours
-  passer par les outils MCP**, qui relisent puis fusionnent :
-  - `add_quotation_block` {quotationId, type, data, title?, position?} — génère l'id UUID
-  - `update_quotation_block` {quotationId, blockId, data (fusionné clé à clé), …}
-  - `replace_quotation_block_text` {quotationId, blockId, path, find?, replace} — édition
-    ciblée par chemin pointé (`code`, `columns.0`, `items.2.answer`) dans les gros blocs
-  - `delete_quotation_block`, `reorder_quotation_blocks` (liste COMPLÈTE des ids)
-- Les `id` de blocs sont des **UUID générés côté client**, persistés tels quels
-  (`clone_deal` les préserve).
-- **Lignes ↔ pricing** : chaque quotation-line se rattache au bloc pricing via `blockId`
-  (payload de `create/update_quotation_line`). Sans `blockId`, les lignes retombent sur le
-  **premier** bloc pricing — indispensable seulement avec plusieurs blocs pricing. Si on
-  remplace le bloc pricing, re-rattacher les lignes.
-- Un devis créé par l'API naît `builderVersion: 1, blocks: null` ; le premier écrit de
-  bloc le bascule en V2 — toujours poser `builderVersion: 2` dès la création.
-- `quotation.shareLinks` = liens de partage V2 (vue filtrée des blocs).
+- **Read**: `GET /quotations/{id}` → `blocks` key. Tools: `get_quotation_blocks`
+  (summaries by default, `full: true` for everything), `get_quotation_block` (one full block).
+- **Write**: `PUT /quotations/{id}` with `{builderVersion: 2, blocks: [...]}` —
+  ⚠️ **the array you send REPLACES everything** (same trap as customFields). The V2 editor is
+  used in parallel by the team: a blind PUT overwrites their work. **Always
+  go through the MCP tools**, which re-read then merge:
+  - `add_quotation_block` {quotationId, type, data, title?, position?} — generates the UUID id
+  - `update_quotation_block` {quotationId, blockId, data (merged key by key), …}
+  - `replace_quotation_block_text` {quotationId, blockId, path, find?, replace} — targeted
+    edit by dotted path (`code`, `columns.0`, `items.2.answer`) inside large blocks
+  - `delete_quotation_block`, `reorder_quotation_blocks` (COMPLETE list of ids)
+- Block `id`s are **client-side generated UUIDs**, persisted as-is
+  (`clone_deal` preserves them).
+- **Lines ↔ pricing**: each quotation-line attaches to the pricing block via `blockId`
+  (payload of `create/update_quotation_line`). Without `blockId`, lines fall back to the
+  **first** pricing block — only required when there are several pricing blocks. If you
+  replace the pricing block, re-attach the lines.
+- A quote created through the API starts at `builderVersion: 1, blocks: null`; the first block
+  write flips it to V2 — always set `builderVersion: 2` right at creation.
+- `quotation.shareLinks` = V2 share links (filtered view of the blocks).
 
-## API JS des blocs `html` (micro-apps)
+## JS API of `html` blocks (micro-apps)
 
-Le `code` tourne dans une iframe sandboxée avec `window.DuoDeal` :
+The `code` runs in a sandboxed iframe with `window.DuoDeal`:
 
-- `DuoDeal.deal / .quotation / .lines / .customFields` — lecture des données du devis
-- `DuoDeal.onUpdate(cb)` — re-render sur édition du pricing en live
-- `DuoDeal.get/set/update/getData/setData` — état persisté par bloc (`data.state`)
+- `DuoDeal.deal / .quotation / .lines / .customFields` — read the quote data
+- `DuoDeal.onUpdate(cb)` — re-render on live pricing edits
+- `DuoDeal.get/set/update/getData/setData` — per-block persisted state (`data.state`)
 - `DuoDeal.formatCurrency(n)` / `formatDate(d)` / `autoResize()`
 
-**Toujours finir par `autoResize()`** — sinon l'iframe garde sa hauteur par défaut
-(espace blanc ou contenu coupé). Les outils MCP émettent un ⚠️ si l'appel manque.
+**Always end with `autoResize()`** — otherwise the iframe keeps its default height
+(white space or clipped content). The MCP tools emit a ⚠️ if the call is missing.
 
-## Check-list avant d'écrire des blocs
+## Checklist before writing blocks
 
-1. Tenant de test/démo uniquement ; étiqueter « à supprimer » ce qui est jetable.
-2. `get_quotation_blocks` d'abord — comprendre l'existant avant de toucher.
-3. Ne JAMAIS pousser un tableau `blocks` partiel via `api_call` — les outils blocs fusionnent.
-4. Sections riches → `wysiwyg` ; code interactif/logos → `html` (+ `autoResize()`).
-5. Ne pas embarquer de spacers (`<div style="height:71px">…`) : chaque bloc gère son
-   espacement — le spacer devient une bande blanche en haut de carte.
-6. `faq` : texte brut uniquement.
-7. Vérifier le rendu dans l'éditeur V2 (lien `editionLink` de `get_links`).
+1. Test/demo tenant only; label anything disposable as "to delete".
+2. `get_quotation_blocks` first — understand what exists before touching anything.
+3. NEVER push a partial `blocks` array through `api_call` — the block tools merge.
+4. Rich sections → `wysiwyg`; interactive code/logos → `html` (+ `autoResize()`).
+5. Do not embed spacers (`<div style="height:71px">…`): each block handles its own
+   spacing — the spacer turns into a white band at the top of the card.
+6. `faq`: raw text only.
+7. `accept` never ships alone → always add a `signstamp` block next to it (the button
+   disappears once signed; the stamp is the only remaining proof of signature).
+8. Check the render in the V2 editor (`editionLink` link from `get_links`).
 
-## Structure de référence (validée — Onboarding Agent)
+## Reference structure (validated — Onboarding Agent)
 
-Ordre canonique d'un devis V2 généré : 1) `header` (cover native, `noLogo: true`) ·
-2) bloc `html` logos émetteur + client côte à côte · 3) 1 bloc `wysiwyg` par section
-(couverture, votre projet, qui sommes-nous, gamme, vidéo, galerie, investissement) ·
-4) `pricing` (lignes rattachées par `blockId`) · 5) wysiwyg post-tableau (modalités,
-témoignages, FAQ, contact) · 6) `contacts` puis `legalnotice`. Ne pas modifier cette
-structure de référence sans accord explicite.
+Canonical order of a generated V2 quote: 1) `header` (native cover, `noLogo: true`) ·
+2) `html` block with sender + client logos side by side · 3) one `wysiwyg` block per section
+(cover, your project, who we are, product range, video, gallery, investment) ·
+4) `pricing` (lines attached via `blockId`) · 5) post-table wysiwyg (terms,
+testimonials, FAQ, contact) · 6) `contacts` then `legalnotice`. Do not change this reference
+structure without explicit approval.
