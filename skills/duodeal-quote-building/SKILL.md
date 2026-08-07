@@ -5,103 +5,163 @@ description: End-to-end flow for building a Duodeal quote from A to Z with the d
 
 # Build a Duodeal quote from A to Z
 
-Proven sequence, with the MCP tools of the `duodeal` server. Two starting points:
-**from scratch** (§1) or **from a template** (§2 — prefer this when a template exists).
-For a visually premium quote (design selling page, polished HTML blocks), chain
-the **duodeal-quote-design** skill after the creation step.
+Proven sequence, written as **what to obtain**, with the tool in parentheses when one
+exists. Tool names are authoritative in **duodeal-api-reference → `references/connector-tools.md`**:
+if a step needs something the connector does not expose, it says so and gives the way out
+(REST with `X-API-KEY` **only if a key is already configured**, otherwise the Duodeal
+interface — and tell the user it is pending).
+Two starting points: **from scratch** (§1) or **from an existing reference quote** (§2 —
+prefer this when one exists). For a visually premium quote (design selling page, polished
+HTML blocks), chain the **duodeal-quote-design** skill after the creation step.
 
 ## 0. Before anything
 
-1. `connection_status` — check the active tenant (company). Writes: test/demo account only.
-2. `list_taxes` + `list_unities` (+ `list_price_categories` if catalog) — fetch the **ids of THIS tenant**. Never reuse the ids of another account (cause #1 of 400s).
+1. Know which tenant you are writing to, and say it out loud (`get_current_user`, then `get_company` for the details). Writes: test/demo account only.
+2. Collect the ids **of THIS tenant** before any line: taxes and units (`list_taxes`, `list_unities`), price categories if there is a catalog (`list_price_categories`). Never reuse the ids of another account (cause #1 of 400s). Rates come back as decimals (0.20 = 20 %).
 
 ## 1. Full from-scratch flow
 
 ```
-1. connection_status                    → tenant OK ?
-2. list_taxes / list_unities            → required ids
-3. create_customer_company {name}       → client company
-4. create_customer {customerCompanyId, firstName, lastName, email}
-5. create_deal {name, customerId}       → deal + empty quotation (createQuotation by default)
-6. update_quotation                     → title, validUntil, customFields (+ primary: see §5)
-7. create_quotation_line (×N)           → lines: title / normal / subtotal, increasing weight
-8. ensure_template (cgv, notice)        → reusable T&Cs + legal notice
-9. get_links {dealId}                   → the 2 links to deliver
+1. Know the tenant                  (get_current_user)
+2. Hold this tenant's ids           (list_taxes, list_unities)
+3. Have the client organization     (create_customer_company {name})
+4. Have the contact                 (create_customer {customer_company_id,
+                                     first_name, last_name, email})
+5. Have the deal                    (create_deal {name, customer_id})
+6. Have ONE quotation on that deal  (list_quotations {deal_id} to see what exists,
+                                     create_quotation {deal_id, title, valid_until}
+                                     if there is none — never assume one was
+                                     auto-created)
+7. Refine the quotation             (update_quotation {id, title, valid_until,
+                                     customFields} — primary flag: see §5)
+8. Fill the price table             (add_quotation_lines {quotation_id, lines[]} as
+                                     soon as there are 2+ lines, create_quotation_line
+                                     for a single one)
+9. Attach T&Cs + legal notice       (no template tool on the connector — see the last
+                                     section)
+10. Hold the 2 delivery links       (rebuild them from get_deal + get_quotation — §5)
 ```
 
-The `create_deal` result already contains `links` (edition + client).
+There is **no `get_links` tool** and no `links` field to rely on in the `create_deal`
+result: both links are rebuilt by hand from the deal `uid` / `id` and the quotation `id` (§5).
 
 ### Lines — rules
 
 - `weight` is mandatory and increasing (= display order).
 - Typical structure: a `title` line (section separator, inline HTML accepted:
   `<p><span style="font-size:18px;">Included in our offer</span></p>`), then `normal`
-  lines (productTitle, unitPrice, quantity, unity, HTML description), then `subtotal`.
+  lines (`productTitle`, `unitPrice`, `quantity`, `unity_id`, HTML `description` —
+  **required** on `lineType: "normal"`), then `subtotal`.
+- **Every** line carries a `tax_id`, including the `title` and `subtotal` ones (otherwise 400).
 - **Discounts**: a `normal` line with a negative `unitPrice`, OR `discount` + `discountType`
   (`percentage`/`amount`) on the line — `lineType: "discount"` does not exist.
 - `option: true` → "Option not included" badge (French deals: « Option non incluse »), excluded from the total.
-- Line image: `upload_media` first, then `medias: [{id}]` in the payload.
-- V2 quotes (blocks): pass the pricing block's `blockId` in the payload — see the
-  **duodeal-v2-blocks** skill.
+- **An image on EVERY product line** (blocking checklist item of **duodeal-quote-design**), on
+  the media of the LINE, square and centered on the subject. ⚠️ **No media argument exists on
+  the line tools, nor on the product tools** (`url` on a product is an external link, not an
+  image). Store the file (`create_media {name, folder, file}` — base64, ⚠️ **never `from_url`**,
+  it 500s on most CDNs), then bind it to the line by REST `POST|PUT /quotation-lines
+  {medias: [{id}]}` if a key is already configured, otherwise attach it in the Duodeal
+  interface and say the images are still pending. Failing that, an image can only be shown in a
+  V2 block (`gallery.images`, `attachments`, `header.cover`) via `update_quotation_block`.
+  Say which route you took.
+- V2 quotes (blocks): pass the pricing block's `blockId` (camelCase, inside the line) so the
+  line lands in the right table — see the **duodeal-v2-blocks** skill.
 
 ### Quotation branding
 
-- `upload_media {url}` → `update_quotation {payload: {logo: {id}}}` (same for `cover`).
-- `noLogo`/`noCover: true` only if there is NOTHING to show (otherwise conflict).
+- Get the logo / cover **stored** (`create_media {name, folder, file}` — base64, ⚠️ never
+  `from_url`) and then **shown**:
+  `update_quotation` has **no `logo` / `cover` argument** on the connector → put the media in
+  the native `header` block (`update_quotation_block` with the **complete** `data`), or set it
+  via REST / the interface.
+- `noLogo` / `noCover: true` only if there is NOTHING to show (otherwise conflict) — they are
+  `header` block fields, sent inside its `data`, not quotation arguments.
 
-## 2. Start from a template (recommended when one exists)
+## 2. Start from an existing reference quote (recommended when one exists)
 
 ```
-1. list_deals {template: true, search: "..."}   → find the template (re-check the template
-                                                  flag on each result, the API filter is
-                                                  sometimes ignored)
-2. clone_deal {dealId}                          → full copy (quotations, lines, V2 blocks)
-3. update_deal {name, customerId}               → rename, set the customer, template: false
-4. update_quotation / block tools               → customization
-5. get_links                                    → delivery
+1. Identify the reference deal      (list_deals {search: "..."} — there is NO template
+                                     flag or template tool on the connector: confirm
+                                     with the user which deal is the reference, and
+                                     re-check what you got)
+2. Read the source completely       (get_deal, get_quotation → blocks[] with every id
+                                     and type, list_quotation_lines)
+3. Rebuild on a NEW deal            (no clone_deal / clone_quotation on the connector:
+                                     create_deal → create_quotation →
+                                     add_quotation_lines → per block
+                                     add_quotation_block {type, position} then
+                                     update_quotation_block with the read data.
+                                     Alternative: duplicate in the Duodeal interface
+                                     and read the copy back with get_quotation)
+4. Customize                        (update_deal {id, name, customer_id},
+                                     update_quotation, block tools —
+                                     replace_quotation_block_text for large html/wysiwyg)
+5. Deliver                          (rebuild the 2 links — §5)
 ```
 
-**2nd quotation on an existing deal**: `clone_quotation` from a quotation of the deal,
-then `update_quotation` on the clone (`title`, `primaryQuotation`…). A bare `POST /quotations`
-fails (500).
+**2nd quotation on an existing deal**: there is no `clone_quotation`. Create it
+(`create_quotation {deal_id}` — `deal_id` is required, a REST `POST /quotations` without a
+deal fails 500), then copy the content block by block and re-run `add_quotation_lines`, then
+`update_quotation` on the new one (`title`…). The **primary** flag is not settable through the
+connector — see §5.
 
 ## 3. Product catalog (if requested)
 
 ```
-create_price_category {name}            → idempotent (volume tiers: 1 category per tier)
-create_product {name, payload}          → product record
-create_product_price {productId, priceCategoryId, price}   → only 1 price per pair
+Have the price tiers      (create_price_category {name, by_default} — 1 category per
+                           volume tier; list_price_categories first, do not recreate)
+Have the product record   (create_product {name, reference, description, ...})
+Have its price            (create_product_price {product_id, price_category_id,
+                           tax_id, price} — the four are required, only 1 price per
+                           product × category pair; delete_product_price is a HARD delete)
 ```
 
-Then reference them in the lines: `product {id}`, `productPrice {id}`.
+Then bind them to the lines: `product_id` on the line. The `productPrice{id}` reference
+exists on `POST|PUT /quotation-lines` (REST) but **is not a connector argument** — through the
+connector the amount charged is the line's own `unitPrice`, so read the catalogue price
+(`list_product_prices`) and carry it over yourself.
 
 ## 4. Custom fields (structured data)
 
-1. `create_custom_field {name, label, type, scope}` — data field on deal / customer / product / quotation.
-2. Values: `update_quotation {payload: {customFields: {key: value}}}` — automatic merge.
-3. Display in the quote: via the V2 **`customfields`** block (list of CF names) — see **duodeal-v2-blocks**.
+1. Have the **definition** (`list_custom_fields` first, then `create_custom_field {name, type, scope}` — the three are required on create, `label` recommended; scope = deal / customer / product / quotation).
+2. Have the **value** on the quotation (`update_quotation {id, customFields: {key: value}}`, key = the field **name**). Read the current dict first and resend it merged: a partial `customFields` can overwrite the rest. For a large text value use `replace_quotation_custom_field {quotation_id, field, search+replace}` instead of rewriting everything.
+3. Display it in the quote: via the V2 **`customfields`** block (list of CF names) — see **duodeal-v2-blocks**.
 
 ## 5. Delivery — always the 2 links
 
 ⚠️ **Before delivering, mark the quotation as primary.** Otherwise it does NOT appear in the customer dashboard (the table only lists primary quotes) — recurring bug. On a rework, switch the primary flag to the new quotation. **Not settable through the official connector** → `PUT /quotations/{id} {primaryQuotation: true}` on the REST API when a key is configured, otherwise hand the step to the user in the Duodeal interface and flag it as pending.
 
-`get_links {dealId}` returns:
+No `get_links` tool exists: read the ids (`get_deal {id}` → deal `uid` + `id`,
+`get_quotation {id}` or `list_quotations {deal_id}` → quotation `id`) and build both links:
 
-- **clientLink** `…/quotations/deal/{uid}` — the selling page sent to the prospect (default link)
-- **editionLink** `…/app/quotations/{dealId}/{quotationId}` — the internal V2 editor
-  (⚠️ never `/app/deals/…`)
+- **client link** `https://duodeal.app/quotations/deal/{deal.uid}` — the selling page sent to
+  the prospect (default link, nothing to generate)
+- **edit link** `https://duodeal.app/app/quotations/{dealId}/{quotationId}` — the internal V2
+  editor (⚠️ never `/app/deals/…`, that is the V1 editor)
 
-Alternative sharing: V2 share link `…/quotations/share/{shareUuid}` (filtered view of the blocks).
+Alternative sharing: V2 share link `https://duodeal.app/quotations/share/{shareUuid}`
+(filtered view of the blocks) — usable **only** if `get_quotation` already returns a
+`shareLinks` entry; the connector cannot create one, and it cannot send the quote by email
+either (do it from the app).
 
 ## 6. Final check
 
-- `get_quotation {quotationId}` — re-read the quote (blocks summarized by default).
-- `list_quotation_lines {quotationId}` — check order (weight), totals, options.
-- A quote is only "done" after a real visual check of the selling page
-  (open the clientLink), not from reading the API alone.
+- Re-read the quote from the server (`get_quotation {id}` — carries `blocks[]` and `shareLinks`).
+- Check order (`weight`), totals and options on the price table (`list_quotation_lines {quotation_id}`).
+- A quote is only "done" after a real visual check of the selling page (open the client link
+  in a browser). **No connector tool renders the page or a block preview** — if you cannot
+  open it yourself, say so and ask the user to look. Never claim a render you have not seen.
 
 ## T&Cs / legal notice / email templates
 
-`ensure_template {title, type: cgv|notice|email, content}` — idempotent (matched by title,
-PUT if the content differs). Variables: `{{quotation.reference}}`, `{{customer.firstName}}`,
-`{{company.name}}`… Emails carry `subject` + `byDefaultSendDeal`.
+**No template tool on the connector** (no `ensure_template`, no `list_templates`): reusable
+T&Cs, legal notices and email templates are created in the Duodeal interface (Settings), then
+read back on the quotation. On the quote itself, the legal text goes in the native
+`legalnotice` block (`add_quotation_block {type: "legalnotice"}` then
+`update_quotation_block` with the **complete** `data`) — `update_quotation` has no
+`legalNoticeText` argument. Variables resolved by the app templates:
+`{{quotation.reference}}`, `{{customer.firstName}}`, `{{company.name}}`… Email templates carry
+`subject` + `byDefaultSendDeal` and are set up in the interface only. If a REST key is already
+configured, that write can go through `X-API-KEY`; otherwise hand the step to the user and
+flag it as pending. Never invent a T&C or a legal notice the client did not provide.

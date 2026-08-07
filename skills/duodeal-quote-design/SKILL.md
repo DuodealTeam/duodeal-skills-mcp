@@ -6,8 +6,12 @@ description: Build a design-grade Duodeal quote in HTML, at premium selling page
 # Duodeal design quote (HTML, V2 blocks)
 
 Guide for building a visually premium quote. The context (sender branding, offers,
-prospect) is already known: no research to do — apply these instructions. Block
-manipulation: MCP tools `add/update_quotation_block`…
+prospect) is already known: no research to do — apply these instructions.
+Getting a designed block on the page always takes two steps: create it, then write its
+full content (connector: `add_quotation_block` writes **default** content only, then
+`update_quotation_block` with the **complete** `data`, or `replace_quotation_block_text`
+for large html). Read the current block inventory from the quotation itself
+(connector: `get_quotation` → `blocks[]`; there is no `list_quotation_blocks`).
 (see the **duodeal-v2-blocks** skill for the technical contract).
 
 ## Step 1 — Lock the design system (BEFORE any HTML)
@@ -40,8 +44,11 @@ Typographic details and choices: [references/design-system.md](references/design
    4 quantified KPIs
 5. *(optional)* **html GALLERY / DEMO** — real photos (physical business) or interface
    mockup (SaaS)
-6. **`pricing`** — the priced quote (title "Your quote"); every product line
-   carries an **image** and this block's `blockId`
+6. **`pricing`** — the priced quote (title "Your quote"); attach every line to this
+   block (line tools carry the block's `blockId`) and give every product line an
+   **image** — not settable by the connector: line and product tools take no media
+   argument, so host the file first (`create_media`) then bind it via REST if a key is
+   configured, otherwise in the Duodeal interface, and tell the user
 7. **html ORDER RECAP** — one-off vs recurring, spelled out. **Recurring lives HERE**
    (the native table has only one total per quote)
 8. **html SOCIAL PROOF** — real testimonials, otherwise a logo wall (real logo
@@ -77,8 +84,11 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
    use ":", ";", "·", ",".
 6. **Every block has a non-empty `title`** (otherwise the interface shows "html"),
    `showTitle:false` when the block already carries its own title in HTML.
-7. Stars/icons as **inline SVG** (never ★ nor emoji); images uploaded via
-   `upload_media` (S3), never hotlinked from a third-party site.
+7. Stars/icons as **inline SVG** (never ★ nor emoji); every image must be hosted on
+   Duodeal storage, never hotlinked from a third-party site (connector: `create_media`
+   with `name` + `folder` + `file` in base64 — ⚠️ **never `from_url`**, the URL import 500s
+   on most CDNs; no `upload_media`, no local path; then reference the url it returns inside
+   the block's `data`).
 8. No orphan lines: any isolated piece of info becomes a 2-line card
    (title + muted text).
 
@@ -88,11 +98,18 @@ Check on the LIVE quotation before delivering — one failing item = not done:
 
 1. Every block has a non-empty `title`.
 2. Native header filled in (sender logo + cover).
-3. Every product line has an image.
+3. Every product line has an image — out of reach of the connector: bind it via REST if a
+   key is configured, otherwise hand the step to the user in the Duodeal interface and say
+   it is still pending.
 4. No leftover `<style>` outside `@font-face` (mental test: if you strip all
    `<style>` tags, the block still looks presentable).
 5. `DuoDeal.autoResize()` at the end of every html block.
 6. Recurring in the html recap, not in the native table.
 7. No "—", no ★, no forgotten `{{…}}` placeholder.
-8. **Real visual verification**: open the `editionLink` (`get_links`) and check
-   the rendering — then deliver both links (client + edition).
+8. **Real visual verification**: open the edit link in a browser, check the rendering, then
+   deliver both links (client + edition). No tool returns a render and no tool returns the
+   links (there is no `get_links`): rebuild them — `get_deal(id)` gives the deal `uid` →
+   client link `https://duodeal.app/quotations/deal/{deal.uid}`; deal `id` + quotation `id`
+   → edit link `https://duodeal.app/app/quotations/{dealId}/{quotationId}` (`/app/deals/…`
+   is the V1 editor, never deliver it). If you cannot open a browser, say so and ask the
+   user to look — never claim a render you have not seen.

@@ -81,7 +81,7 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 
 ## Medias
 
-- `POST /medias` — **Req**: `name, mime, folder` + `file` (base64 data URI) **or** `fromUrl`. MIME: `image/jpeg|png|gif|webp|svg+xml`, `application/pdf`. ⚠️ `fromUrl` is unstable (500 on many CDNs) → always go through base64 (the `upload_media` tool does this). Limit ~4 MB.
+- `POST /medias` — **Req**: `name, mime, folder` + `file` (base64 data URI) **or** `fromUrl`. MIME: `image/jpeg|png|gif|webp|svg+xml`, `application/pdf`. ⚠️ `fromUrl` is unstable (500 on many CDNs) → download the file yourself and send it base64 (connector: `create_media` with `file`; there is **no `upload_media`** tool — nothing base64-encodes for you). Limit ~4 MB.
 - `GET|PUT|DELETE /medias/{id}` — DELETE breaks references.
 
 ## Users / User Groups / Filter Views / Pins

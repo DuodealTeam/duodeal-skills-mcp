@@ -40,26 +40,55 @@ gallery, accept, signstamp, pagebreak.
 
 ## REST contract (off-spec) and MCP tools
 
-- **Read**: `GET /quotations/{id}` → `blocks` key. Tools: `get_quotation_blocks`
-  (summaries by default, `full: true` for everything), `get_quotation_block` (one full block).
+- **Take the inventory before touching anything** — every block `id`, `type` and the current
+  order (connector: `get_quotation(id)` → `blocks[]`; there is **no** block-listing tool).
+  One block in full: `get_quotation_block` {`quotation_id` integer, `block_id` **UUID string**}.
 - **Write**: `PUT /quotations/{id}` with `{builderVersion: 2, blocks: [...]}` —
   ⚠️ **the array you send REPLACES everything** (same trap as customFields). The V2 editor is
-  used in parallel by the team: a blind PUT overwrites their work. **Always
-  go through the MCP tools**, which re-read then merge:
-  - `add_quotation_block` {quotationId, type, data, title?, position?} — generates the UUID id
-  - `update_quotation_block` {quotationId, blockId, data (merged key by key), …}
-  - `replace_quotation_block_text` {quotationId, blockId, path, find?, replace} — targeted
-    edit by dotted path (`code`, `columns.0`, `items.2.answer`) inside large blocks
-  - `delete_quotation_block`, `reorder_quotation_blocks` (COMPLETE list of ids)
-- Block `id`s are **client-side generated UUIDs**, persisted as-is
-  (`clone_deal` preserves them).
+  used in parallel by the team: a blind PUT overwrites their work. **Edit block by block**,
+  never by re-posting the whole array:
+  - Add a block, then fill it — a new block always lands with the **server's default content**
+    (connector: `add_quotation_block` {`quotation_id`, `type`, `position` 0-based, omit =
+    append} takes no content argument) → second call to write the content.
+  - Change a block's content: send the **COMPLETE `data`** — the merge is **shallow at root**,
+    a partial `data` wipes the rest of the object (connector: `update_quotation_block`
+    {`quotation_id`, `block_id`, `data` **JSON object, never a JSON string**, `title`,
+    `showTitle`, `visible`, `layout`}). Read the block first, edit in memory, send it whole.
+  - Large text (html `code`, long wysiwyg column): edit by anchor instead of resending tens of
+    KB (connector: `replace_quotation_block_text` {`quotation_id`, `block_id`, `field` =
+    dot-path inside `data` — `"code"`, `"columns.0"` — plus `search`+`replace` **or**
+    `from`+`to`+`replace`}). Anchors must be **short and unique**: no `replace_all`, no regex,
+    no occurrence index. A non-text structure (one `faq.items` entry, one `gallery.images`)
+    is **not** reachable this way → complete `data` instead.
+  - Delete / reorder: `delete_quotation_block` {`quotation_id`, `block_id`} ·
+    `reorder_quotation_blocks` {`quotation_id`, `order`} where `order` is the **COMPLETE** list
+    of ids top to bottom — a partial list silently pushes the omitted blocks to the end.
+  - Retype or duplicate a block: **no tool for either** — a block's `id` and `type` are
+    immutable. Delete + add of the right type + reorder; to copy one, read the source block and
+    write its `data` into a freshly added block of the same type (watch internal ids like
+    `faq.items`). No history either: keep the `data` you read before any write, it is your undo.
+- Block `id`s are **client-side generated UUIDs**, persisted as-is (a clone made in the Duodeal
+  interface preserves them). The connector has **no `clone_deal` / `clone_quotation`**: either
+  rebuild deal → quotation → lines → blocks, or clone in the app and read the result back.
 - **Lines ↔ pricing**: each quotation-line attaches to the pricing block via `blockId`
   (payload of `create/update_quotation_line`). Without `blockId`, lines fall back to the
   **first** pricing block — only required when there are several pricing blocks. If you
-  replace the pricing block, re-attach the lines.
-- A quote created through the API starts at `builderVersion: 1, blocks: null`; the first block
-  write flips it to V2 — always set `builderVersion: 2` right at creation.
-- `quotation.shareLinks` = V2 share links (filtered view of the blocks).
+  replace the pricing block, re-attach the lines. Rows never live in `block.data`, and
+  deleting a pricing block does **not** delete its lines — remove them explicitly.
+- **Images inside blocks** (header `cover`/`logo`, `gallery`, `attachments`, `pdfviewer`):
+  register the media first (connector: `create_media` {`name`, `folder`, `file` in base64 —
+  ⚠️ **never `from_url`**, the URL import 500s on most CDNs whatever the tool description says),
+  then reference its url/id in the **complete `data`** of the
+  target block. Line and product tools have **no media argument** — an image on a line is bound
+  by REST (`POST|PUT /quotation-lines {medias: [{id}]}`) when a key is already configured,
+  otherwise in the Duodeal interface, and you say it is still pending.
+- **The quotation must already be V2** for any of this to apply: a quote created through the
+  connector starts at `builderVersion: 1, blocks: null`, and **no connector argument exposes
+  `builderVersion`**. Check it (`get_quotation` → non-empty `blocks[]` = V2); to flip it, `PUT
+  /quotations/{id}` with `{builderVersion: 2, blocks: [...]}` via REST if a key is configured,
+  otherwise convert it in the Duodeal interface — and say so to the user.
+- `quotation.shareLinks` = V2 share links (filtered view of the blocks), **read-only** in
+  `get_quotation`: the connector cannot create one.
 
 ## JS API of `html` blocks (micro-apps)
 
@@ -71,20 +100,28 @@ The `code` runs in a sandboxed iframe with `window.DuoDeal`:
 - `DuoDeal.formatCurrency(n)` / `formatDate(d)` / `autoResize()`
 
 **Always end with `autoResize()`** — otherwise the iframe keeps its default height
-(white space or clipped content). The MCP tools emit a ⚠️ if the call is missing.
+(white space or clipped content). Check the call is there **before** writing the block: no
+connector tool validates the code you send.
 
 ## Checklist before writing blocks
 
 1. Test/demo tenant only; label anything disposable as "to delete".
-2. `get_quotation_blocks` first — understand what exists before touching anything.
-3. NEVER push a partial `blocks` array through `api_call` — the block tools merge.
+2. Read the existing blocks first — understand what exists before touching anything
+   (connector: `get_quotation` → `blocks[]`, then `get_quotation_block` for the ones you edit).
+3. NEVER post a partial `blocks` array: through REST it replaces the whole page, and the
+   connector has **no raw-HTTP tool** (`api_call` does not exist) — edit block by block, and
+   send the complete `data` each time.
 4. Rich sections → `wysiwyg`; interactive code/logos → `html` (+ `autoResize()`).
 5. Do not embed spacers (`<div style="height:71px">…`): each block handles its own
    spacing — the spacer turns into a white band at the top of the card.
 6. `faq`: raw text only.
 7. `accept` never ships alone → always add a `signstamp` block next to it (the button
    disappears once signed; the stamp is the only remaining proof of signature).
-8. Check the render in the V2 editor (`editionLink` link from `get_links`).
+8. Check the render in the V2 editor — no tool returns a preview, so open the edit link in a
+   browser (or ask the user to look, and say so). Build it by hand, there is no link tool:
+   `https://duodeal.app/app/quotations/{dealId}/{quotationId}` from the deal `id`
+   (`get_deal`) and the quotation `id`; the customer link is
+   `https://duodeal.app/quotations/deal/{deal.uid}`.
 
 ## Reference structure (validated — Onboarding Agent)
 

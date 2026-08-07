@@ -60,7 +60,10 @@ Check the whole set on a white background AND on DARK before producing the block
 
 ## Images
 
-- Every image goes through `upload_media` (Duodeal S3) — never hotlink.
+- Host every image in the Duodeal media library (S3) before using it — never hotlink
+  an external URL (connector: `create_media`, `name` + `folder` both required, then
+  `file` in base64; ⚠️ **never `from_url`** despite the tool description — the URL import
+  500s on most CDNs; no local path, no multipart).
 - Intro lockup logos: issuer tile ~96 px (radius 20 px), prospect wordmark
   ~34 px tall; with no prospect logo file available, a styled text wordmark
   (`font-size:34px`, 800, INK) does the job.
@@ -68,4 +71,8 @@ Check the whole set on a white background AND on DARK before producing the block
   (20-40 px), centered rows `display:flex;justify-content:center;flex-wrap:wrap;gap:44px`.
 - Sales rep photo: a real photo, cropped square centered on the face, rendered round
   (`border-radius:50%`, 96 px, `object-fit:cover`).
-- Every pricing product line carries an image (upload_media → `medias:[{id}]`).
+- Give every pricing product line an image. The connector cannot bind one: line tools
+  take no media argument, and product tools take none either. Host the file first
+  (`create_media`), then set `medias:[{id}]` on the line through the REST API with
+  `X-API-KEY` if a key is already configured in the environment; otherwise attach it
+  on the line in the Duodeal interface and tell the user that step is still to do.

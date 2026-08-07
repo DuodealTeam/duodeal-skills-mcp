@@ -234,7 +234,10 @@ colors, ~80 px, centered, with its exact regulatory wording in small text.
 ```
 
 Always filled in (logo + cover) — never hidden, never re-coded as an html block.
-Upload via `upload_media`, then reference the complete media object returned.
+Upload via `create_media` (`name` + `folder` required, `file` in base64 — ⚠️ **never
+`from_url`**, the URL import 500s on most CDNs) — there is **no `upload_media`** tool on the
+connector — then reference the complete media object returned inside the block's `data`
+(`update_quotation_block`).
 
 ---
 

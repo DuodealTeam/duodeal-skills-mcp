@@ -73,6 +73,6 @@ Two gaps to plan for instead of stalling mid-course:
 - **No tool at all**: taxes, unities, quotation statuses, templates, user creation.
 - **Fields missing from the tools that do exist**: `update_company` has no `currencyFormat`, `setLogo`, `setCover`, `showUnboarding`; `create_deal`/`update_deal` have no `language`, `template`, `createQuotation`, `owner`; `update_quotation` has no `builderVersion`, `primaryQuotation`, `logo`/`cover`, `legalNoticeText`; `create_quotation_line`/`update_quotation_line` have no `medias`.
 
-Those writes go through the REST API with `X-API-KEY` (or through this plugin's local `duodeal` MCP server, whose `create_deal` and `update_quotation {quotationId, payload}` take the raw API fields), or through the Duodeal interface.
+Those writes go through the REST API with `X-API-KEY`, or through the Duodeal interface. The full map of what the connector can and cannot do: **duodeal-api-reference → `references/connector-tools.md`**.
 
 ⚠️ **The REST fallback is only available if a key is already set up in the environment** (a file or a variable an admin configured). Never ask the user to paste one in the chat to unblock a step: hand them the step in the Duodeal interface with a short click-by-click, and record it as still to do. A skipped setting is recoverable, a leaked key is not.
