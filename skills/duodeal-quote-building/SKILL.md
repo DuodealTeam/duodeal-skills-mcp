@@ -130,7 +130,7 @@ connector the amount charged is the line's own `unitPrice`, so read the catalogu
 
 ## 5. Delivery — always the 2 links
 
-⚠️ **Before delivering, mark the quotation as primary.** Otherwise it does NOT appear in the customer dashboard (the table only lists primary quotes) — recurring bug. On a rework, switch the primary flag to the new quotation. **Not settable through the official connector** → `PUT /quotations/{id} {primaryQuotation: true}` on the REST API when a key is configured, otherwise hand the step to the user in the Duodeal interface and flag it as pending.
+**Primary quotation — check it in the §2 case.** A deal's first quotation is primary by default, so §1 needs nothing. But the customer dashboard table lists primary quotes only: a **second** quotation on a deal, or a quote rebuilt as a new quotation (§2), may not appear there. Say so to the user in that case — the flag is switched in the Duodeal interface (no connector argument exposes it).
 
 No `get_links` tool exists: read the ids (`get_deal {id}` → deal `uid` + `id`,
 `get_quotation {id}` or `list_quotations {deal_id}` → quotation `id`) and build both links:

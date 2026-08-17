@@ -47,7 +47,7 @@ Repeated from the skills because they are the recurring failures.
 **Quote content**
 - Native **header** filled in (sender logo + cover) and native **contacts** block present (sender AND recipient), never hidden nor recoded in HTML.
 - **`accept` and `signstamp` always ship as a pair**: once signed, `accept` disappears and `signstamp` is the only proof of signature left.
-- The delivered quotation must be **primary**, otherwise it stays invisible in the client dashboard table (which lists primary quotes only). ⚠️ The connector cannot set it (`update_quotation` has no `primaryQuotation`, `update_deal` no `primaryQuotationId`): set it through the REST API if a key is configured, otherwise **tell the user to mark it primary in the Duodeal interface** and say so explicitly rather than delivering a quote the client cannot see.
+- **Primary quotation**, in some cases only: the first quotation of a deal is primary by default, but the client dashboard table lists primary quotes only — a **second** quotation on a deal, or a rebuilt one, may not show up there. Flag it to the user when that case applies; switching the flag is an interface job (no connector argument for it).
 - **Inline-first**: no `<style>` in a delivered block except `@font-face`, no separate `<script>`, every html block ends with `DuoDeal.autoResize()` in a try/catch.
 - **No em dash "—" anywhere** in quote content (the server truncates a `productTitle` at the em dash): use ":", ";", "·", ",". No `{{...}}` placeholder left.
 - Recurring amounts live in an HTML recap block, never in the native pricing table (one total per quote only).
