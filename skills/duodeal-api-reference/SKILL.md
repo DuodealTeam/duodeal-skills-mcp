@@ -83,7 +83,7 @@ Recurring errors, deletion rules, media, logos: read
 
 | Link | URL | Use |
 |---|---|---|
-| **Edit** (internal) | `https://duodeal.app/app/quotations/{dealId}/{quotationId}` | **V2** editor (⚠️ not `/app/deals/…`) |
+| **Edit** (internal) | `https://duodeal.app/app/quotations/{dealId}/{quotationId}` | **V2** editor (⚠️ not `/app/deals/…`). `{dealId}` = the real parent deal, read on `GET /quotations/{id}` → `deal.id` |
 | **Customer / selling page** (default) | `https://duodeal.app/quotations/deal/{deal.uid}` | Sent to the prospect; the `deal.uid` is enough |
 | Share link (V2) | `https://duodeal.app/quotations/share/{shareUuid}` | Alternative sharing (filtered view of the blocks) |
 

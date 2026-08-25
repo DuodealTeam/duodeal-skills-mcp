@@ -140,6 +140,10 @@ No `get_links` tool exists: read the ids (`get_deal {id}` → deal `uid` + `id`,
 - **edit link** `https://duodeal.app/app/quotations/{dealId}/{quotationId}` — the internal V2
   editor (⚠️ never `/app/deals/…`, that is the V1 editor)
 
+⚠️ The `{dealId}` in that URL must be the **real parent deal** of the quotation: read it back on
+`get_quotation {id}` → `deal.id`, and never paste a deal id from memory or from another quote.
+A wrong `dealId` opens someone else's deal or a blank editor.
+
 Alternative sharing: V2 share link `https://duodeal.app/quotations/share/{shareUuid}`
 (filtered view of the blocks) — usable **only** if `get_quotation` already returns a
 `shareLinks` entry; the connector cannot create one, and it cannot send the quote by email

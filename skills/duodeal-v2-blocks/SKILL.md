@@ -84,7 +84,10 @@ gallery, accept, signstamp, pagebreak.
   otherwise in the Duodeal interface, and you say it is still pending.
 - **The quotation must already be V2** for any of this to apply: a quote created through the
   connector starts at `builderVersion: 1, blocks: null`, and **no connector argument exposes
-  `builderVersion`**. Check it (`get_quotation` → non-empty `blocks[]` = V2); to flip it, `PUT
+  `builderVersion`**. Check it on the **`builderVersion` field itself** (`get_quotation` →
+  `builderVersion == 2`). ⚠️ **Non-empty `blocks[]` is NOT a proof of V2**: a quotation can carry
+  V2 blocks and still be `builderVersion: 1` — the menu then opens it in the **old (V1) editor**,
+  and the blocks are ignored. To flip it, `PUT
   /quotations/{id}` with `{builderVersion: 2, blocks: [...]}` via REST if a key is configured,
   otherwise convert it in the Duodeal interface — and say so to the user.
 - `quotation.shareLinks` = V2 share links (filtered view of the blocks), **read-only** in

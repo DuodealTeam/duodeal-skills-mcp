@@ -59,7 +59,7 @@ This file is **authoritative on tool names and argument names** — if a tool is
 | Mark a quotation (or a deal) as a **template** | No `template` argument anywhere, and no template tool at all (no `list_templates`, no `ensure_template`) | Create / flag the template in the app, then read it back with `get_quotation` |
 | Set a deal's **language** or **currency** | `create_deal`/`update_deal` accept only `name`, `customer_id`, `date`, `validUntil`, `introduction`, `customFields`, `status_id`; currency exists only company-wide (`update_company.currency`) | Set the company currency, or adjust the deal in the app |
 | **Clone** a deal or a quotation | No `clone_deal` / `clone_quotation` tool on the connector | Rebuild: `create_deal` → `create_quotation` → `add_quotation_lines` → `add_quotation_block` + `update_quotation_block` per block; or clone in the app and read the result back |
-| Choose or change `builderVersion` (V1 ↔ V2) | Not exposed by any argument | Check what you have: a V2 quotation returns a non-empty `blocks[]` in `get_quotation`; the block tools only make sense there. Any conversion is done in the app |
+| Choose or change `builderVersion` (V1 ↔ V2) | Not exposed by any argument | Check the **`builderVersion` field** in `get_quotation` (`== 2`) — **not** the presence of `blocks[]`, which can exist on a V1 quote that still opens in the old editor. Any conversion is done in the app |
 | Attach a media to a **line** or a **product** | Line tools have no media/image argument; `create_product` / `update_product` have none either (`url` is an external link, not an image) | `create_media` then reference the url/id in a block (`gallery.images`, `attachments`, `header.cover`/`logo`, `pdfviewer`) via `update_quotation_block` with the complete `data`, or bind it in the app |
 | Delete, rename, move or replace a media | No `delete_media`, `update_media` or `move_media` | Do it in app.duodeal.com, or create a new media and re-point the blocks at it |
 | List the media folders | `list_medias` filters on `folder` but nothing returns the existing folders | List without a filter and deduce the folders, or use the known conventions (`products`, `quotations`) |
@@ -82,7 +82,7 @@ There is **no `get_links` tool** on the connector. Build both links by hand:
 | Link | Pattern | Built from |
 |---|---|---|
 | **Customer link / selling page** (the one to send) | `https://duodeal.app/quotations/deal/{deal.uid}` | the `uid` returned by `get_deal` — nothing to generate |
-| **Edit link** (internal, V2 editor) | `https://duodeal.app/app/quotations/{dealId}/{quotationId}` | deal `id` + quotation `id`, both integers |
+| **Edit link** (internal, V2 editor) | `https://duodeal.app/app/quotations/{dealId}/{quotationId}` | deal `id` + quotation `id`, both integers — and the deal `id` must be the **real parent**, checked on `get_quotation` → `deal.id` |
 | Share link (optional) | `https://duodeal.app/quotations/share/{shareUuid}` | only if `get_quotation` already returns a `shareLinks` entry — the connector cannot create one |
 
 ⚠️ `https://duodeal.app/app/deals/{dealId}/{quotationId}` is the **V1** editor: never deliver it. When a quote is delivered, **always give both links** (customer + edit).
