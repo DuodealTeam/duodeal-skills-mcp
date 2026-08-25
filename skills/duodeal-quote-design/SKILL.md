@@ -1,6 +1,6 @@
 ---
 name: duodeal-quote-design
-description: Build a design-grade Duodeal quote in HTML, at premium selling page quality — token-based design system, narrative structure of the V2 blocks, proven HTML skeletons (intro, value cards, order recap, social proof, FAQ, CTA, legal pack), inline-first rule and delivery checklist. Use whenever someone wants a "beautiful quote", a "design" or "premium" quote, a quote with real wow factor, a polished selling page, a better-looking proposal, or wants to turn a raw quote into a visual proposal.
+description: Build a design-grade Duodeal quote in HTML, at premium selling page quality — token-based design system, narrative structure of the V2 blocks, proven HTML skeletons (intro, value cards, order recap, social proof, FAQ, CTA, legal pack), inline-first rule and delivery checklist. Use whenever someone wants a "beautiful quote", a "design" or "premium" quote, a quote with real wow factor, a polished selling page, a better-looking proposal, or wants to turn a raw quote into a visual proposal. Also covers reworking a quote that already exists: restyle it, rewrite the HTML of a block, add or remove a section, and edit the price table (add, change, reorder or delete lines) — the same way as when the quote was created.
 ---
 
 # Duodeal design quote (HTML, V2 blocks)
@@ -13,6 +13,47 @@ full content (connector: `add_quotation_block` writes **default** content only, 
 for large html). Read the current block inventory from the quotation itself
 (connector: `get_quotation` → `blocks[]`; there is no `list_quotation_blocks`).
 (see the **duodeal-v2-blocks** skill for the technical contract).
+
+## Step 0 — New quote, or rework of an existing one?
+
+Both use the **same tools and the same rules**: an already-delivered quote is edited exactly like
+one being built, block by block. Nothing here is create-only.
+
+Start by reading the server state (`get_quotation {id}` → `blocks[]` with every `id` and `type`,
+`list_quotation_lines {quotation_id}`), then touch **only** what was asked — never rebuild a whole
+quote to change a section, and never re-post the full `blocks` array.
+
+**Editing the HTML of a block** (same as at creation, on a block that already exists):
+
+- Small change, targeted text: `replace_quotation_block_text` {`quotation_id`, `block_id`,
+  `field` (`"code"` for html, `"columns.0"` for wysiwyg), `search`+`replace`} — anchors **short
+  and unique**, no regex, no `replace_all`.
+- Rewritten block: `update_quotation_block` with the **COMPLETE `data`**. ⚠️ The merge is
+  **shallow at root**: a partial `data` wipes the rest of the object. Read the block, edit in
+  memory, send it whole — and keep the version you read, it is your only undo.
+- New section: `add_quotation_block` {`type`, `position`} (default content) then
+  `update_quotation_block` to fill it, then `reorder_quotation_blocks` with the **complete**
+  ordered list of ids if it must move.
+- The Step 3 golden rules apply to every edit, including a one-line fix: still inline-first,
+  still `DuoDeal.autoResize()` at the end, still no "—".
+
+**Editing the price table** (native `pricing` block):
+
+- Rows are **not** in `block.data` (its `data` holds only `discountEnabled`, `discount`,
+  `discountType`, `columns`): they are quotation-lines. List them first
+  (`list_quotation_lines {quotation_id}`), then `update_quotation_line` to change one,
+  `add_quotation_lines` to add several, `create_quotation_line` for a single one,
+  `delete_quotation_line` to remove one (nothing cascades: deleting the pricing block leaves
+  its lines behind).
+- Reordering = the `weight` field (increasing = display order). Every line carries a `tax_id`,
+  including `title` and `subtotal` ones. Several pricing blocks on the page → set `blockId` on
+  the line so it lands in the right table.
+- Ids are per tenant: re-read `list_taxes` / `list_unities` on THIS account, never reuse ids seen
+  on another quote.
+
+**Before touching anything**: a real client quote is only edited on explicit request, the Duodeal
+editor tab must be closed on that deal (auto-save overwrites API writes with its in-memory copy),
+and the changes are re-checked on the live page afterwards (Step 4).
 
 ## Step 1 — Lock the design system (BEFORE any HTML)
 

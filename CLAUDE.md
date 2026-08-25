@@ -18,7 +18,7 @@ Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**,
 |---|---|
 | Set up an account, get started, first time, "onboard me", no `DUODEAL-CONTEXT.md` yet, first template | **duodeal-onboarding** |
 | Create, duplicate or deliver a quote; start from a template; add a 2nd quotation; product catalog; customers | **duodeal-quote-building** |
-| A "beautiful", "design" or "premium" quote; a real selling page; turn a raw quote into a visual proposal | **duodeal-quote-design** |
+| A "beautiful", "design" or "premium" quote; a real selling page; turn a raw quote into a visual proposal; **rework an existing quote** — restyle it, rewrite a block's HTML, add/remove a section, edit the price table | **duodeal-quote-design** |
 | Read or write V2 blocks, convert to V2, build an html micro-app, debug a render (iframe height, autoResize) | **duodeal-v2-blocks** |
 | Golden rules, render contract, pre-delivery checklist, prices and currencies, write guardrails | **duodeal-mcp-best-practices** |
 | An endpoint, a field, a filter, a 4xx/5xx, an operation with no MCP tool | **duodeal-api-reference** |
