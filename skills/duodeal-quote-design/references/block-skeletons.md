@@ -107,8 +107,17 @@ between the amount rows: only the strong rule before the Total incl. tax.
 <div style="height:71px" aria-hidden="true"></div>
 ```
 
-The hard-coded amounts MUST match those of the pricing block (re-check after any line
-edit). SaaS variant with a setup fee: 2 cards side by side (`flex:1 1 340px`),
+⚠️ The amounts above are written as `{{X XXX.XX €}}` placeholders. Two ways to fill them:
+
+- **Bound to the price table (recommended)** — the block reads the live quote and follows
+  every line edit on its own: see §9. Ask the user; it is good practice, not an obligation.
+- **Written by hand** — legitimate for what the table does not hold (recurring, options
+  presented separately, figures given by the client), and acceptable for the rest if the user
+  prefers it. In that case the amounts MUST match the pricing block **and** be re-checked
+  after any line edit: tell the user they are a manual copy.
+
+Anything that already exists in the price table (total, subtotal, VAT, a line price) is bound
+rather than retyped — a hand copy drifts silently the day a sales rep edits a line. SaaS variant with a setup fee: 2 cards side by side (`flex:1 1 340px`),
 "Development / one-off" | "Monthly subscription", each with its own bullets.
 
 ---
@@ -241,22 +250,43 @@ connector — then reference the complete media object returned inside the block
 
 ---
 
-## 9. Dynamic block (advanced) — read the quote data live
+## 9. Binding a block to the price table — read the quote data live
+
+**This is possible on any html block, and it is the right way to show an amount that comes
+from Duodeal.** Good practice, not an obligation: ask the user. But a figure that already
+exists in the price table is bound, not retyped — a hand copy drifts silently the day a
+sales rep edits a line.
 
 Inside an html block, `window.DuoDeal` exposes `deal`, `quotation`, `lines`,
 `customFields`, `formatCurrency(n)`, `formatDate(d)`, `onUpdate(cb)`,
-`getData()/setData()` (per-block persisted state). Example: a recap that stays accurate
-if the sales rep edits a line:
+`getData()/setData()` (per-block persisted state).
+
+Mark every dynamic figure with an id in the HTML (`<b id="dd-total">…</b>`), fill them in a
+single `ddRender()`, and re-run it on `onUpdate` so the block follows live pricing edits:
 
 ```html
 <script>
 try{
-  function ddRender(){var q=DuoDeal.quotation||{};var el=document.getElementById('dd-total');if(el){el.textContent=DuoDeal.formatCurrency(q.amountTtc||0)}}
+  function ddRender(){
+    var q=DuoDeal.quotation||{}, L=DuoDeal.lines||[], f=DuoDeal.formatCurrency;
+    function put(id,v){var el=document.getElementById(id);if(el){el.textContent=v}}
+    put('dd-total', f(q.amountTtc||0));
+    put('dd-ht', f(q.amountHt||0));
+    put('dd-vat', f((q.amountTtc||0)-(q.amountHt||0)));
+    // one line by title, options excluded from the total
+    var setup=L.filter(function(l){return l.lineType==='normal'&&!l.option});
+    put('dd-setup', f(setup.reduce(function(a,l){return a+(l.totalHt||0)},0)));
+  }
   ddRender();if(DuoDeal.onUpdate){DuoDeal.onUpdate(ddRender)}
 }catch(e){}
 try{if(window.DuoDeal&&DuoDeal.autoResize){DuoDeal.autoResize()}}catch(e){}
 </script>
 ```
+
+Always keep a plain readable value inside the tag as a fallback (`<b id="dd-total">1 200.00
+€</b>`): if `DuoDeal` is unavailable, the block still shows something instead of an empty
+slot. Field names come from the quotation you actually read (`get_quotation`,
+`list_quotation_lines`) — check them there rather than assuming.
 
 (Exception to "no script": the DuoDeal logic goes into THE final script, together with
 the autoResize.)

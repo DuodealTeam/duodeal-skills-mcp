@@ -91,7 +91,8 @@ Typographic details and choices: [references/design-system.md](references/design
    argument, so host the file first (`create_media`) then bind it via REST if a key is
    configured, otherwise in the Duodeal interface, and tell the user
 7. **html ORDER RECAP** — one-off vs recurring, spelled out. **Recurring lives HERE**
-   (the native table has only one total per quote)
+   (the native table has only one total per quote). An html block **can be bound to the
+   price table** and display its real amounts live — offer it, see the rule below
 8. **html SOCIAL PROOF** — real testimonials, otherwise a logo wall (real logo
    files, never names typed as text)
 9. **html FAQ** — 5-8 real objections + an "Another question?" card pointing to the
@@ -132,6 +133,20 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
    the block's `data`).
 8. No orphan lines: any isolated piece of info becomes a 2-line card
    (title + muted text).
+9. **An amount that comes from Duodeal is read from Duodeal, never retyped.** An html block
+   can read the live quote through `window.DuoDeal` (`quotation`, `lines`, `deal`,
+   `customFields`, `formatCurrency(n)`) and re-render on every edit with `onUpdate(cb)` —
+   see §9 of [references/block-skeletons.md](references/block-skeletons.md).
+   - **Binding is good practice, not mandatory**: a quote is perfectly valid with amounts
+     written by hand. **Ask the user** whether they want the block bound, and say what it
+     buys them: a bound recap follows the price table on its own, a hand-written one has to
+     be re-checked after every line edit and silently lies if someone forgets.
+   - **But if the figure already exists in the price table, bind it** — a total, a subtotal,
+     a VAT amount or a line price duplicated by hand **will** drift the day a sales rep
+     edits a line, and nothing warns anyone.
+   - Hard-code only what the table does **not** hold: recurring amounts, options presented
+     separately, illustrative packages, figures given by the client. Say which ones are
+     hard-coded when you deliver.
 
 ## Step 4 — Delivery checklist (blocking)
 
@@ -146,6 +161,9 @@ Check on the LIVE quotation before delivering — one failing item = not done:
    `<style>` tags, the block still looks presentable).
 5. `DuoDeal.autoResize()` at the end of every html block.
 6. Recurring in the html recap, not in the native table.
+6bis. Every amount duplicated from the price table is bound to `DuoDeal`, not retyped —
+   or, if it is hard-coded on purpose, it matches the table today and the user knows it
+   is a manual copy to re-check after any line edit.
 7. No "—", no ★, no forgotten `{{…}}` placeholder.
 8. **Real visual verification**: open the edit link in a browser, check the rendering, then
    deliver both links (client + edition). No tool returns a render and no tool returns the
