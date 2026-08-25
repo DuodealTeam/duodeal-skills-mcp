@@ -128,7 +128,7 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
    `showTitle:false` when the block already carries its own title in HTML.
 7. Stars/icons as **inline SVG** (never ★ nor emoji); every image must be hosted on
    Duodeal storage, never hotlinked from a third-party site (connector: `create_media`
-   with `name` + `folder` + `file` in base64 — ⚠️ **never `from_url`**, the URL import 500s
+   with `name` + `folder` + `file` in base64 — ⚠️ prefer an upload in the Duodeal media library (interface) and reuse `list_medias`; base64 is a fallback that causes known bugs on Duodeal — when you use it, say so (see **duodeal-mcp-best-practices** → getting an image into the library); **never `from_url`**, the URL import 500s
    on most CDNs; no `upload_media`, no local path; then reference the url it returns inside
    the block's `data`).
 8. No orphan lines: any isolated piece of info becomes a 2-line card

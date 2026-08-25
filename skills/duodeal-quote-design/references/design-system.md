@@ -61,9 +61,11 @@ Check the whole set on a white background AND on DARK before producing the block
 ## Images
 
 - Host every image in the Duodeal media library (S3) before using it — never hotlink
-  an external URL (connector: `create_media`, `name` + `folder` both required, then
-  `file` in base64; ⚠️ **never `from_url`** despite the tool description — the URL import
-  500s on most CDNs; no local path, no multipart).
+  an external URL. ⚠️ Preferred route: reuse an existing media (`list_medias`) or have the
+  file uploaded in the Duodeal interface. `create_media` with `file` in base64 works but is a
+  **fallback** — it causes known bugs on Duodeal, so say so when you use it. **Never
+  `from_url`** despite the tool description — the URL import 500s on most CDNs; no local
+  path, no multipart.
 - Intro lockup logos: issuer tile ~96 px (radius 20 px), prospect wordmark
   ~34 px tall; with no prospect logo file available, a styled text wordmark
   (`font-size:34px`, 800, INK) does the job.

@@ -48,7 +48,12 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 - Before delivery, check that every block stays presentable once its `<style>` tags are stripped: that is the state the prospect will see.
 - End every block with `DuoDeal.autoResize()` inside a `try/catch`; ⚠️ otherwise the iframe keeps a fixed height and cuts off the bottom.
 - Brand font as inline base64 `@font-face` + a readable system fallback; never a CDN `<link>` nor an external font (blocked by CORS or missing in the PDF).
-- Images/logos in the Duodeal media library, `max-width:100%; height:auto`; never an external hotlink. Put them there with `create_media` (base64 `file`, ⚠️ **never `from_url`** — the URL import 500s on most CDNs whatever the tool description says; no local path); a media cannot be renamed, moved or deleted from the connector, so create a new one and re-point the block rather than trying to replace it.
+- Images/logos in the Duodeal media library, `max-width:100%; height:auto`; never an external hotlink. A media cannot be renamed, moved or deleted from the connector, so create a new one and re-point the block rather than trying to replace it.
+- **Getting an image into the library — in this order:**
+  1. **Reuse what is already there** (`list_medias`, `search`): nothing to upload, nothing to break.
+  2. **Have it uploaded in the Duodeal interface** (media library, drag and drop), then reference the url it gets. **This is the preferred route** and it costs the user thirty seconds.
+  3. **`create_media` with `file` in base64 — possible, but a fallback.** The base64 upload causes known bugs on Duodeal (media that ends up broken or does not render), on top of the ~4 MB ceiling. Use it only when route 2 is not available, and **never silently**: when you take it, tell the user, in substance — *"I uploaded <name> through the API in base64 because <reason>. That route is known to be unreliable on Duodeal: please check the image displays in the editor, and if it does not, drop the file into the media library yourself and I will re-point the block."* Then actually verify the render before delivering.
+  4. **`from_url` — never**, whatever the tool description says: the URL import 500s on most CDNs. There is no local path and no `upload_media`.
 - `box-sizing:border-box` on every sized element; ⚠️ its absence is the number one cause of mobile overflow (`width:100%` + padding).
 - `break-inside:avoid` (+ `page-break-inside:avoid`) on cards, steps, panels, CTAs; wrap kicker + title + content in a single container; ⚠️ the PDF engine does not honor `break-after:avoid`.
 - Height determined by the content: no fixed `height`, no `vh`, no forced page break.

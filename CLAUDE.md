@@ -51,6 +51,8 @@ Repeated from the skills because they are the recurring failures.
 - **Inline-first**: no `<style>` in a delivered block except `@font-face`, no separate `<script>`, every html block ends with `DuoDeal.autoResize()` in a try/catch.
 - **No em dash "—" anywhere** in quote content (the server truncates a `productTitle` at the em dash): use ":", ";", "·", ",". No `{{...}}` placeholder left.
 - Recurring amounts live in an HTML recap block, never in the native pricing table (one total per quote only).
+- An amount already in the price table is **read from `DuoDeal`**, not retyped in the HTML. Binding a block to the table is **good practice, not an obligation**: offer it, and hard-code only what the table does not hold (recurring, options, client-supplied figures).
+- **Images: base64 is a fallback, not the default.** Reuse an existing media, or have the file uploaded in the Duodeal interface. The `create_media` base64 route causes known bugs on Duodeal — when there is no other way, use it, tell the user plainly, and check the render. Never `from_url` (500s on most CDNs).
 - VAT rate is a **decimal 0 to 1** (0.20 = 20%). Tenant ids (tax, unity, price category) are per tenant: re-read them, never copy ids from another account.
 
 **Honesty**

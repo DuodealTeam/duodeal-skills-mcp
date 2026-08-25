@@ -9,8 +9,9 @@
 | 400 on a discount line | `lineType:"discount"` does not exist | Book the discount as `lineType:"normal"` with a negative `unitPrice`, **or** as `discount` + `discountType` on the line |
 | 400 on a tax | `rate` outside [0,1] | Express the rate as a decimal (0.20, not 20) |
 | 409 when deleting a tax | the tax is still used by lines or products | Keep it and reassign what uses it. Not available to the connector anyway (only `list_taxes`, no create/delete): change taxes in the Duodeal interface (Settings), then re-read with `list_taxes` |
-| 500 creating a media from a URL | the source CDN refused the server-side fetch (Cloudinary, Shopify, S3…) | Download the file yourself and send it base64 (connector: `create_media` with `file` instead of `from_url`) |
+| 500 creating a media from a URL | the source CDN refused the server-side fetch (Cloudinary, Shopify, S3…) | Do not retry `from_url`. Prefer an upload in the Duodeal interface; base64 `file` only as a fallback |
 | 500 creating a media from base64 | file over ~4 MB | Supply a lighter image — nothing resizes it for you |
+| Media created but broken, blank or not rendering | known weakness of the **base64** upload route | Do not loop on it: have the file dropped into the media library from the Duodeal interface, then re-point the block to the new url. Tell the user why |
 | 500 creating a quotation on its own | a quotation cannot exist without a deal | Create the deal first, then the quotation on it (connector: `create_deal` → `create_quotation(deal_id=…)`). No `clone_deal` / `clone_quotation` on the connector: rebuild the content, or duplicate in the interface and read it back with `get_quotation` |
 | Tenant logo ignored | a data URI was sent instead of RAW base64 PNG | Send RAW base64 PNG in `setLogo`. Not available to the connector (`update_company` has no `setLogo`): REST `PUT /companies/{id}` if a key is already configured, otherwise do it in the Duodeal interface and tell the user |
 | Empty list from a read | the `{data:[]}` envelope was not unwrapped | Connector tools already normalize it (`data/items/results/records/rows`); only raw REST calls need unwrapping |
@@ -29,7 +30,7 @@ The connector hard-deletes only lines, blocks, product prices and comments (`del
 
 ## Media — image upload
 
-1. **Get the image into the library** (connector: `create_media` — `name` + `folder` both required, then `file` in base64 **or** `from_url`; no local path, no multipart, and no `upload_media` tool). ⚠️ **Never the URL import**, even though the connector's own description says `from_url` is preferred: `from_url` / `fromUrl` returns a 500 on most CDNs (Cloudinary, Shopify, S3…). **Download the file yourself** (browser UA), check the MIME type and the size, base64-encode it and send it as `file`. Nothing does those steps for you.
+1. **Get the image into the library**, in this order: **(a)** reuse an existing media (`list_medias`, `search`); **(b)** have it uploaded in the **Duodeal interface** (media library, drag and drop) and reference the url — the preferred route; **(c)** `create_media` with `file` in base64 — it works, but it is a **fallback**: the base64 route causes known bugs on Duodeal (media that ends up broken or does not render). When you take it, tell the user and check the render before delivering. **Download the file yourself** (browser UA), check the MIME type and the size, base64-encode it and send it as `file` — nothing does those steps for you (`name` + `folder` both required, no local path, no multipart, no `upload_media` tool). ⚠️ **(d) Never the URL import**, even though the connector's own description says `from_url` is preferred: `from_url` / `fromUrl` returns a 500 on most CDNs (Cloudinary, Shopify, S3…).
 2. Limit ~**4 MB**; beyond that the API returns 500. No automatic resizing anywhere: supply a lighter image.
 3. Accepted MIME types: png, jpeg, gif, webp, svg+xml, pdf.
 
