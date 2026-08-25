@@ -11,15 +11,37 @@ repérer dans l'API.
 
 ## Installation
 
+Le plus simple, sans rien taper dans un terminal : ouvre Claude Code dans le dossier de
+ton projet et colle ce message.
+
+```
+Installe les skills Duodeal dans ce projet. Fais tout toi-même, étape par étape :
+
+1. Clone https://github.com/DuodealTeam/duodeal-skills-mcp dans un dossier temporaire.
+2. Copie le dossier "skills/" du clone vers ".claude/skills/" à la racine de mon
+   projet (crée le dossier s'il n'existe pas).
+3. Copie le fichier "CLAUDE.md" du clone à la racine de mon projet. S'il y a déjà
+   un CLAUDE.md, ajoute le contenu à la fin au lieu de l'écraser.
+4. Supprime le dossier temporaire.
+5. Liste-moi les skills installés, et dis-moi si le connecteur MCP Duodeal est
+   bien connecté à mon Claude.
+```
+
+Puis redémarre Claude Code pour que les skills soient chargés.
+
+### En ligne de commande
+
 ```bash
-claude plugin marketplace add DuodealTeam/duodeal-plugin
+claude plugin marketplace add DuodealTeam/duodeal-skills-mcp
 ```
 
 ```bash
 claude plugin install duodeal@duodeal-marketplace
 ```
 
-> ℹ️ Dépôt **privé** : ton compte GitHub doit avoir été invité par l'équipe Duodeal.
+Mise à jour : `claude plugin marketplace update duodeal-marketplace`
+
+> ℹ️ Dépôt **public** : aucun accès GitHub particulier n'est nécessaire.
 
 ## Les 5 skills
 
