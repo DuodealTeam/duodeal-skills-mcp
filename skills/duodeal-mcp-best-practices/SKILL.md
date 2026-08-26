@@ -43,7 +43,7 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 
 ⚠️ The visual editor strips `<style>` tags and neutralizes `<script>` tags the first time the sales rep edits; the final rendering also goes through a PDF export. Every block must hold up in both states.
 
-- All styling inline (`style="..."`); no `<style>` except `@font-face`, no separate `<script>` (interactivity through inline `onclick`).
+- All styling inline (`style="..."`); **no `<style>` at all** (no `@font-face` exception — see the font rule below), no separate `<script>` (interactivity through inline `onclick`).
 - Responsive without media queries: `flex` + `flex-wrap` + `flex:1 1 basis` (never `grid-template-columns`), falling back to a single column on narrow screens and in print.
 - Before delivery, check that every block stays presentable once its `<style>` tags are stripped: that is the state the prospect will see.
 - End every block with `DuoDeal.autoResize()` inside a `try/catch`; ⚠️ otherwise the iframe keeps a fixed height and cuts off the bottom.

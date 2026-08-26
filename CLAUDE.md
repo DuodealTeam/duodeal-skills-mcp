@@ -48,7 +48,7 @@ Repeated from the skills because they are the recurring failures.
 - Native **header** filled in (sender logo + cover) and native **contacts** block present (sender AND recipient), never hidden nor recoded in HTML.
 - **`accept` and `signstamp` always ship as a pair**: once signed, `accept` disappears and `signstamp` is the only proof of signature left.
 - **Primary quotation**, in some cases only: the first quotation of a deal is primary by default, but the client dashboard table lists primary quotes only — a **second** quotation on a deal, or a rebuilt one, may not show up there. Flag it to the user when that case applies; switching the flag is an interface job (no connector argument for it).
-- **Inline-first**: no `<style>` in a delivered block except `@font-face`, no separate `<script>`, every html block ends with `DuoDeal.autoResize()` in a try/catch.
+- **Inline-first**: **no `<style>` at all** in a delivered block (the editor strips them on the first rep edit — and no custom-font route survives, so ship the system stack), no separate `<script>`, every html block ends with `DuoDeal.autoResize()` in a try/catch.
 - **No em dash "—" anywhere** in quote content (the server truncates a `productTitle` at the em dash): use ":", ";", "·", ",". No `{{...}}` placeholder left.
 - Recurring amounts live in an HTML recap block, never in the native pricing table (one total per quote only).
 - An amount already in the price table is **read from `DuoDeal`**, not retyped in the HTML. Binding a block to the table is **good practice, not an obligation**: offer it, and hard-code only what the table does not hold (recurring, options, client-supplied figures).
