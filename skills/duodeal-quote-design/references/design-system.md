@@ -22,11 +22,13 @@ Check the whole set on a white background AND on DARK before producing the block
 
 ## Brand fonts: the honest rule
 
-- Default: **system font via the fallback stack** — zero risk.
-- `@font-face` in base64 inside a `<style>` is the ONLY tolerated exception to the
-  "no `<style>`" rule… but the editor's auto-save may strip it if the sales rep
-  edits the block. So: use it only if the brand font is essential, and design the
-  block to stay good-looking in fallback.
+- Default: **system font via the fallback stack** — zero risk, and what you should ship.
+- 🚫 **No base64 `@font-face`.** Embedding the font file in the HTML bugs every time: the
+  block becomes far too heavy, and the editor's auto-save strips the `<style>` anyway as
+  soon as the sales rep edits it. A brand font is not worth a broken block.
+- If the brand font is genuinely essential, the file goes to the **media library** like any
+  other asset and the `@font-face` points at **its url** — never at inlined bytes. Design the
+  block to stay good-looking in fallback either way.
 
 ## Typographic hierarchy (proven values)
 
@@ -61,11 +63,12 @@ Check the whole set on a white background AND on DARK before producing the block
 ## Images
 
 - Host every image in the Duodeal media library (S3) before using it — never hotlink
-  an external URL. ⚠️ Preferred route: reuse an existing media (`list_medias`) or have the
-  file uploaded in the Duodeal interface. `create_media` with `file` in base64 works but is a
-  **fallback** — it causes known bugs on Duodeal, so say so when you use it. **Never
-  `from_url`** despite the tool description — the URL import 500s on most CDNs; no local
-  path, no multipart.
+  an external URL. Reuse an existing media first (`list_medias`); otherwise `create_media`
+  with `file` in **base64, which is the normal route** for the upload (no multipart, no local
+  path, ~4 MB ceiling). **Never `from_url`** despite the tool description — the URL import
+  500s on most CDNs.
+- 🚫 **The HTML carries the media url, never the base64.** A `data:` URI inside a block bugs
+  every time: far too heavy for the editor and the PDF export.
 - Intro lockup logos: issuer tile ~96 px (radius 20 px), prospect wordmark
   ~34 px tall; with no prospect logo file available, a styled text wordmark
   (`font-size:34px`, 800, INK) does the job.

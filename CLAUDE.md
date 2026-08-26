@@ -52,7 +52,7 @@ Repeated from the skills because they are the recurring failures.
 - **No em dash "—" anywhere** in quote content (the server truncates a `productTitle` at the em dash): use ":", ";", "·", ",". No `{{...}}` placeholder left.
 - Recurring amounts live in an HTML recap block, never in the native pricing table (one total per quote only).
 - An amount already in the price table is **read from `DuoDeal`**, not retyped in the HTML. Binding a block to the table is **good practice, not an obligation**: offer it, and hard-code only what the table does not hold (recurring, options, client-supplied figures).
-- **Images: base64 is a fallback, not the default.** Reuse an existing media, or have the file uploaded in the Duodeal interface. The `create_media` base64 route breaks at both ends: known bugs on Duodeal, **and** a failed or truncated AI call, since the base64 string travels through the tool arguments (one image = hundreds of thousands of tokens). When there is no other way, use it, tell the user plainly, and check the render. Never `from_url` (500s on most CDNs).
+- **Images: base64 for the upload, never in the HTML.** Reuse an existing media (`list_medias`) or upload it with `create_media` (`file` in base64 — the normal, supported route; never `from_url`, it 500s on most CDNs). Then the block references the **url** the media returns. 🚫 A `data:` URI inside a block — image, background or font — bugs every time: far too heavy for the editor and the PDF export.
 - VAT rate is a **decimal 0 to 1** (0.20 = 20%). Tenant ids (tax, unity, price category) are per tenant: re-read them, never copy ids from another account.
 
 **Honesty**

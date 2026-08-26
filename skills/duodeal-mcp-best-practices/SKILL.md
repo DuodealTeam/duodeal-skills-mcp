@@ -47,15 +47,14 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 - Responsive without media queries: `flex` + `flex-wrap` + `flex:1 1 basis` (never `grid-template-columns`), falling back to a single column on narrow screens and in print.
 - Before delivery, check that every block stays presentable once its `<style>` tags are stripped: that is the state the prospect will see.
 - End every block with `DuoDeal.autoResize()` inside a `try/catch`; ⚠️ otherwise the iframe keeps a fixed height and cuts off the bottom.
-- Brand font as inline base64 `@font-face` + a readable system fallback; never a CDN `<link>` nor an external font (blocked by CORS or missing in the PDF).
+- Brand font: ship the **system fallback stack** by default. Never a CDN `<link>` nor an external font (blocked by CORS or missing in the PDF) — and 🚫 **never a base64 `@font-face`** either: the inlined file makes the block far too heavy and the editor strips the `<style>` on the first rep edit. If the brand font is essential, upload it as a media and point `@font-face` at its url.
 - Images/logos in the Duodeal media library, `max-width:100%; height:auto`; never an external hotlink. A media cannot be renamed, moved or deleted from the connector, so create a new one and re-point the block rather than trying to replace it.
-- **Getting an image into the library — in this order:**
-  1. **Reuse what is already there** (`list_medias`, `search`): nothing to upload, nothing to break.
-  2. **Have it uploaded in the Duodeal interface** (media library, drag and drop), then reference the url it gets. **This is the preferred route** and it costs the user thirty seconds.
-  3. **`create_media` with `file` in base64 — possible, but a fallback.** It breaks at **both** ends:
-     - **On the Duodeal side**, the base64 upload causes known bugs (media that ends up broken or does not render), on top of the ~4 MB ceiling.
-     - **On the AI side**, the base64 string travels through the tool call itself: one image is hundreds of thousands of tokens of argument. It saturates the context, gets truncated, and the call fails — often without a clean error. **Never pull an image file into the conversation just to re-send it**: a single 3 MB photo can end a session. Use it only when route 2 is not available, and **never silently**: when you take it, tell the user, in substance — *"I uploaded <name> through the API in base64 because <reason>. That route is known to be unreliable on Duodeal: please check the image displays in the editor, and if it does not, drop the file into the media library yourself and I will re-point the block."* Then actually verify the render before delivering.
-  4. **`from_url` — never**, whatever the tool description says: the URL import 500s on most CDNs. There is no local path and no `upload_media`.
+- **Getting an image into the library:**
+  1. **Reuse what is already there** (`list_medias`, `search`) before uploading anything.
+  2. **`create_media` {`name`, `folder`, `file` in base64}** — this is the **normal, supported route**. Base64 is how the API takes a file: there is no multipart, no local path and no `upload_media` tool. Ceiling ~4 MB, nothing resizes for you.
+  3. **`from_url` — never**, whatever the tool description says: the URL import 500s on most CDNs.
+  4. Then reference the **url the media returns** inside the block's `data`.
+- 🚫 **Never base64 inside the HTML.** A `data:` URI in a block (`<img src="data:image/png;base64,…">`, an inline background, a base64 font) **bugs every time**: the block is far too heavy, the editor and the PDF export choke on it, and the same bytes travel back through every read of the quote. An image always goes to the media library first and the HTML carries **its url**. The rule holds for every asset: images, logos, icons, fonts.
 - `box-sizing:border-box` on every sized element; ⚠️ its absence is the number one cause of mobile overflow (`width:100%` + padding).
 - `break-inside:avoid` (+ `page-break-inside:avoid`) on cards, steps, panels, CTAs; wrap kicker + title + content in a single container; ⚠️ the PDF engine does not honor `break-after:avoid`.
 - Height determined by the content: no fixed `height`, no `vh`, no forced page break.

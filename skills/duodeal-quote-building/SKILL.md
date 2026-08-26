@@ -59,7 +59,7 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
 - **An image on EVERY product line** (blocking checklist item of **duodeal-quote-design**), on
   the media of the LINE, square and centered on the subject. ⚠️ **No media argument exists on
   the line tools, nor on the product tools** (`url` on a product is an external link, not an
-  image). Store the file (⚠️ prefer an upload in the Duodeal media library (interface) and reuse `list_medias`; base64 is a fallback that causes known bugs on Duodeal — when you use it, say so (see **duodeal-mcp-best-practices** → getting an image into the library); `create_media {name, folder, file}`, **never `from_url`**, it 500s on most CDNs), then bind it to the line by REST `POST|PUT /quotation-lines
+  image). Store the file (⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); `create_media {name, folder, file}`, **never `from_url`**, it 500s on most CDNs), then bind it to the line by REST `POST|PUT /quotation-lines
   {medias: [{id}]}` if a key is already configured, otherwise attach it in the Duodeal
   interface and say the images are still pending. Failing that, an image can only be shown in a
   V2 block (`gallery.images`, `attachments`, `header.cover`) via `update_quotation_block`.
@@ -69,7 +69,7 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
 
 ### Quotation branding
 
-- Get the logo / cover **stored** (⚠️ prefer an upload in the Duodeal media library (interface) and reuse `list_medias`; base64 is a fallback that causes known bugs on Duodeal — when you use it, say so (see **duodeal-mcp-best-practices** → getting an image into the library); `create_media {name, folder, file}`, never `from_url`) and then **shown**:
+- Get the logo / cover **stored** (⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); `create_media {name, folder, file}`, never `from_url`) and then **shown**:
   `update_quotation` has **no `logo` / `cover` argument** on the connector → put the media in
   the native `header` block (`update_quotation_block` with the **complete** `data`), or set it
   via REST / the interface.

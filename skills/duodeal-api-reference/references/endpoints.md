@@ -81,7 +81,7 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 
 ## Medias
 
-- `POST /medias` — **Req**: `name, mime, folder` + `file` (base64 data URI) **or** `fromUrl`. MIME: `image/jpeg|png|gif|webp|svg+xml`, `application/pdf`. ⚠️ `fromUrl` is unstable (500 on many CDNs). And base64 is a **fallback**, not the default: it causes known bugs on Duodeal — prefer an upload from the Duodeal interface, and say so when you fall back to base64 (connector: `create_media` with `file`; there is **no `upload_media`** tool — nothing base64-encodes for you). Limit ~4 MB.
+- `POST /medias` — **Req**: `name, mime, folder` + `file` (base64 data URI) **or** `fromUrl`. MIME: `image/jpeg|png|gif|webp|svg+xml`, `application/pdf`. ⚠️ `fromUrl` is unstable (500 on many CDNs) → download the file yourself and send it base64 as `file` — that is the normal route (connector: `create_media`; there is **no `upload_media`** tool, nothing base64-encodes for you). Limit ~4 MB. 🚫 The base64 stops there: the quote's HTML references the media **url**, never a `data:` URI.
 - `GET|PUT|DELETE /medias/{id}` — DELETE breaks references.
 
 ## Users / User Groups / Filter Views / Pins

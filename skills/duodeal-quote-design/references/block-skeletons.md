@@ -243,7 +243,7 @@ colors, ~80 px, centered, with its exact regulatory wording in small text.
 ```
 
 Always filled in (logo + cover) — never hidden, never re-coded as an html block.
-Upload: ⚠️ prefer an upload in the Duodeal media library (interface) and reuse `list_medias`; base64 is a fallback that causes known bugs on Duodeal — when you use it, say so (see **duodeal-mcp-best-practices** → getting an image into the library). Via `create_media` (`name` + `folder` required, `file` in base64 — ⚠️ **never
+Upload: ⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images). Via `create_media` (`name` + `folder` required, `file` in base64 — ⚠️ **never
 `from_url`**, the URL import 500s on most CDNs) — there is **no `upload_media`** tool on the
 connector — then reference the complete media object returned inside the block's `data`
 (`update_quotation_block`).

@@ -76,7 +76,7 @@ gallery, accept, signstamp, pagebreak.
   replace the pricing block, re-attach the lines. Rows never live in `block.data`, and
   deleting a pricing block does **not** delete its lines — remove them explicitly.
 - **Images inside blocks** (header `cover`/`logo`, `gallery`, `attachments`, `pdfviewer`):
-  register the media first — ⚠️ prefer an upload in the Duodeal media library (interface) and reuse `list_medias`; base64 is a fallback that causes known bugs on Duodeal — when you use it, say so (see **duodeal-mcp-best-practices** → getting an image into the library); **never `from_url`**, the URL import 500s on most CDNs whatever the tool description says (connector: `create_media` {`name`, `folder`, `file`}) —
+  register the media first — ⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); **never `from_url`**, the URL import 500s on most CDNs whatever the tool description says (connector: `create_media` {`name`, `folder`, `file`}) —
   then reference its url/id in the **complete `data`** of the
   target block. Line and product tools have **no media argument** — an image on a line is bound
   by REST (`POST|PUT /quotation-lines {medias: [{id}]}`) when a key is already configured,
