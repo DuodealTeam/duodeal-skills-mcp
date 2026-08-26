@@ -112,7 +112,7 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
 
 ## Step 3 — Golden rules for the HTML (non-negotiable)
 
-1. **INLINE-FIRST**: no `<style>` in a delivered block (except `@font-face`).
+1. **INLINE-FIRST**: **no `<style>` at all** in a delivered block — there is no `@font-face` exception any more (see the font rule in `references/design-system.md`: no custom-font route survives the editor).
    The Duodeal visual editor **strips `<style>` tags** as soon as the sales rep edits the
    block → the whole design breaks. So: everything in `style="…"` on each element.
 2. **Responsive without media queries**: never `grid`, never `@media` — use containers
@@ -157,7 +157,7 @@ Check on the LIVE quotation before delivering — one failing item = not done:
 3. Every product line has an image — out of reach of the connector: bind it via REST if a
    key is configured, otherwise hand the step to the user in the Duodeal interface and say
    it is still pending.
-4. No leftover `<style>` outside `@font-face` (mental test: if you strip all
+4. No leftover `<style>` at all (mental test: if you strip all
    `<style>` tags, the block still looks presentable).
 5. `DuoDeal.autoResize()` at the end of every html block.
 6. Recurring in the html recap, not in the native table.

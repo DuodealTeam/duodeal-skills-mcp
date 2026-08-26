@@ -22,13 +22,26 @@ Check the whole set on a white background AND on DARK before producing the block
 
 ## Brand fonts: the honest rule
 
-- Default: **system font via the fallback stack** — zero risk, and what you should ship.
-- 🚫 **No base64 `@font-face`.** Embedding the font file in the HTML bugs every time: the
-  block becomes far too heavy, and the editor's auto-save strips the `<style>` anyway as
-  soon as the sales rep edits it. A brand font is not worth a broken block.
-- If the brand font is genuinely essential, the file goes to the **media library** like any
-  other asset and the `@font-face` points at **its url** — never at inlined bytes. Design the
-  block to stay good-looking in fallback either way.
+**Ship the system stack. There is no reliable custom-font route in a Duodeal block.**
+
+- Default, and in practice the only answer: **system font via the fallback stack**
+  (`-apple-system,'Segoe UI',Roboto,sans-serif`). It is the one thing that survives both the
+  editor and the PDF export.
+- Every custom-font route fails, and the last two fail twice:
+  | Route | What happens |
+  |---|---|
+  | `<link>` to a CDN (Google Fonts…) | blocked by CORS, and absent from the PDF |
+  | `@font-face` in base64 | far too heavy → the block bugs · **and** the `<style>` is stripped on the first rep edit |
+  | `@font-face` on a media url | fonts are **not** in the accepted MIME list (images + pdf only) · **and** the `<style>` is stripped anyway |
+- The reason the last two die twice: `@font-face` needs a `<style>`, and the editor **strips
+  `<style>` tags as soon as a sales rep edits the block**. That is the same rule that makes
+  the whole design inline-first.
+- So carry the brand identity with what does survive: the accent color, the weights, the type
+  scale, the spacing, the rhythm of the cards. A well-set quote in the system font beats a
+  quote in the right font that breaks the first time a rep touches it.
+- **The one place the typeface is preserved: the logo.** `image/svg+xml` is accepted by the
+  media library, so a wordmark exported as SVG keeps the exact brand type as outlines. That is
+  a file, not a font — and it is where the typography matters most.
 
 ## Typographic hierarchy (proven values)
 
