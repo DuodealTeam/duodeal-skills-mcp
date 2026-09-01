@@ -17,7 +17,16 @@ One failed item = redo the quote.
 4. **Every product line has an image**, square and centered, on the media of the LINE (not of the linked product). ⚠️ The connector cannot attach it: line tools take no media argument, and `create_product`/`update_product` have none either. Upload with `create_media`, then bind the line media through the REST API when a key is already configured, otherwise ask the user to attach it in the Duodeal interface and say so.
 5. **Every HTML block ends with `DuoDeal.autoResize()`** and stays presentable once its `<style>` tags are stripped (everything styled inline, no separate `<script>`).
 6. **`builderVersion` 2 enabled**, language and currency set at deal level, without touching the account settings. ⚠️ The connector exposes none of the three (no `builderVersion` argument anywhere; `create_deal`/`update_deal` accept no language and no currency): check what you have on the **`builderVersion` field** in `get_quotation` (`builderVersion == 2`, **not** the mere presence of `blocks[]` — blocks can sit on a `builderVersion: 1` quote, which then opens in the old V1 editor) — and set what is missing through REST or in the app, saying which.
-7. **No `{{...}}` placeholder and no em dash left**, rendering verified on the real client view + PDF export (not on code reading alone). ⚠️ No connector tool returns a render: open the customer link and the PDF yourself, or ask the user to look and say you have not seen it.
+7. **No `{{...}}` placeholder and no em dash left**, rendering verified on the PDF export and the rendered page (not on code reading alone). ⚠️ No connector tool returns a render: look yourself, or ask the user to look and say you have not seen it. ⚠️ **But opening the CLIENT link counts as a prospect visit** (see the tracking rule below): decide with the user before you open it.
+
+## Checking your work without polluting the prospect's statistics
+
+⚠️ **Opening the client link is recorded as a prospect visit.** The public client view posts a `visit` on load, then a `heartbeat` every 15 s, to `/api/access-sessions` (browser `fetch`; a plain server-side GET counts nothing). Your own review — open, scroll to hydrate the blocks, read each section — therefore reads as a highly engaged buyer, on the very deal whose re-opens drive the follow-up and the Hot Deal Score.
+
+- There is **no internal-view opt-out** today: you cannot look without being counted.
+- So **tell the user before you open the client link**, and let them decide. On a real prospect's deal the honest default is not to open it.
+- The **PDF export** (`GET /deals/pdf/{uuid}`) and the **edit link** cost nothing on the prospect's statistics counter: use them for everything they can show.
+- If you do open the client view, keep it short and say in your delivery that one visit was recorded.
 
 ## Quote structure and native blocks (render contract)
 
@@ -29,6 +38,7 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 - An image on every product line, on the media of the LINE, square, centered on the subject (`object-fit: cover`); upload it with `create_media`, then bind it by REST or in the app (no media argument on the line and product tools).
 - Consistent logos (same format, background, size) across all quotes of the same account.
 - Deal owner = a dedicated, named sender user (person + job title) with their real photo, never the company nor a generic account. Pick the owner among the existing users (`list_users`, `get_user`); the connector creates no user and `create_deal`/`update_deal` take no owner — assign it in the app (or by REST) and say so.
+- ⚠️ **On a REST `PUT /deals/{id}`, always resend `users`.** A partial PUT resets `deal.users` to the API key's own owner, and `deal.users` drives the **sender identity displayed on the client page**: another prospect's contact then ships in the delivered HTML, silently and beautifully. Read the deal, keep its `users`, send them back with every write, and re-read them afterwards.
 - Choose a plausible login address for the owner: the sender card displays the LOGIN email. That address is set when the user is created, which only the client's admin does in the app.
 - Set language and currency at deal level (per-deal), without touching the account. ⚠️ Not reachable from the connector (`create_deal`/`update_deal` have neither, and currency exists only company-wide via `update_company`, which you must not overwrite): do it by REST if a key is configured, otherwise in the app.
 - Group legal notices and terms & conditions in the native `legalnotice` block, only once, with every structured field filled in (at minimum the name of the issuing company); ⚠️ an empty field falls back to the ACCOUNT name.
@@ -83,6 +93,7 @@ The native table exposes only ONE total and the platform can rescale amounts thr
 ## Content and copy
 
 - ⚠️ Never use an em dash "—" anywhere (the server truncates a `productTitle` at the em dash); prefer ":", ";", "·" or the comma.
+  ⚠️ **Floor of the rule: it targets U+2014 "—" and U+2013 "–", never the ASCII hyphen of compound words.** Keep « ce soir-là », « ci-dessus », « c'est-à-dire », « quarante-huit ». A too-broad de-hyphenation pass has already shipped those as spelling errors on a live client page.
 - Real logo files (official SVG/PNG), never a brand name typed as styled text; do not stretch, distort, recolor or rotate it.
 - A real photo of the sales rep (square portrait centered on the face) in the sender card; an initials monogram as a last resort, never a fabricated face.
 - No `{{...}}` placeholder and no unreplaced generic content on the client page.

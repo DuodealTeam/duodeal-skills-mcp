@@ -56,6 +56,10 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
 - **Discounts**: a `normal` line with a negative `unitPrice`, OR `discount` + `discountType`
   (`percentage`/`amount`) on the line — `lineType: "discount"` does not exist.
 - `option: true` → "Option not included" badge (French deals: « Option non incluse »), excluded from the total.
+- **When the sender's loudest promise is transparency** ("no hidden fees"), the price table IS the
+  demonstration: quote in the unit THEY publish (43/week × 52 on one row, so the reader can divide),
+  and give every included service a real row at **0.00** — a number can be audited, an adjective
+  cannot. Confirm each zero line with the user: a 0.00 row is a deliberate gift, not an oversight.
 - **An image on EVERY product line** (blocking checklist item of **duodeal-quote-design**), on
   the media of the LINE, square and centered on the subject. ⚠️ **No media argument exists on
   the line tools, nor on the product tools** (`url` on a product is an external link, not an
@@ -97,6 +101,13 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
                                      replace_quotation_block_text for large html/wysiwyg)
 5. Deliver                          (rebuild the 2 links — §5)
 ```
+
+⚠️ **A clone inherits the identity of its source.** The owner avatar, the quotation title (the
+YEAR!), gallery media and custom fields all travel with the copy. Audit them before showing a
+clone-based build: a photo of someone else is worse than no photo, and a rep's verdict on an
+inherited avatar was "the sales contact is completely wrong". Delivery test: *would this page
+embarrass the client if they sent it tomorrow, unedited, to a real customer of theirs?* A demo
+mailbox address or the wrong person's face fails it instantly.
 
 **2nd quotation on an existing deal**: there is no `clone_quotation`. Create it
 (`create_quotation {deal_id}` — `deal_id` is required, a REST `POST /quotations` without a
@@ -147,13 +158,38 @@ Alternative sharing: V2 share link `https://duodeal.app/quotations/share/{shareU
 `shareLinks` entry; the connector cannot create one, and it cannot send the quote by email
 either (do it from the app).
 
+## 5bis. Take the deal out of `Draft` when you hand it over
+
+A deal created through the API is born `Draft` and stays there. `Draft` should mean **not yet sent
+out**: when it also holds everything already delivered, the rep's pile stops meaning anything.
+So at handoff — whether the rep sends the quote as is or edits it first — move **the deal AND its
+quotation** to the `deal-sent` status:
+
+- Status ids are **per company**: resolve them (`list_deal_statuses`, `list_quotation_statuses`,
+  take the one whose `onAction == "deal-sent"`), never hard-code an id seen on another account.
+- Deal and quotation: `update_deal {id, status_id}` / `update_quotation {id, status_id}`.
+  ⚠️ If you go through REST on the deal instead, **resend `users`** (see
+  **duodeal-mcp-best-practices** → sender identity).
+- ⚠️ The quotation also carries a **`send: true`** boolean, and the status alone leaves it in the
+  "to be sent" view. **`send` is not a connector argument**: set it by REST
+  (`PUT /quotations/{id} {"send": true}`) only if a key is already configured, otherwise hand that
+  step to the user in the interface and say it is pending.
+- Deliberately left in `Draft`: internal templates, technical drafts, test fixtures, and any quote
+  nobody could send as it stands.
+
 ## 6. Final check
 
 - Re-read the quote from the server (`get_quotation {id}` — carries `blocks[]` and `shareLinks`).
 - Check order (`weight`), totals and options on the price table (`list_quotation_lines {quotation_id}`).
-- A quote is only "done" after a real visual check of the selling page (open the client link
-  in a browser). **No connector tool renders the page or a block preview** — if you cannot
-  open it yourself, say so and ask the user to look. Never claim a render you have not seen.
+- A quote is only "done" after a real visual check. **No connector tool renders the page or a
+  block preview** — if you cannot look yourself, say so and ask the user to look. Never claim a
+  render you have not seen.
+- ⚠️ **Opening the client link is recorded as a prospect visit.** The client view posts a `visit`
+  on load and a `heartbeat` every 15 s to `/api/access-sessions` (browser `fetch`; a plain
+  server-side GET counts nothing). Your own check then reads as a highly engaged buyer and inflates
+  the Hot Deal Score of the very deal whose re-opens drive the follow-up. There is no internal-view
+  opt-out today. Verify on the **edit link** and the **PDF export** wherever they can show it, and
+  **ask the user before opening the client view**; if you open it, say so in your delivery.
 
 ## T&Cs / legal notice / email templates
 

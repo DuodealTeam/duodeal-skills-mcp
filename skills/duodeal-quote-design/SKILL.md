@@ -94,7 +94,18 @@ Typographic details and choices: [references/design-system.md](references/design
    (the native table has only one total per quote). An html block **can be bound to the
    price table** and display its real amounts live — offer it, see the rule below
 8. **html SOCIAL PROOF** — real testimonials, otherwise a logo wall (real logo
-   files, never names typed as text)
+   files, never names typed as text). **If neither exists, there is a third rung before
+   dropping the block: quote the sender itself.** Reproduce sentences they publish on their
+   own site, WORD FOR WORD and attributed, plus figures drawn only from those sentences —
+   never a testimonial you wrote. If two of their own pages disagree (160 vs 150 years), the
+   contradiction does not give you a fact, it forbids two: omit it if it is decorative, quote
+   ONE attributed sentence if it carries the argument, never arbitrate and never restate the
+   number in the document's own voice.
+   ⚠️ **If the recipient is already a client of the sender**, three things flip: the tension is
+   EXTEND, not buy (never re-pitch the platform they use daily); **scrub them from the logo
+   wall** (showing a client their own logo is an instant tell); and describe the **added
+   perimeter only** — you do not know their current contract, and "this gives you a dedicated
+   CSM" may promise as new what their tier already includes.
 9. **html FAQ** — 5-8 real objections + an "Another question?" card pointing to the
    native comment button. ⚠️ **Never the native `faq` block** (it renders HTML
    entities literally)
@@ -124,6 +135,10 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
    AND at the bottom of each html block (legal pack: bottom ≤ 16 px, otherwise an empty PDF page).
 5. **Never use an em dash "—"** anywhere (titles, cards, T&Cs, product lines):
    use ":", ";", "·", ",".
+   ⚠️ **Floor of this rule: it targets U+2014 "—" and U+2013 "–", NEVER the ASCII hyphen of
+   compound words.** Write « ce soir-là », « ci-dessus », « c'est-à-dire », « quarante-huit »,
+   « au cœur ». A de-hyphenation pass applied too broadly has already shipped those five as
+   spelling mistakes on a live client page: a typographic rule with no floor eats the text.
 6. **Every block has a non-empty `title`** (otherwise the interface shows "html"),
    `showTitle:false` when the block already carries its own title in HTML.
 7. Stars/icons as **inline SVG** (never ★ nor emoji); every image must be hosted on
@@ -147,6 +162,22 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
    - Hard-code only what the table does **not** hold: recurring amounts, options presented
      separately, illustrative packages, figures given by the client. Say which ones are
      hard-coded when you deliver.
+   - **Anchor rule, for an interactive block tied to the price**: its DEFAULT position must
+     display a figure that also exists in the quote (native total, recurring card, or the sum
+     of the `option:true` lines). Correctness then becomes an equality anyone can check
+     instead of a judgement call, and any quotation carrying option lines already contains its
+     own anchor. A micro-app unrelated to pricing is not forced onto a quote figure — but any
+     figure it shows that also appears elsewhere on the page must match it.
+
+10. **No HTML comment in a delivered block.** The platform serves the block's `code`
+    verbatim, so anything inside `<!-- … -->` reaches the buyer in view-source — including
+    your own reasoning, your TODOs, and the exact wording you just removed for being wrong.
+    A check that reads the RENDERED text is structurally blind to it (ten such comments once
+    shipped across seven of eight blocks, one of them explaining at length why the sender's
+    previous copy was false). Rationale belongs in the conversation, never in the payload.
+    ⚠️ Grepping the served page also returns comments and em dashes that are **not yours**:
+    the platform injects its own `DuoDeal` bootstrap into each block iframe. Check the strings
+    YOU authored, not the host's chrome.
 
 ## Step 4 — Delivery checklist (blocking)
 
@@ -164,9 +195,16 @@ Check on the LIVE quotation before delivering — one failing item = not done:
 6bis. Every amount duplicated from the price table is bound to `DuoDeal`, not retyped —
    or, if it is hard-coded on purpose, it matches the table today and the user knows it
    is a manual copy to re-check after any line edit.
-7. No "—", no ★, no forgotten `{{…}}` placeholder.
-8. **Real visual verification**: open the edit link in a browser, check the rendering, then
-   deliver both links (client + edition). No tool returns a render and no tool returns the
+7. No "—", no ★, no forgotten `{{…}}` placeholder, and **no `<!-- … -->` comment** left in
+   any block (rule 10) — check the block `code` you sent, not the rendered text.
+8. **Real visual verification**: check the rendering, then deliver both links (client + edition).
+   ⚠️ **Opening the CLIENT link is recorded as a prospect visit**: the client view posts a `visit`
+   on load and a `heartbeat` every 15 s to `/api/access-sessions` (a plain server-side GET counts
+   nothing). Your review then reads as a highly engaged buyer and inflates the Hot Deal Score of
+   the deal whose re-opens drive the follow-up. There is no internal-view opt-out today, so: verify
+   on the **edit link** and the **PDF export** for everything they can show, and **ask the user
+   before opening the client view** — on a real prospect's deal, the honest default is not to open
+   it, and if you do, say in your delivery that one visit was recorded. No tool returns a render and no tool returns the
    links (there is no `get_links`): rebuild them — `get_deal(id)` gives the deal `uid` →
    client link `https://duodeal.app/quotations/deal/{deal.uid}`; deal `id` + quotation `id`
    → edit link `https://duodeal.app/app/quotations/{dealId}/{quotationId}` (`/app/deals/…`
