@@ -2,6 +2,12 @@
 
 Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**, with a **Hot Deal Score (0-100)** measuring prospect engagement. This package carries the Duodeal know-how: one onboarding path plus five reference skills, used on top of the **official Duodeal MCP connector** (which provides the tools).
 
+This file's entry rule and routing table below are for the **6 client-facing quote
+skills** only. The 7th skill in this package, **`duodeal-hubspot-crm`**, is unrelated: it
+documents how the Duodeal TEAM runs its own internal HubSpot CRM (portal 146999082), on a
+HubSpot connector rather than the Duodeal one, and triggers on its own from its
+description — it does not need `DUODEAL-CONTEXT.md` or the entry rule below.
+
 > ⚠️ **Where this file must live.** A `CLAUDE.md` sitting at the root of a plugin is **not** loaded as context — plugins contribute through skills only. To make the rules below permanent, copy this file to the root of the user's own project. Installed as a plugin alone, the entry rule still fires through the **duodeal-onboarding** skill, whose description triggers on a first-time Duodeal request.
 
 ## Entry rule — run this before ANY Duodeal work

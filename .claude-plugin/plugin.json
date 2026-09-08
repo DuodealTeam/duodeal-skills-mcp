@@ -1,10 +1,10 @@
 {
   "name": "duodeal",
-  "version": "0.1.0",
-  "description": "Duodeal pour Claude — 6 skills de savoir-faire V2 (onboarding, bonnes pratiques, création de devis, devis design HTML, blocs V2, référence API). Les outils Duodeal sont fournis par le connecteur MCP officiel (OAuth).",
+  "version": "0.2.0",
+  "description": "Duodeal pour Claude — 7 skills de savoir-faire : 6 pour les devis V2 (onboarding, bonnes pratiques, création de devis, devis design HTML, blocs V2, référence API), utilisées avec le connecteur MCP officiel Duodeal (OAuth) ; 1 pour le CRM HubSpot interne de Duodeal (portail 146999082), utilisée avec un connecteur HubSpot.",
   "author": {
     "name": "Duodeal"
   },
-  "keywords": ["duodeal", "quotes", "quotations", "selling-pages", "mcp", "api"],
+  "keywords": ["duodeal", "quotes", "quotations", "selling-pages", "mcp", "api", "hubspot", "crm"],
   "license": "UNLICENSED"
 }
