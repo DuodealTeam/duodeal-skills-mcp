@@ -1,11 +1,8 @@
 # Duodeal — skills pour Claude
 
-Ce dépôt fournit **7 skills**. Six donnent à Claude le savoir-faire Duodeal côté **devis
-client** : embarquer un nouveau compte, créer un devis, le rendre **design** (qualité
-selling page), manipuler les **blocs V2**, et se repérer dans l'API. La septième est à
-part : le savoir-faire du **CRM HubSpot interne de Duodeal** (portail 146999082) — utile
-à l'équipe Duodeal elle-même, pas à un client qui installe ce paquet pour son propre
-compte Duodeal.
+Ce dépôt fournit **6 skills** qui donnent à Claude le savoir-faire Duodeal : embarquer un
+nouveau compte, créer un devis, le rendre **design** (qualité selling page), manipuler les
+**blocs V2**, et se repérer dans l'API.
 
 > **Ce dépôt ne contient que les skills** (le savoir-faire). Les **outils** Duodeal
 > (créer un deal, un devis, des lignes, des blocs…) sont fournis séparément par le
@@ -73,7 +70,7 @@ Mise à jour : `claude plugin marketplace update duodeal-marketplace`
 
 > ℹ️ Dépôt **public** : aucun accès GitHub particulier n'est nécessaire.
 
-## Les 6 skills de devis (côté client)
+## Les 6 skills
 
 | Skill | Rôle |
 | --- | --- |
@@ -92,19 +89,6 @@ garde-fous permanents : un `CLAUDE.md` livré dans un plugin n'est pas chargé
 automatiquement (un plugin ne charge que des skills). Le skill `duodeal-onboarding` porte
 la règle d'entrée de toute façon et se déclenche seul.
 
-## Le skill CRM interne (côté Duodeal)
-
-| Skill | Rôle |
-| --- | --- |
-| `duodeal-hubspot-crm` | Comment Duodeal tient son PROPRE CRM HubSpot (portail 146999082) : lifecycle stage, les deux pipelines de deal, la règle « 1 démo = 1 deal », quoi remplir, comment logger une note, valeurs live des propriétés (à jour, pas la version des comptes-rendus de réunion) |
-
-Sans rapport avec les 6 skills ci-dessus : ceux-là aident un CLIENT à monter et utiliser
-SON compte Duodeal ; celui-ci aide l'équipe Duodeal à tenir SA propre CRM commerciale. Il
-s'appuie sur un connecteur HubSpot (pas le connecteur Duodeal) et se déclenche seul dès
-que la demande porte sur HubSpot, un deal/contact/company Duodeal, ou après la
-construction d'une proposition Duodeal réelle (le skill demande alors de proposer une
-synchro HubSpot).
-
 ## Les outils (connecteur MCP officiel)
 
 Le savoir-faire de ces skills s'appuie sur les outils du **connecteur MCP officiel
@@ -115,6 +99,14 @@ correctement.
 
 Sans le connecteur, Claude a le savoir-faire mais aucune main sur le compte : c'est la
 cause n°1 d'un premier essai qui ne produit rien.
+
+## Ce qui n'est PAS dans ce paquet
+
+Ce dépôt est **public** et installé par tous les clients Duodeal : il ne porte que le
+savoir-faire qui sert **le compte d'un client**. Le savoir-faire qui décrit **nos propres
+systèmes** vit dans le dépôt privé `DuodealTeam/duodeal-internal-skills`, réservé à
+l'équipe. Le test avant d'ajouter une skill ici : *un client qui la lit y apprend-il
+quelque chose sur nous plutôt que sur son propre compte ?* Si oui, elle va dans le privé.
 
 ## Statut
 
