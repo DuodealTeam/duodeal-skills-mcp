@@ -198,8 +198,11 @@ T&Cs, legal notices and email templates are created in the Duodeal interface (Se
 read back on the quotation. On the quote itself, the legal text goes in the native
 `legalnotice` block (`add_quotation_block {type: "legalnotice"}` then
 `update_quotation_block` with the **complete** `data`) — `update_quotation` has no
-`legalNoticeText` argument. Variables resolved by the app templates:
-`{{quotation.reference}}`, `{{customer.firstName}}`, `{{company.name}}`… Email templates carry
-`subject` + `byDefaultSendDeal` and are set up in the interface only. If a REST key is already
+`legalNoticeText` argument. Variables in email templates are written in **square brackets**:
+`[client.firstName]`, `[client.fullName]`, `[client.lastName]`, `[deal.link]`,
+`[sales.firstName]`, `[sales.fullName]`, `[sales.jobTitle]`, `[company.name]` (measured on the
+platform's own default template; the `{{…}}` form found in older docs is **not** substituted).
+The link to the page is not added by itself: place `[deal.link]` on its own line. Email templates
+carry `subject` + `byDefaultSendDeal` and are set up in the interface only. If a REST key is already
 configured, that write can go through `X-API-KEY`; otherwise hand the step to the user and
 flag it as pending. Never invent a T&C or a legal notice the client did not provide.

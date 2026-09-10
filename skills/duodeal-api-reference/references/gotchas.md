@@ -16,6 +16,8 @@
 | Tenant logo ignored | a data URI was sent instead of RAW base64 PNG | Send RAW base64 PNG in `setLogo`. Not available to the connector (`update_company` has no `setLogo`): REST `PUT /companies/{id}` if a key is already configured, otherwise do it in the Duodeal interface and tell the user |
 | Empty list from a read | the `{data:[]}` envelope was not unwrapped | Connector tools already normalize it (`data/items/results/records/rows`); only raw REST calls need unwrapping |
 | A filter has no effect | filter written in the wrong form for the transport | On the connector, pass the tool's own named arguments (`status_id`, `owner_id`, `date_from`, `search`…); over REST, `filters[field][op]=value` |
+| An email goes out with `{{customer.firstName}}` unreplaced, or with no link to the page | curly variables from older docs; `[deal.link]` was never placed | Write the variables in square brackets (`[client.firstName]`, `[client.fullName]`, `[sales.fullName]`, `[sales.jobTitle]`, `[company.name]`) and put `[deal.link]` on its own line: the link is not added by itself |
+| The default email template flag keeps disappearing | `byDefaultSendDeal: true` in a PUT is a toggle (sent on the current default, it clears it), and a `POST /templates` clears it too | Write every template with `false`, then one flag-only `PUT /templates/{id} {byDefaultSendDeal: true}` on the default, last, only when it reads false; re-read and assert exactly one default |
 
 ## Deletion rules / dependencies
 

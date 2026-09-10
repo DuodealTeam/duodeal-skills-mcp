@@ -73,7 +73,9 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 ## Templates
 
 - `GET /templates` — query `type` + `filters[type][eq]`. Resp: `id, title, type, content, subject, byDefaultSendDeal`.
-- `POST /templates` — **Req**: `title, type(email|notice|cgv), content(HTML)`. Opt: `subject (email), byDefaultSendDeal`. Variables: `{{quotation.reference}}`, `{{customer.firstName}}`, `{{customer.lastName}}`, `{{company.name}}`…
+- `POST /templates` — **Req**: `title, type(email|notice|cgv), content(HTML)`. Opt: `subject (email), byDefaultSendDeal`. Email variables, in **square brackets**: `[client.firstName]`, `[client.fullName]`, `[client.lastName]`, `[deal.link]` (the link to the page, to place explicitly, on its own line), `[sales.firstName]`, `[sales.fullName]`, `[sales.jobTitle]`, `[company.name]`. The `{{…}}` form of the OpenAPI spec is not substituted.
+- `PUT /templates/{id}` — same fields. ⚠️ `byDefaultSendDeal: true` **toggles** the flag (sent on the current default, it clears it); `false` sets false; the flag is exclusive across email templates; and a `POST /templates` clears it on the template that had it. Write contents with `false`, then one flag-only PUT on the default, last, only when it reads false.
+- Signature confirmations: `PUT /companies/{id} {dealSettings}` with the whole object — `{confirm_mail_owner, confirm_mail_client (bool), confirm_mail_owner_template, confirm_mail_client_template (email template id | false), add_attachment_owner, add_attachment_client (bool), enableCalendarView, calendar_start_field, calendar_end_field}`. Read, merge, write; not exposed on the connector's `update_company`.
 
 ## Sharing (V2)
 
