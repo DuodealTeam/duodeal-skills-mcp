@@ -1,8 +1,9 @@
 # Duodeal — skills pour Claude
 
-Ce dépôt fournit **6 skills** qui donnent à Claude le savoir-faire Duodeal : embarquer un
-nouveau compte, créer un devis, le rendre **design** (qualité selling page), manipuler les
-**blocs V2**, et se repérer dans l'API.
+Ce dépôt fournit **7 skills** qui donnent à Claude le savoir-faire Duodeal : embarquer un
+nouveau compte, créer un devis, le rendre **design** (qualité selling page), **transposer
+le deck d'un designer** (PDF ou `.ai`) en blocs, manipuler les **blocs V2**, et se repérer
+dans l'API.
 
 > **Ce dépôt ne contient que les skills** (le savoir-faire). Les **outils** Duodeal
 > (créer un deal, un devis, des lignes, des blocs…) sont fournis séparément par le
@@ -70,7 +71,7 @@ Mise à jour : `claude plugin marketplace update duodeal-marketplace`
 
 > ℹ️ Dépôt **public** : aucun accès GitHub particulier n'est nécessaire.
 
-## Les 6 skills
+## Les 7 skills
 
 | Skill | Rôle |
 | --- | --- |
@@ -78,11 +79,14 @@ Mise à jour : `claude plugin marketplace update duodeal-marketplace`
 | `duodeal-mcp-best-practices` | Règles d'or et check-list de rendu : garder header + contacts natifs, blocs qui survivent à l'éditeur & au PDF, prix/devises, garde-fous d'écriture |
 | `duodeal-quote-building` | Créer un devis de A à Z : client → deal → lignes → branding → CGV → les 2 liens à livrer |
 | `duodeal-quote-design` | Devis **design** en HTML : design system, structure narrative, squelettes de blocs, reprise d'un devis existant, check-list de livraison (+ `references/`) |
+| `duodeal-deck-to-blocks` | Le deck d'un designer (PDF, `.ai`, export de slides) transposé en blocs V2 fidèles au pixel et lisibles sur mobile : lire les vraies valeurs dans le fichier, découper l'art, héberger la police de marque, boucle de calibration mesurée (+ `references/`) |
 | `duodeal-v2-blocks` | Le système de blocs V2 des selling pages et sa manipulation sans risque |
 | `duodeal-api-reference` | Référence de l'API Duodeal : opérations, conventions, filtres, erreurs connues, et carte de ce que le connecteur sait vraiment faire (+ `references/`) |
 
 Ils s'enchaînent : *quote-building* (créer) → *quote-design* (mettre en forme) →
-*v2-blocks* (écrire) → *mcp-best-practices* (vérifier avant de livrer).
+*v2-blocks* (écrire) → *mcp-best-practices* (vérifier avant de livrer). Quand le point de
+départ est le fichier d'un designer, *deck-to-blocks* remplace *quote-design* : la mise en
+page existe déjà et n'est pas à réinventer.
 
 Le `CLAUDE.md` du dépôt est à **copier à la racine du projet du client** pour rendre les
 garde-fous permanents : un `CLAUDE.md` livré dans un plugin n'est pas chargé

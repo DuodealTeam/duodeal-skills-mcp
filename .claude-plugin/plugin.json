@@ -1,7 +1,7 @@
 {
   "name": "duodeal",
   "version": "0.3.1",
-  "description": "Duodeal pour Claude — 6 skills de savoir-faire V2 (onboarding, bonnes pratiques, création de devis, devis design HTML, blocs V2, référence API). Les outils Duodeal sont fournis par le connecteur MCP officiel (OAuth).",
+  "description": "Duodeal pour Claude — 7 skills de savoir-faire V2 (onboarding, bonnes pratiques, création de devis, devis design HTML, deck d'un designer vers blocs, blocs V2, référence API). Les outils Duodeal sont fournis par le connecteur MCP officiel (OAuth).",
   "author": {
     "name": "Duodeal"
   },

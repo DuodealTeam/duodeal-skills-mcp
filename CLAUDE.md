@@ -1,6 +1,6 @@
 # Duodeal — orchestrator
 
-Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**, with a **Hot Deal Score (0-100)** measuring prospect engagement. This package carries the Duodeal know-how: one onboarding path plus five reference skills, used on top of the **official Duodeal MCP connector** (which provides the tools).
+Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**, with a **Hot Deal Score (0-100)** measuring prospect engagement. This package carries the Duodeal know-how: one onboarding path plus six reference skills, used on top of the **official Duodeal MCP connector** (which provides the tools).
 
 > ⚠️ **Where this file must live.** A `CLAUDE.md` sitting at the root of a plugin is **not** loaded as context — plugins contribute through skills only. To make the rules below permanent, copy this file to the root of the user's own project. Installed as a plugin alone, the entry rule still fires through the **duodeal-onboarding** skill, whose description triggers on a first-time Duodeal request.
 
@@ -19,11 +19,12 @@ Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**,
 | Set up an account, get started, first time, "onboard me", no `DUODEAL-CONTEXT.md` yet, first template | **duodeal-onboarding** |
 | Create, duplicate or deliver a quote; start from a template; add a 2nd quotation; product catalog; customers | **duodeal-quote-building** |
 | A "beautiful", "design" or "premium" quote; a real selling page; turn a raw quote into a visual proposal; **rework an existing quote** — restyle it, rewrite a block's HTML, add/remove a section, edit the price table | **duodeal-quote-design** |
+| A designer's deck to rebuild: a PDF, an `.ai`, an exported slide deck, "the designer's file"; a block that "does not look like the design"; checking a transposed block on mobile | **duodeal-deck-to-blocks** |
 | Read or write V2 blocks, convert to V2, build an html micro-app, debug a render (iframe height, autoResize) | **duodeal-v2-blocks** |
 | Golden rules, render contract, pre-delivery checklist, prices and currencies, write guardrails | **duodeal-mcp-best-practices** |
 | An endpoint, a field, a filter, a 4xx/5xx, an operation with no MCP tool | **duodeal-api-reference** |
 
-Skills combine: design quote = quote-building (create) then quote-design (HTML) then v2-blocks (write) then mcp-best-practices (check before delivery).
+Skills combine: design quote = quote-building (create) then quote-design (HTML) then v2-blocks (write) then mcp-best-practices (check before delivery). A designer's deck = quote-building (create) then **deck-to-blocks** (transpose) then v2-blocks (write) then mcp-best-practices (check).
 
 ## Permanent guardrails — non negotiable
 
