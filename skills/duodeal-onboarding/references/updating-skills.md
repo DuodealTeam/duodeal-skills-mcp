@@ -10,8 +10,11 @@ Two mechanisms cover this, and the second exists because the first can fail.
 
 ## 1. The automatic refresh (installed with the skills)
 
-`.claude/duodeal-skills-update.sh`, run by a `SessionStart` hook in
-`.claude/settings.json`. Past **7 days** it re-downloads the skills, rewrites the date —
+`.claude/duodeal-skills-update.sh`, run by **two** hooks in `.claude/settings.json`:
+`SessionStart` and `UserPromptSubmit`. Both are needed — `SessionStart` only fires when a
+session starts, so a session someone keeps open for weeks would never be refreshed;
+`UserPromptSubmit` fires on every message. A failed refresh warns **once a day**, not at
+every message. Past **7 days** it re-downloads the skills, rewrites the date —
 so the counter restarts and the check **recurs every week**, it is not a one-shot — and
 prints one line. Under 7 days it says nothing and costs ~15 ms.
 
@@ -27,9 +30,9 @@ fixed.
 
 **If the hook is absent** — an install made before this mechanism existed, or one where the
 user removed it — put it back: copy `install/duodeal-skills-update.sh` from the repo into
-`.claude/`, make it executable, and add the hook to `.claude/settings.json` with the
-**absolute** path (merge, never overwrite; and never `"once": true`, which would delete the
-hook after a single run).
+`.claude/`, make it executable, and add BOTH hooks to `.claude/settings.json` with the
+**absolute** path, each passing its own event name as the argument (merge, never overwrite;
+and never `"once": true`, which would delete the hook after a single run).
 
 ## 2. The rule carried by the skills themselves
 

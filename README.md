@@ -27,11 +27,16 @@ Installe les skills Duodeal dans ce projet. Fais tout toi-même, étape par éta
    a. Copie "install/duodeal-skills-update.sh" du clone vers ".claude/" et rends-le
       exécutable.
    b. Dans ".claude/settings.json" (crée-le s'il n'existe pas ; s'il existe, FUSIONNE
-      sans rien supprimer de ce qui s'y trouve), ajoute ce hook, en remplaçant
+      sans rien supprimer de ce qui s'y trouve), ajoute ces DEUX hooks, en remplaçant
       <RACINE> par le chemin ABSOLU de mon projet :
-      {"hooks":{"SessionStart":[{"hooks":[{"type":"command","timeout":60,
-       "command":"<RACINE>/.claude/duodeal-skills-update.sh"}]}]}}
-      N'ajoute jamais "once": true — le hook doit se déclencher à CHAQUE session.
+      {"hooks":{
+        "SessionStart":[{"hooks":[{"type":"command","timeout":60,
+          "command":"<RACINE>/.claude/duodeal-skills-update.sh SessionStart"}]}],
+        "UserPromptSubmit":[{"hooks":[{"type":"command","timeout":60,
+          "command":"<RACINE>/.claude/duodeal-skills-update.sh UserPromptSubmit"}]}]}}
+      Les deux sont nécessaires : le premier couvre les démarrages, le second les
+      sessions que je garde ouvertes plusieurs semaines.
+      N'ajoute jamais "once": true — les hooks doivent se déclencher à CHAQUE fois.
    c. Écris ".claude/.duodeal-skills-stamp" avec exactement deux lignes :
       date=<la date du jour, AAAA-MM-JJ>
       version=<la valeur "version" lue dans .claude-plugin/plugin.json du clone>
@@ -57,11 +62,16 @@ Install the Duodeal skills in this project. Do everything yourself, step by step
    a. Copy "install/duodeal-skills-update.sh" from the clone into ".claude/" and
       make it executable.
    b. In ".claude/settings.json" (create it if missing; if it exists, MERGE without
-      removing anything already there), add this hook, replacing <ROOT> with the
+      removing anything already there), add these TWO hooks, replacing <ROOT> with the
       ABSOLUTE path of my project:
-      {"hooks":{"SessionStart":[{"hooks":[{"type":"command","timeout":60,
-       "command":"<ROOT>/.claude/duodeal-skills-update.sh"}]}]}}
-      Never add "once": true — the hook must fire on EVERY session.
+      {"hooks":{
+        "SessionStart":[{"hooks":[{"type":"command","timeout":60,
+          "command":"<ROOT>/.claude/duodeal-skills-update.sh SessionStart"}]}],
+        "UserPromptSubmit":[{"hooks":[{"type":"command","timeout":60,
+          "command":"<ROOT>/.claude/duodeal-skills-update.sh UserPromptSubmit"}]}]}}
+      Both are needed: the first covers start-ups, the second covers sessions I keep
+      open for weeks.
+      Never add "once": true — the hooks must fire EVERY time.
    c. Write ".claude/.duodeal-skills-stamp" with exactly two lines:
       date=<today, YYYY-MM-DD>
       version=<the "version" value read from .claude-plugin/plugin.json in the clone>
@@ -108,7 +118,12 @@ La mise à jour est donc assurée par **deux couches**, et la seconde existe par
 première peut échouer.
 
 **1. Automatique** — le prompt d'installation pose `install/duodeal-skills-update.sh` dans
-`.claude/` et un hook `SessionStart` qui l'exécute. Au-delà de **7 jours** il re-télécharge
+`.claude/` et **deux** hooks qui l'exécutent : `SessionStart` **et** `UserPromptSubmit`.
+Le second n'est pas une redondance : `SessionStart` ne se déclenche qu'au démarrage, donc
+une session gardée ouverte plusieurs semaines ne serait jamais rafraîchie. `UserPromptSubmit`
+se déclenche à chaque message — et comme le script sort en 15 ms quand les skills sont
+fraîches, ça ne coûte rien. Quand un rafraîchissement échoue, l'alerte est limitée à **une
+fois par jour** pour ne pas harceler à chaque message. Au-delà de **7 jours** il re-télécharge
 les skills, réécrit la date (donc le compteur repart : c'est **récurrent**, pas un
 déclenchement unique) et affiche une ligne. En deçà de 7 jours il ne dit rien et coûte
 ~15 ms. Il ne supprime que les dossiers `duodeal-*` : les skills du client ne sont jamais
