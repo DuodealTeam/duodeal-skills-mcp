@@ -64,20 +64,14 @@ days old, or absent → offer the refresh in one sentence before working.**
 
 ## The refresh
 
-1. Clone `https://github.com/DuodealTeam/duodeal-skills-mcp` into a temporary folder.
-2. **Delete only the `duodeal-*` folders** under `.claude/skills/` — so a skill renamed or
-   removed upstream does not survive as a stale copy. ⚠️ Never touch any other skill in
-   that folder: it belongs to the user, not to us.
-3. Copy `skills/*` from the clone into `.claude/skills/`.
-4. `CLAUDE.md` of the clone → the project root. If the user already has one, **append** —
-   never overwrite. If a previous Duodeal section is already there, replace that section
-   only.
-5. Delete the temporary folder.
-6. Update the stamp line in `DUODEAL-CONTEXT.md` with today's date and the version read
-   from the clone's `.claude-plugin/plugin.json`.
-7. Tell the user what changed, and that Claude Code must be restarted for the skills to
-   reload.
+**The procedure lives in one place: [`install/PROCEDURE.md`](https://github.com/DuodealTeam/duodeal-skills-mcp/blob/main/install/PROCEDURE.md)
+in the public repo.** Follow it as written — it covers the skills, the `CLAUDE.md`, the two
+hooks, the stamp and the context line, and it is the same procedure a fresh install uses,
+so the two can never drift apart.
 
-**Never touched by a refresh**: `DUODEAL-CONTEXT.md` (apart from the stamp line) and
+Do not improvise a shorter version from memory: the step everyone skips is installing the
+auto-update hooks, and skipping it is exactly what leaves a client frozen for weeks.
+
+**Never touched by a refresh**: `DUODEAL-CONTEXT.md` (apart from its stamp line) and
 anything the user wrote themselves. If the clone fails, say so plainly and stop — working
 around it leaves a half-installed set that looks fine.

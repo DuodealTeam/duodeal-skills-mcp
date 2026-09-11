@@ -13,83 +13,33 @@ des données du client** depuis un bloc html, et se repérer dans l'API.
 ## Installation
 
 Le plus simple, sans rien taper dans un terminal : ouvre Claude Code dans le dossier de
-ton projet et colle ce message.
+ton projet et colle **cette phrase** :
 
 ```
-Installe les skills Duodeal dans ce projet. Fais tout toi-même, étape par étape :
-
-1. Clone https://github.com/DuodealTeam/duodeal-skills-mcp dans un dossier temporaire.
-2. Copie le dossier "skills/" du clone vers ".claude/skills/" à la racine de mon
-   projet (crée le dossier s'il n'existe pas).
-3. Copie le fichier "CLAUDE.md" du clone à la racine de mon projet. S'il y a déjà
-   un CLAUDE.md, ajoute le contenu à la fin au lieu de l'écraser.
-4. Mets en place la mise à jour automatique (les skills changent chaque semaine) :
-   a. Copie "install/duodeal-skills-update.sh" du clone vers ".claude/" et rends-le
-      exécutable.
-   b. Dans ".claude/settings.json" (crée-le s'il n'existe pas ; s'il existe, FUSIONNE
-      sans rien supprimer de ce qui s'y trouve), ajoute ces DEUX hooks, en remplaçant
-      <RACINE> par le chemin ABSOLU de mon projet :
-      {"hooks":{
-        "SessionStart":[{"hooks":[{"type":"command","timeout":60,
-          "command":"<RACINE>/.claude/duodeal-skills-update.sh SessionStart"}]}],
-        "UserPromptSubmit":[{"hooks":[{"type":"command","timeout":60,
-          "command":"<RACINE>/.claude/duodeal-skills-update.sh UserPromptSubmit"}]}]}}
-      Les deux sont nécessaires : le premier couvre les démarrages, le second les
-      sessions que je garde ouvertes plusieurs semaines.
-      N'ajoute jamais "once": true — les hooks doivent se déclencher à CHAQUE fois.
-   c. Écris ".claude/.duodeal-skills-stamp" avec exactement deux lignes :
-      date=<la date du jour, AAAA-MM-JJ>
-      version=<la valeur "version" lue dans .claude-plugin/plugin.json du clone>
-5. Supprime le dossier temporaire.
-6. Liste-moi les skills installées, confirme que la mise à jour automatique est en
-   place, et dis-moi si le connecteur MCP Duodeal est bien connecté à mon Claude.
-
-Si le clone échoue, dis-le-moi clairement et arrête-toi — ne contourne pas.
+Installe les skills Duodeal dans ce projet, en suivant la procédure décrite sur
+https://github.com/DuodealTeam/duodeal-skills-mcp/blob/main/install/PROCEDURE.md
 ```
 
 <details>
-<summary>English version of the same prompt</summary>
+<summary>English version of the same sentence</summary>
 
 ```
-Install the Duodeal skills in this project. Do everything yourself, step by step:
-
-1. Clone https://github.com/DuodealTeam/duodeal-skills-mcp into a temporary folder.
-2. Copy the "skills/" folder from the clone into ".claude/skills/" at the root of
-   my project (create the folder if it does not exist).
-3. Copy the "CLAUDE.md" file from the clone to the root of my project. If I already
-   have a CLAUDE.md, append the content at the end instead of overwriting it.
-4. Set up the automatic update (these skills change every week):
-   a. Copy "install/duodeal-skills-update.sh" from the clone into ".claude/" and
-      make it executable.
-   b. In ".claude/settings.json" (create it if missing; if it exists, MERGE without
-      removing anything already there), add these TWO hooks, replacing <ROOT> with the
-      ABSOLUTE path of my project:
-      {"hooks":{
-        "SessionStart":[{"hooks":[{"type":"command","timeout":60,
-          "command":"<ROOT>/.claude/duodeal-skills-update.sh SessionStart"}]}],
-        "UserPromptSubmit":[{"hooks":[{"type":"command","timeout":60,
-          "command":"<ROOT>/.claude/duodeal-skills-update.sh UserPromptSubmit"}]}]}}
-      Both are needed: the first covers start-ups, the second covers sessions I keep
-      open for weeks.
-      Never add "once": true — the hooks must fire EVERY time.
-   c. Write ".claude/.duodeal-skills-stamp" with exactly two lines:
-      date=<today, YYYY-MM-DD>
-      version=<the "version" value read from .claude-plugin/plugin.json in the clone>
-5. Delete the temporary folder.
-6. List the skills you installed, confirm the automatic update is in place, and tell
-   me whether the Duodeal MCP connector is properly connected to my Claude.
-
-If the clone fails, tell me clearly and stop — do not work around it.
+Install the Duodeal skills in this project, following the procedure at
+https://github.com/DuodealTeam/duodeal-skills-mcp/blob/main/install/PROCEDURE.md
 ```
 
 </details>
 
-Puis redémarre Claude Code pour que les skills soient chargés.
+Puis redémarre Claude Code pour que les skills soient chargées.
 
-Deux consignes du prompt sont là pour une raison, à garder si tu le reformules :
-**« ajoute à la fin au lieu de l'écraser »** protège le `CLAUDE.md` que le client a déjà, et
-**« dis-le-moi clairement et arrête-toi »** évite que Claude bricole une demi-installation
-que le client croit réussie.
+Toute la procédure vit dans **[install/PROCEDURE.md](install/PROCEDURE.md)** — un seul
+endroit, que Claude lit au moment de l'installation. Elle sert aussi bien à installer qu'à
+mettre à jour : la même phrase, en remplaçant « Installe » par « Mets à jour », refait le
+travail proprement.
+
+L'avantage sur un long prompt copié-collé : la procédure peut être corrigée sans que
+personne n'ait à rediffuser le bon texte. Ce qui a déjà servi — le prompt qui circulait
+n'installait pas la mise à jour automatique.
 
 ### En ligne de commande
 
