@@ -23,9 +23,21 @@ Installe les skills Duodeal dans ce projet. Fais tout toi-même, étape par éta
    projet (crée le dossier s'il n'existe pas).
 3. Copie le fichier "CLAUDE.md" du clone à la racine de mon projet. S'il y a déjà
    un CLAUDE.md, ajoute le contenu à la fin au lieu de l'écraser.
-4. Supprime le dossier temporaire.
-5. Liste-moi les skills installés, et dis-moi si le connecteur MCP Duodeal est
-   bien connecté à mon Claude.
+4. Mets en place la mise à jour automatique (les skills changent chaque semaine) :
+   a. Copie "install/duodeal-skills-update.sh" du clone vers ".claude/" et rends-le
+      exécutable.
+   b. Dans ".claude/settings.json" (crée-le s'il n'existe pas ; s'il existe, FUSIONNE
+      sans rien supprimer de ce qui s'y trouve), ajoute ce hook, en remplaçant
+      <RACINE> par le chemin ABSOLU de mon projet :
+      {"hooks":{"SessionStart":[{"hooks":[{"type":"command","timeout":60,
+       "command":"<RACINE>/.claude/duodeal-skills-update.sh"}]}]}}
+      N'ajoute jamais "once": true — le hook doit se déclencher à CHAQUE session.
+   c. Écris ".claude/.duodeal-skills-stamp" avec exactement deux lignes :
+      date=<la date du jour, AAAA-MM-JJ>
+      version=<la valeur "version" lue dans .claude-plugin/plugin.json du clone>
+5. Supprime le dossier temporaire.
+6. Liste-moi les skills installées, confirme que la mise à jour automatique est en
+   place, et dis-moi si le connecteur MCP Duodeal est bien connecté à mon Claude.
 
 Si le clone échoue, dis-le-moi clairement et arrête-toi — ne contourne pas.
 ```
@@ -41,9 +53,21 @@ Install the Duodeal skills in this project. Do everything yourself, step by step
    my project (create the folder if it does not exist).
 3. Copy the "CLAUDE.md" file from the clone to the root of my project. If I already
    have a CLAUDE.md, append the content at the end instead of overwriting it.
-4. Delete the temporary folder.
-5. List the skills you installed, and tell me whether the Duodeal MCP connector is
-   properly connected to my Claude.
+4. Set up the automatic update (these skills change every week):
+   a. Copy "install/duodeal-skills-update.sh" from the clone into ".claude/" and
+      make it executable.
+   b. In ".claude/settings.json" (create it if missing; if it exists, MERGE without
+      removing anything already there), add this hook, replacing <ROOT> with the
+      ABSOLUTE path of my project:
+      {"hooks":{"SessionStart":[{"hooks":[{"type":"command","timeout":60,
+       "command":"<ROOT>/.claude/duodeal-skills-update.sh"}]}]}}
+      Never add "once": true — the hook must fire on EVERY session.
+   c. Write ".claude/.duodeal-skills-stamp" with exactly two lines:
+      date=<today, YYYY-MM-DD>
+      version=<the "version" value read from .claude-plugin/plugin.json in the clone>
+5. Delete the temporary folder.
+6. List the skills you installed, confirm the automatic update is in place, and tell
+   me whether the Duodeal MCP connector is properly connected to my Claude.
 
 If the clone fails, tell me clearly and stop — do not work around it.
 ```
@@ -80,11 +104,31 @@ dossier temporaire puis le supprime. Il n'y a donc **rien à `git pull`** de son
 rafraîchir, c'est **refaire la copie**. Laissée seule, une installation reste figée à la
 version du jour où elle a été faite.
 
-C'est pourquoi la règle est portée par les skills elles-mêmes : chaque skill Duodeal
-commence par vérifier la ligne `Skills Duodeal : mises à jour le <date>` de
-`DUODEAL-CONTEXT.md` et, **au-delà de 7 jours, propose la mise à jour avant de travailler**
-(une fois par session, jamais en silence). La procédure complète est dans
+La mise à jour est donc assurée par **deux couches**, et la seconde existe parce que la
+première peut échouer.
+
+**1. Automatique** — le prompt d'installation pose `install/duodeal-skills-update.sh` dans
+`.claude/` et un hook `SessionStart` qui l'exécute. Au-delà de **7 jours** il re-télécharge
+les skills, réécrit la date (donc le compteur repart : c'est **récurrent**, pas un
+déclenchement unique) et affiche une ligne. En deçà de 7 jours il ne dit rien et coûte
+~15 ms. Il ne supprime que les dossiers `duodeal-*` : les skills du client ne sont jamais
+touchées, et rien n'est effacé avant que le remplacement ne soit vérifié.
+
+**2. Le warning** — si le rafraîchissement échoue (pas de réseau, pas de `git`, dossier
+protégé), le hook **le dit au lieu de rester muet** :
+
+> ⚠️ Vos skills Duodeal datent du 2026-08-26 (16 jours) et n'ont PAS pu être mises à jour :
+> le téléchargement a échoué (réseau ?). Demandez à Claude « mets à jour mes skills Duodeal ».
+
+Il n'avance alors pas la date, donc l'alerte revient à chaque session. Et il sort toujours
+en code 0 : une mise à jour ratée ne casse jamais la session du client. En parallèle, chaque
+skill vérifie elle-même la ligne `Skills Duodeal : mises à jour le <date>` de
+`DUODEAL-CONTEXT.md` — ce qui couvre les clients installés avant ce mécanisme. La procédure
+complète est dans
 [`skills/duodeal-onboarding/references/updating-skills.md`](skills/duodeal-onboarding/references/updating-skills.md).
+
+⚠️ **Les skills se chargent au démarrage de la session** : un rafraîchissement s'applique à
+partir de la session **suivante**. Le message le dit.
 
 Côté équipe Duodeal : après toute modification poussée ici, **régénérer le zip** joint à la
 page Notion — c'est lui que récupèrent les clients qui n'installent pas depuis GitHub.
