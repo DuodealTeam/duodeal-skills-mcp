@@ -5,6 +5,14 @@ description: First-run onboarding for a Duodeal account — check the connected 
 
 # Duodeal onboarding
 
+> 🔄 **Are these skills current?** They are a **copy** taken from the public repo — there is
+> no git remote behind them and nothing refreshes them on its own, so an install silently
+> stays on the version of the day it was made. Read the line `Skills Duodeal : mises à jour
+> le …` in `DUODEAL-CONTEXT.md` (project root): **absent, or more than 7 days old → offer
+> the refresh in one sentence before working**. Procedure: [references/updating-skills.md](references/updating-skills.md). Ask **once per session**;
+> if the user declines, work with what is installed and drop it.
+
+
 Run this once per client account. Output: an account configured without breaking anything, a `DUODEAL-CONTEXT.md` file at the root of the user's project, and a first quote template that is actually usable.
 
 **Golden rule of this whole skill: read everything, write almost nothing, and never twice.** A new Duodeal account already ships with a company record, taxes, unities, statuses and numbering. Onboarding **adds what is missing**, it never rebuilds and never cleans up.
@@ -152,10 +160,13 @@ Write it **at the root of the user's project** (never inside the plugin). This i
 
 Fill only what is known: an unknown field stays `TODO` and is listed openly at the end, never filled with invented content. Anything inferred from the website but not confirmed by the user is suffixed `(à confirmer)`.
 
+**The `Skills Duodeal : mises à jour le …` line is not decoration.** It is the only thing on the client's machine that says how old their skills are: the install is a copy, with no git remote behind it and nothing that refreshes on its own. Write it with the date of the day you actually installed them, and rewrite it after every refresh — see [references/updating-skills.md](references/updating-skills.md).
+
 ```markdown
 # Duodeal context — <Company name>
 
 Written by duodeal-onboarding on <YYYY-MM-DD>, file kept at <absolute path>. Re-read at the start of every Duodeal session.
+Skills Duodeal : mises à jour le <YYYY-MM-DD> (v<version read from the clone's `.claude-plugin/plugin.json`)
 Update it whenever the branding, the offers, the sender or the legal texts change.
 Convention: `(à confirmer)` = inferred from the website, not yet validated by the client · `TODO` = missing, never to be invented.
 No secret in this file (no API key, no password, no bank details).
@@ -269,6 +280,7 @@ Re-read the server state before claiming anything is done (connector: `get_compa
 10. Sender profile complete (name, job title, real photo provided by the client, credible login email).
 11. Currency, currency format and language settled before the first real quote.
 12. `DUODEAL-CONTEXT.md` written, **absolute path given to the user**, tenant ids and the two template links filled in.
+12bis. The `Skills Duodeal : mises à jour le <date>` line is in that file, with a real date — without it no later session can tell that the skills have gone stale.
 13. First template built in **V2** — checked on the `builderVersion` field itself (`== 2`), not on the presence of `blocks[]` — and render checked visually, or explicitly handed to the user to check, with no claim of having seen it. Nothing to do about the **primary** flag here: a deal's first quotation is primary by default (verified). It only becomes a subject if a second quotation is added to the deal later.
 14. **Honest recap delivered**: what already existed, what was created, what was skipped and why, what is left to the client (user creation and passwords, missing legal content, assets not provided). Nothing filled with invented content, drafts announced as drafts.
 15. Offer, only if the user asks for it: hide the in-app onboarding assistant (`showUnboarding: false` — not a connector argument: interface, or `PUT /companies/{id}`).

@@ -1,6 +1,6 @@
 # Duodeal — orchestrator
 
-Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**, with a **Hot Deal Score (0-100)** measuring prospect engagement. This package carries the Duodeal know-how: one onboarding path plus six reference skills, used on top of the **official Duodeal MCP connector** (which provides the tools).
+Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**, with a **Hot Deal Score (0-100)** measuring prospect engagement. This package carries the Duodeal know-how: one onboarding path plus seven reference skills, used on top of the **official Duodeal MCP connector** (which provides the tools).
 
 > ⚠️ **Where this file must live.** A `CLAUDE.md` sitting at the root of a plugin is **not** loaded as context — plugins contribute through skills only. To make the rules below permanent, copy this file to the root of the user's own project. Installed as a plugin alone, the entry rule still fires through the **duodeal-onboarding** skill, whose description triggers on a first-time Duodeal request.
 
@@ -11,6 +11,7 @@ Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**,
 3. **Present** → read it in full, then chain to the skill matching the intent (table below). It holds the identity, design tokens, offers, targets, proofs, legal texts and the **tenant ids already discovered** (taxes, unities, price categories, owner, media).
 4. Either way, confirm the connected tenant with `get_current_user` before touching anything, and state it: "connected to <company> (company <id>)". A 403 on a known resource means the **wrong account**, not a rate limit.
 5. If the context file looks stale (new offers, new sender, rebrand), update it instead of working around it.
+6. **Check how old these skills are.** `DUODEAL-CONTEXT.md` carries a line `Skills Duodeal : mises à jour le <date>`. These skills are a **copy** of the public repo with no git remote behind them: nothing refreshes them on its own, and an install silently stays on the version of the day it was made — one client ran for two weeks on skills frozen at 2026-08-26. **Absent, or more than 7 days old → offer the refresh in one sentence before working** (procedure: **duodeal-onboarding → `references/updating-skills.md`**). Ask once per session, never refresh silently, and if the user declines, work with what is installed and drop it.
 
 ## Routing — intent to skill
 
@@ -21,6 +22,7 @@ Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**,
 | A "beautiful", "design" or "premium" quote; a real selling page; turn a raw quote into a visual proposal; **rework an existing quote** — restyle it, rewrite a block's HTML, add/remove a section, edit the price table | **duodeal-quote-design** |
 | A designer's deck to rebuild: a PDF, an `.ai`, an exported slide deck, "the designer's file"; a block that "does not look like the design"; checking a transposed block on mobile | **duodeal-deck-to-blocks** |
 | Read or write V2 blocks, convert to V2, build an html micro-app, debug a render (iframe height, autoResize) | **duodeal-v2-blocks** |
+| Read live quote data inside a block, or **collect data from the client** — a form, a questionnaire, a choice, a document to upload, a configurator; where the answers land and whether they are encrypted | **duodeal-html-block-js** |
 | Golden rules, render contract, pre-delivery checklist, prices and currencies, write guardrails | **duodeal-mcp-best-practices** |
 | An endpoint, a field, a filter, a 4xx/5xx, an operation with no MCP tool | **duodeal-api-reference** |
 
@@ -49,7 +51,8 @@ Repeated from the skills because they are the recurring failures.
 - Native **header** filled in (sender logo + cover) and native **contacts** block present (sender AND recipient), never hidden nor recoded in HTML.
 - **`accept` and `signstamp` always ship as a pair**: once signed, `accept` disappears and `signstamp` is the only proof of signature left.
 - **Primary quotation**, in some cases only: the first quotation of a deal is primary by default, but the client dashboard table lists primary quotes only — a **second** quotation on a deal, or a rebuilt one, may not show up there. Flag it to the user when that case applies; switching the flag is an interface job (no connector argument for it).
-- **Inline-first**: **no `<style>` at all** in a delivered block (the editor strips them on the first rep edit — and no custom-font route survives, so ship the system stack), no separate `<script>`, every html block ends with `DuoDeal.autoResize()` in a try/catch.
+- **Inline-first**: **no `<style>` at all** in a delivered block (the editor strips them on the first rep edit — and no custom-font route survives, so ship the system stack), no decorative `<script>`, every html block ends with `DuoDeal.autoResize()` in a try/catch. A block that reads the quote or collects client data carries its `DuoDeal` logic in that same final script (**duodeal-html-block-js**).
+- **A block that collects data must render from its saved state alone, at load.** In the PDF there is no interaction and `onUpdate` never fires: a block painted only inside an event handler prints **empty**. The client's answers are **encrypted by default** — unreadable to exports, automations, webhooks and the AI until the block's "Encrypt client answers" setting is turned off, which is the user's decision, not yours. Anything sensitive goes under a **top-level `_` key**.
 - **No em dash "—" anywhere** in quote content (the server truncates a `productTitle` at the em dash): use ":", ";", "·", ",". No `{{...}}` placeholder left.
 - Recurring amounts live in an HTML recap block, never in the native pricing table (one total per quote only).
 - An amount already in the price table is **read from `DuoDeal`**, not retyped in the HTML. Binding a block to the table is **good practice, not an obligation**: offer it, and hard-code only what the table does not hold (recurring, options, client-supplied figures).

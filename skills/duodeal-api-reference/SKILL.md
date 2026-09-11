@@ -5,6 +5,14 @@ description: Duodeal REST API reference (api.duodeal.app) — X-API-KEY auth, pa
 
 # Duodeal API — reference
 
+> 🔄 **Are these skills current?** They are a **copy** taken from the public repo — there is
+> no git remote behind them and nothing refreshes them on its own, so an install silently
+> stays on the version of the day it was made. Read the line `Skills Duodeal : mises à jour
+> le …` in `DUODEAL-CONTEXT.md` (project root): **absent, or more than 7 days old → offer
+> the refresh in one sentence before working**. Procedure: [../duodeal-onboarding/references/updating-skills.md](../duodeal-onboarding/references/updating-skills.md). Ask **once per session**;
+> if the user declines, work with what is installed and drop it.
+
+
 Operational reference for the Duodeal REST API, compiled from the official OpenAPI spec
 (~80 operations) + the rules learned in the field. What follows describes **the server**:
 the official Duodeal MCP connector covers only a subset of it.

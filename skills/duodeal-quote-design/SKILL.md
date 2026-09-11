@@ -5,6 +5,14 @@ description: Build a design-grade Duodeal quote in HTML, at premium selling page
 
 # Duodeal design quote (HTML, V2 blocks)
 
+> 🔄 **Are these skills current?** They are a **copy** taken from the public repo — there is
+> no git remote behind them and nothing refreshes them on its own, so an install silently
+> stays on the version of the day it was made. Read the line `Skills Duodeal : mises à jour
+> le …` in `DUODEAL-CONTEXT.md` (project root): **absent, or more than 7 days old → offer
+> the refresh in one sentence before working**. Procedure: [../duodeal-onboarding/references/updating-skills.md](../duodeal-onboarding/references/updating-skills.md). Ask **once per session**;
+> if the user declines, work with what is installed and drop it.
+
+
 Guide for building a visually premium quote. The context (sender branding, offers,
 prospect) is already known: no research to do — apply these instructions.
 Getting a designed block on the page always takes two steps: create it, then write its
@@ -128,9 +136,15 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
    block → the whole design breaks. So: everything in `style="…"` on each element.
 2. **Responsive without media queries**: never `grid`, never `@media` — use containers
    `display:flex;flex-wrap:wrap` + children `flex:1 1 <base>px;min-width:<x>px`.
-3. **Interactivity via inline `onclick`** — no separate `<script>`. The only exception,
-   mandatory at the end of EVERY html block:
-   `<script>try{if(window.DuoDeal&&DuoDeal.autoResize){DuoDeal.autoResize()}}catch(e){}</script>`
+3. **Interactivity via inline `onclick`** — no separate `<script>` for presentation. Two
+   exceptions, both at the very END of the block, after the markup (the editor deletes
+   whatever precedes the first element, so position matters more than count):
+   - mandatory on EVERY html block:
+     `<script>try{if(window.DuoDeal&&DuoDeal.autoResize){DuoDeal.autoResize()}}catch(e){}</script>`
+   - a block that genuinely **reads the quote or collects data from the client** (a bound
+     recap, a form, a file upload, a configurator) carries its logic in that same final
+     script — see **duodeal-html-block-js**. That is a micro-app, not decoration: the rule
+     above bans decorative scripts, not the `DuoDeal` logic.
 4. **Spacing**: spacer `<div style="height:71px" aria-hidden="true"></div>` at the top
    AND at the bottom of each html block (legal pack: bottom ≤ 16 px, otherwise an empty PDF page).
 5. **Never use an em dash "—"** anywhere (titles, cards, T&Cs, product lines):
@@ -151,7 +165,9 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
 9. **An amount that comes from Duodeal is read from Duodeal, never retyped.** An html block
    can read the live quote through `window.DuoDeal` (`quotation`, `lines`, `deal`,
    `customFields`, `formatCurrency(n)`) and re-render on every edit with `onUpdate(cb)` —
-   see §9 of [references/block-skeletons.md](references/block-skeletons.md).
+   see §9 of [references/block-skeletons.md](references/block-skeletons.md), and the full
+   API in **duodeal-html-block-js** (which also covers collecting data FROM the client:
+   forms, choices, uploaded documents).
    - **Binding is good practice, not mandatory**: a quote is perfectly valid with amounts
      written by hand. **Ask the user** whether they want the block bound, and say what it
      buys them: a bound recap follows the price table on its own, a hand-written one has to

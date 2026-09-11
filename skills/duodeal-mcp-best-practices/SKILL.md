@@ -5,6 +5,14 @@ description: Golden rules, render contract and checklist for generating, editing
 
 # Best practices — Duodeal quotes (via MCP)
 
+> 🔄 **Are these skills current?** They are a **copy** taken from the public repo — there is
+> no git remote behind them and nothing refreshes them on its own, so an install silently
+> stays on the version of the day it was made. Read the line `Skills Duodeal : mises à jour
+> le …` in `DUODEAL-CONTEXT.md` (project root): **absent, or more than 7 days old → offer
+> the refresh in one sentence before working**. Procedure: [../duodeal-onboarding/references/updating-skills.md](../duodeal-onboarding/references/updating-skills.md). Ask **once per session**;
+> if the user declines, work with what is installed and drop it.
+
+
 These rules apply as soon as you generate, edit or deliver a quote through the official Duodeal MCP connector. The client context is already known: apply them directly, with no prior research. For the detailed know-how, see also **duodeal-quote-building**, **duodeal-quote-design** and **duodeal-v2-blocks**.
 
 ## Blocking checklist (before any delivery)
@@ -15,7 +23,7 @@ One failed item = redo the quote.
 2. **Native contacts block present**, sender (dedicated, named owner) AND recipient filled in.
 3. **Every block carries a non-empty `title`** (otherwise the interface displays "html" instead of the title).
 4. **Every product line has an image**, square and centered, on the media of the LINE (not of the linked product). ⚠️ The connector cannot attach it: line tools take no media argument, and `create_product`/`update_product` have none either. Upload with `create_media`, then bind the line media through the REST API when a key is already configured, otherwise ask the user to attach it in the Duodeal interface and say so.
-5. **Every HTML block ends with `DuoDeal.autoResize()`** and stays presentable once its `<style>` tags are stripped (everything styled inline, no separate `<script>`).
+5. **Every HTML block ends with `DuoDeal.autoResize()`** and stays presentable once its `<style>` tags are stripped (everything styled inline, no decorative `<script>`).
 6. **`builderVersion` 2 enabled**, language and currency set at deal level, without touching the account settings. ⚠️ The connector exposes none of the three (no `builderVersion` argument anywhere; `create_deal`/`update_deal` accept no language and no currency): check what you have on the **`builderVersion` field** in `get_quotation` (`builderVersion == 2`, **not** the mere presence of `blocks[]` — blocks can sit on a `builderVersion: 1` quote, which then opens in the old V1 editor) — and set what is missing through REST or in the app, saying which.
 7. **No `{{...}}` placeholder and no em dash left**, rendering verified on the PDF export and the rendered page (not on code reading alone). ⚠️ No connector tool returns a render: look yourself, or ask the user to look and say you have not seen it. ⚠️ **But opening the CLIENT link counts as a prospect visit** (see the tracking rule below): decide with the user before you open it.
 
@@ -53,10 +61,11 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 
 ⚠️ The visual editor strips `<style>` tags and neutralizes `<script>` tags the first time the sales rep edits; the final rendering also goes through a PDF export. Every block must hold up in both states.
 
-- All styling inline (`style="..."`); **no `<style>` at all** (no `@font-face` exception — see the font rule below), no separate `<script>` (interactivity through inline `onclick`).
+- All styling inline (`style="..."`); **no `<style>` at all** (no `@font-face` exception — see the font rule below), no decorative `<script>` (presentation interactivity through inline `onclick`). A block that reads the quote or collects client data keeps its `DuoDeal` logic in the block's **final** script, never before the first element — the editor deletes what precedes it (**duodeal-html-block-js**).
 - Responsive without media queries: `flex` + `flex-wrap` + `flex:1 1 basis` (never `grid-template-columns`), falling back to a single column on narrow screens and in print.
 - Before delivery, check that every block stays presentable once its `<style>` tags are stripped: that is the state the prospect will see.
 - End every block with `DuoDeal.autoResize()` inside a `try/catch`; ⚠️ otherwise the iframe keeps a fixed height and cuts off the bottom.
+- A block that **reads the quote or collects data from the client** (bound recap, form, upload, configurator) follows **duodeal-html-block-js**. The one that ships broken blocks: it must render **from its saved state alone, at load** — in the PDF there is no interaction and `onUpdate` never fires, so a block painted only inside an event handler prints empty.
 - Brand font: ship the **system fallback stack**, full stop. No CDN `<link>` (CORS, and missing from the PDF), no base64 `@font-face` (far too heavy), no `@font-face` on a media url (fonts are not in the accepted MIME list) — and every `@font-face` route dies anyway, because it needs a `<style>` and the editor strips `<style>` on the first rep edit. Carry the brand through color, weights, scale and spacing instead. The typeface is preserved where it counts by shipping the **logo as SVG** (`image/svg+xml` is accepted): outlines, not a font.
 - Images/logos in the Duodeal media library, `max-width:100%; height:auto`; never an external hotlink. A media cannot be renamed, moved or deleted from the connector, so create a new one and re-point the block rather than trying to replace it.
 - **Getting an image into the library:**

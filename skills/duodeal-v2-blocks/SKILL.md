@@ -5,6 +5,14 @@ description: V2 block system of Duodeal quotations (builderVersion 2) — data m
 
 # V2 blocks of Duodeal quotations
 
+> 🔄 **Are these skills current?** They are a **copy** taken from the public repo — there is
+> no git remote behind them and nothing refreshes them on its own, so an install silently
+> stays on the version of the day it was made. Read the line `Skills Duodeal : mises à jour
+> le …` in `DUODEAL-CONTEXT.md` (project root): **absent, or more than 7 days old → offer
+> the refresh in one sentence before working**. Procedure: [../duodeal-onboarding/references/updating-skills.md](../duodeal-onboarding/references/updating-skills.md). Ask **once per session**;
+> if the user declines, work with what is installed and drop it.
+
+
 A V2 quotation is an **ordered list of `blocks`** (`builderVersion: 2`), edited
 in the block editor. Contract verified empirically — **nothing is in openapi.yaml**
 (spec predates V2).
@@ -94,12 +102,20 @@ gallery, accept, signstamp, pagebreak.
 
 ## JS API of `html` blocks (micro-apps)
 
-The `code` runs in a sandboxed iframe with `window.DuoDeal`:
+The `code` runs in a sandboxed iframe with `window.DuoDeal` injected:
 
 - `DuoDeal.deal / .quotation / .lines / .customFields` — read the quote data
 - `DuoDeal.onUpdate(cb)` — re-render on live pricing edits
 - `DuoDeal.get/set/update/getData/setData` — per-block persisted state (`data.state`)
+- `DuoDeal.uploadFile/removeFile/isFile` — files attached by the client
+- `DuoDeal.storage` / `DuoDeal.locale` — encryption mode of the answers, client language
 - `DuoDeal.formatCurrency(n)` / `formatDate(d)` / `autoResize()`
+
+➡️ **Full contract in [duodeal-html-block-js](../duodeal-html-block-js/SKILL.md)**: the four
+render contexts (a block that paints itself only in an event handler prints **empty** in the
+PDF), the field maps, the fields never to show a client, the state and its 64 KB limit, the
+encryption of client answers and the `_` prefix, files. Read it before writing any block
+that reads data or collects some.
 
 **Always end with `autoResize()`** — otherwise the iframe keeps its default height
 (white space or clipped content). Check the call is there **before** writing the block: no

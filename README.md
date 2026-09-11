@@ -1,9 +1,9 @@
 # Duodeal — skills pour Claude
 
-Ce dépôt fournit **7 skills** qui donnent à Claude le savoir-faire Duodeal : embarquer un
+Ce dépôt fournit **8 skills** qui donnent à Claude le savoir-faire Duodeal : embarquer un
 nouveau compte, créer un devis, le rendre **design** (qualité selling page), **transposer
-le deck d'un designer** (PDF ou `.ai`) en blocs, manipuler les **blocs V2**, et se repérer
-dans l'API.
+le deck d'un designer** (PDF ou `.ai`) en blocs, manipuler les **blocs V2**, **récupérer
+des données du client** depuis un bloc html, et se repérer dans l'API.
 
 > **Ce dépôt ne contient que les skills** (le savoir-faire). Les **outils** Duodeal
 > (créer un deal, un devis, des lignes, des blocs…) sont fournis séparément par le
@@ -67,11 +67,29 @@ claude plugin marketplace add DuodealTeam/duodeal-skills-mcp
 claude plugin install duodeal@duodeal-marketplace
 ```
 
-Mise à jour : `claude plugin marketplace update duodeal-marketplace`
+Mise à jour : `claude plugin marketplace update duodeal-marketplace` **puis**
+`claude plugin update duodeal@duodeal-marketplace` (la première rafraîchit le catalogue, la
+seconde remplace la version installée ; redémarrer Claude pour l'appliquer).
 
 > ℹ️ Dépôt **public** : aucun accès GitHub particulier n'est nécessaire.
 
-## Les 7 skills
+## Rester à jour
+
+⚠️ **Le client installé par le prompt n'a pas de dépôt git** : le prompt clone dans un
+dossier temporaire puis le supprime. Il n'y a donc **rien à `git pull`** de son côté —
+rafraîchir, c'est **refaire la copie**. Laissée seule, une installation reste figée à la
+version du jour où elle a été faite.
+
+C'est pourquoi la règle est portée par les skills elles-mêmes : chaque skill Duodeal
+commence par vérifier la ligne `Skills Duodeal : mises à jour le <date>` de
+`DUODEAL-CONTEXT.md` et, **au-delà de 7 jours, propose la mise à jour avant de travailler**
+(une fois par session, jamais en silence). La procédure complète est dans
+[`skills/duodeal-onboarding/references/updating-skills.md`](skills/duodeal-onboarding/references/updating-skills.md).
+
+Côté équipe Duodeal : après toute modification poussée ici, **régénérer le zip** joint à la
+page Notion — c'est lui que récupèrent les clients qui n'installent pas depuis GitHub.
+
+## Les 8 skills
 
 | Skill | Rôle |
 | --- | --- |
@@ -81,12 +99,14 @@ Mise à jour : `claude plugin marketplace update duodeal-marketplace`
 | `duodeal-quote-design` | Devis **design** en HTML : design system, structure narrative, squelettes de blocs, reprise d'un devis existant, check-list de livraison (+ `references/`) |
 | `duodeal-deck-to-blocks` | Le deck d'un designer (PDF, `.ai`, export de slides) transposé en blocs V2 fidèles au pixel et lisibles sur mobile : lire les vraies valeurs dans le fichier, découper l'art, héberger la police de marque, boucle de calibration mesurée (+ `references/`) |
 | `duodeal-v2-blocks` | Le système de blocs V2 des selling pages et sa manipulation sans risque |
+| `duodeal-html-block-js` | L'API JavaScript `window.DuoDeal` d'un bloc html : lire le devis en direct, **récupérer et enregistrer les données du client** (formulaire, choix, pièces jointes), persistance par bloc, chiffrement des réponses (+ `references/`) |
 | `duodeal-api-reference` | Référence de l'API Duodeal : opérations, conventions, filtres, erreurs connues, et carte de ce que le connecteur sait vraiment faire (+ `references/`) |
 
 Ils s'enchaînent : *quote-building* (créer) → *quote-design* (mettre en forme) →
 *v2-blocks* (écrire) → *mcp-best-practices* (vérifier avant de livrer). Quand le point de
 départ est le fichier d'un designer, *deck-to-blocks* remplace *quote-design* : la mise en
-page existe déjà et n'est pas à réinventer.
+page existe déjà et n'est pas à réinventer. Et dès qu'un bloc doit **lire le devis ou
+collecter des données du client**, *html-block-js* s'ajoute à la chaîne.
 
 Le `CLAUDE.md` du dépôt est à **copier à la racine du projet du client** pour rendre les
 garde-fous permanents : un `CLAUDE.md` livré dans un plugin n'est pas chargé

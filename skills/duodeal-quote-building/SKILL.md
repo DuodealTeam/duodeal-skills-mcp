@@ -5,6 +5,14 @@ description: End-to-end flow for building a Duodeal quote from A to Z with the d
 
 # Build a Duodeal quote from A to Z
 
+> 🔄 **Are these skills current?** They are a **copy** taken from the public repo — there is
+> no git remote behind them and nothing refreshes them on its own, so an install silently
+> stays on the version of the day it was made. Read the line `Skills Duodeal : mises à jour
+> le …` in `DUODEAL-CONTEXT.md` (project root): **absent, or more than 7 days old → offer
+> the refresh in one sentence before working**. Procedure: [../duodeal-onboarding/references/updating-skills.md](../duodeal-onboarding/references/updating-skills.md). Ask **once per session**;
+> if the user declines, work with what is installed and drop it.
+
+
 Proven sequence, written as **what to obtain**, with the tool in parentheses when one
 exists. Tool names are authoritative in **duodeal-api-reference → `references/connector-tools.md`**:
 if a step needs something the connector does not expose, it says so and gives the way out
