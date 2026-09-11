@@ -41,7 +41,9 @@ HTML blocks), chain the **duodeal-quote-design** skill after the creation step.
                                      if there is none — never assume one was
                                      auto-created)
 7. Refine the quotation             (update_quotation {id, title, valid_until,
-                                     customFields} — primary flag: see §5)
+                                     customFields}), then CHECK the primary flag:
+                                     get_deal → quotations[].primaryQuotation must
+                                     be true, a created quotation is born null (§5)
 8. Fill the price table             (add_quotation_lines {quotation_id, lines[]} as
                                      soon as there are 2+ lines, create_quotation_line
                                      for a single one)
@@ -121,7 +123,7 @@ mailbox address or the wrong person's face fails it instantly.
 (`create_quotation {deal_id}` — `deal_id` is required, a REST `POST /quotations` without a
 deal fails 500), then copy the content block by block and re-run `add_quotation_lines`, then
 `update_quotation` on the new one (`title`…). The **primary** flag is not settable through the
-connector — see §5.
+connector, and every quotation you create is born without it — see §5 before delivering.
 
 ## 3. Product catalog (if requested)
 
@@ -147,7 +149,21 @@ connector the amount charged is the line's own `unitPrice`, so read the catalogu
 
 ## 5. Delivery — always the 2 links
 
-**Primary quotation — check it in the §2 case.** A deal's first quotation is primary by default, so §1 needs nothing. But the customer dashboard table lists primary quotes only: a **second** quotation on a deal, or a quote rebuilt as a new quotation (§2), may not appear there. Say so to the user in that case — the flag is switched in the Duodeal interface (no connector argument exposes it).
+**Primary quotation — check it on every deal you built, before delivering (§1 and §2 alike).**
+A quotation created with `create_quotation` (connector) or `POST /quotations` (REST) is born with
+`primaryQuotation: null`, even the first and only quotation of a new deal: the deal's `primaryQuotationId` is filled, the
+quotation's own flag is not. The app's deals table lists deals **through their primary
+quotation** (status, amount, Hot Deal Score and number all come from it), so a deal without one
+is **missing from the table**: it exists, the API returns it, the client link works, and the rep
+still cannot find it. "A deal's first quotation is primary by default" is only guaranteed for deals
+created in the app: check, never assume.
+
+1. Read `get_deal {id}` → `quotations[].primaryQuotation`: one quotation of the deal must say `true`.
+2. If it is not `true`: a REST key already configured → `PUT /quotations/{id} {"primaryQuotation": true}`,
+   then read `get_deal` again. No key → the connector has no argument for it: tell the user plainly,
+   before delivering, that the deal will not appear in their deals table until the quotation is set
+   as primary (in the Duodeal interface, or by the Duodeal team), and list it as pending.
+3. A deal with several quotations (§2): ask the user which one should be primary before switching anything.
 
 No `get_links` tool exists: read the ids (`get_deal {id}` → deal `uid` + `id`,
 `get_quotation {id}` or `list_quotations {deal_id}` → quotation `id`) and build both links:
