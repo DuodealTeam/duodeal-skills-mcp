@@ -213,6 +213,10 @@ Check on the LIVE quotation before delivering — one failing item = not done:
    is a manual copy to re-check after any line edit.
 7. No "—", no ★, no forgotten `{{…}}` placeholder, and **no `<!-- … -->` comment** left in
    any block (rule 10) — check the block `code` you sent, not the rendered text.
+7bis. **The PDF exports A4** (595 × 842 pt on every page, 10 mm margins, no section cut in two):
+   the print rule sits in the first title line's `title`, never in an html block
+   (**duodeal-mcp-best-practices** → PDF export). No copy that points at the screen ("the
+   button at the top right of this page"): it is false on paper.
 8. **Real visual verification**: check the rendering, then deliver both links (client + edition).
    ⚠️ **Opening the CLIENT link is recorded as a prospect visit**: the client view posts a `visit`
    on load and a `heartbeat` every 15 s to `/api/access-sessions` (a plain server-side GET counts

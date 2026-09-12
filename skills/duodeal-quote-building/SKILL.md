@@ -67,6 +67,9 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
   lines (`productTitle`, `unitPrice`, `quantity`, `unity_id`, HTML `description` —
   **required** on `lineType: "normal"`), then `subtotal`.
 - **Every** line carries a `tax_id`, including the `title` and `subtotal` ones (otherwise 400).
+- **The FIRST `title` line also carries the print rule**, so the PDF exports in A4 with margins
+  instead of US Letter: prepend the `<style>` from **duodeal-mcp-best-practices** → PDF export to
+  that line's `title` when you create it, then check the export's page size before delivering.
 - **Discounts**: a `normal` line with a negative `unitPrice`, OR `discount` + `discountType`
   (`percentage`/`amount`) on the line — `lineType: "discount"` does not exist.
 - `option: true` → "Option not included" badge (French deals: « Option non incluse »), excluded from the total.

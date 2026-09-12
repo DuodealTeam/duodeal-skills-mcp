@@ -26,6 +26,7 @@ One failed item = redo the quote.
 5. **Every HTML block ends with `DuoDeal.autoResize()`** and stays presentable once its `<style>` tags are stripped (everything styled inline, no decorative `<script>`).
 6. **`builderVersion` 2 enabled**, language and currency set at deal level, without touching the account settings. ⚠️ The connector exposes none of the three (no `builderVersion` argument anywhere; `create_deal`/`update_deal` accept no language and no currency): check what you have on the **`builderVersion` field** in `get_quotation` (`builderVersion == 2`, **not** the mere presence of `blocks[]` — blocks can sit on a `builderVersion: 1` quote, which then opens in the old V1 editor) — and set what is missing through REST or in the app, saying which.
 7. **No `{{...}}` placeholder and no em dash left**, rendering verified on the PDF export and the rendered page (not on code reading alone). ⚠️ No connector tool returns a render: look yourself, or ask the user to look and say you have not seen it. ⚠️ **But opening the CLIENT link counts as a prospect visit** (see the tracking rule below): decide with the user before you open it.
+8. **The PDF exports in A4, with margins, no section cut in two.** Left alone, the export is US Letter with no margins. One `<style>` in the `title` of the first title line fixes it, through the connector: see **PDF export** below.
 
 ## Checking your work without polluting the prospect's statistics
 
@@ -33,7 +34,7 @@ One failed item = redo the quote.
 
 - There is **no internal-view opt-out** today: you cannot look without being counted.
 - So **tell the user before you open the client link**, and let them decide. On a real prospect's deal the honest default is not to open it.
-- The **PDF export** (`GET /deals/pdf/{uuid}`) and the **edit link** cost nothing on the prospect's statistics counter: use them for everything they can show.
+- The **PDF export** (`GET https://api.duodeal.app/api/public/quotations/pdf/deal/{deal_uid}/{quotation_id}`, the route behind the page's own "Download PDF" button, public, no key) and the **edit link** cost nothing on the prospect's statistics counter: use them for everything they can show.
 - If you do open the client view, keep it short and say in your delivery that one visit was recorded.
 
 ## Quote structure and native blocks (render contract)
@@ -89,6 +90,27 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 - Covers/full-bleed at `width:100%` and `border-radius:0`, validated against the client view (not the editor card, which has a radius and a clip that are absent on the client side).
 - Portrait shot in a landscape frame: `object-fit:contain` on a white background, never `cover` (which crops and zooms).
 - Video: check that the embed is allowed, opaque branded poster over an `about:blank` iframe, inject the embed URL (autoplay, playsinline) when the poster is clicked.
+
+## PDF export: A4, 10 mm margins, no section cut in two
+
+The client's "Download PDF" button runs a headless Chrome print that passes **no paper format**: every export comes out **US Letter (612 × 792 pt) with near-zero margins**, and sections are sliced wherever the page ends, a totals card left alone on a page, a product line with its price on one page and its description on the next. A Letter file printed on A4 rescales and loses its margins. Clients who print proposals for meetings notice it first.
+
+The export honours a CSS `@page` rule found in the page (`preferCSSPageSize` is on), so the fix lives in the quote's content and needs no key and no dev:
+
+1. **The carrier: the `title` of the FIRST `lineType:"title"` line** of the price table. Write it with the connector, `update_quotation_line {id, title}` on an existing line, or `title` in `create_quotation_line` / `add_quotation_lines` at build time. Put the `<style>` first and keep the section's visible text after it:
+
+   ```
+   <style>/*dd-print-v2*/@page { size: A4; margin: 10mm; } @media print { [data-block-type] { break-inside: avoid; page-break-inside: avoid; } .qv-row-stacked, .qv-summary, .qv-summary-card { break-inside: avoid; page-break-inside: avoid; } }</style><p>Your section title</p>
+   ```
+
+   Copy it verbatim. `@page` sets paper and margins; `[data-block-type]` keeps each block whole; the three `.qv-` classes keep a price-table row and the totals card whole, so a long table breaks between two lines instead of through one.
+2. **Why a line title and never an html block.** A line title renders in the page's root document, where `@page` reaches the printed page. An `html` block runs in a sandboxed iframe: its `@page` describes only the iframe and the PDF stays Letter. This does not relax the inline-first rule above, which is about html blocks and still stands. The rule is print-only: nothing changes on the web page, and the section title keeps its exact look.
+3. **Exactly one rule per quotation.** On a rework, replace the existing `<style>…@page…</style>` rather than adding a second one. A **hidden** title line (`hide: 1`) does not work: hidden means not rendered, so the rule never reaches the page.
+4. **Selectors come from the print DOM, not the client view.** When printing, each block is a `<div data-block-type="…">`, and the client view's own layout classes do not exist there. A rule written on a class read in the client view matches nothing, silently, and the PDF comes out unchanged, which looks like "CSS does not work here" when it is only a wrong selector. Use the rule above as is.
+5. **A quote with no price table** has no title line. The native `legalnotice` block's `other` field also renders in the root document and carries the same `<style>` (measured by REST; through the connector it is `update_quotation_block` with the complete `data`, then verify, step 7).
+6. **An existing quote the client already has**: add the rule only when the user asks for it. It touches one line title and nothing visible, but it is still a write on a live quote.
+7. **Verify, always.** Download the PDF from the route above and read the page size: **595 × 842 pt on every page** (210 × 297 mm), and text no longer touching the edge. An unchanged export means the rule did not land, never that it was useless. Look at the pages too: each section whole, the totals with their table. If you cannot fetch or measure a PDF, ask the user to download it and check the page size in their viewer, and say you have not seen it. A block taller than one page still breaks; that is expected.
+8. **Copy that points at the screen is false on paper.** "The button at the top right of this page" or "click here" describes nothing in a PDF. Word it so it holds in both: "the comment button beside any section of the online proposal".
 
 ## Prices, totals and currencies
 
