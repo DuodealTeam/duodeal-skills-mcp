@@ -25,13 +25,14 @@ HTML blocks), chain the **duodeal-quote-design** skill after the creation step.
 ## 0. Before anything
 
 1. Know which tenant you are writing to, and say it out loud (`get_current_user`, then `get_company` for the details). Writes: test/demo account only.
-2. Collect the ids **of THIS tenant** before any line: taxes and units (`list_taxes`, `list_unities`), price categories if there is a catalog (`list_price_categories`). Never reuse the ids of another account (cause #1 of 400s). Rates come back as decimals (0.20 = 20 %).
+2. Collect the ids **of THIS tenant** before any line: taxes and units (`list_taxes`, `list_unities`), the quotation statuses (`list_quotation_statuses` — you need the Draft id for step 7) and the price categories (`list_price_categories` — the default one for step 7, all of them if there is a catalog). Never reuse the ids of another account (cause #1 of 400s). Rates come back as decimals (0.20 = 20 %).
 
 ## 1. Full from-scratch flow
 
 ```
 1. Know the tenant                  (get_current_user)
-2. Hold this tenant's ids           (list_taxes, list_unities)
+2. Hold this tenant's ids           (list_taxes, list_unities,
+                                     list_quotation_statuses, list_price_categories)
 3. Have the client organization     (create_customer_company {name})
 4. Have the contact                 (create_customer {customer_company_id,
                                      first_name, last_name, email})
@@ -41,9 +42,12 @@ HTML blocks), chain the **duodeal-quote-design** skill after the creation step.
                                      if there is none — never assume one was
                                      auto-created)
 7. Refine the quotation             (update_quotation {id, title, valid_until,
-                                     customFields}), then CHECK the primary flag:
-                                     get_deal → quotations[].primaryQuotation must
-                                     be true, a created quotation is born null (§5)
+                                     status_id, price_category_id, customFields}: a
+                                     created quotation is born with NO status and no
+                                     price category, and a null status reads as
+                                     broken), then CHECK the primary flag: get_deal →
+                                     quotations[].primaryQuotation must be true, it
+                                     is born null too (§5)
 8. Fill the price table             (add_quotation_lines {quotation_id, lines[]} as
                                      soon as there are 2+ lines, create_quotation_line
                                      for a single one)
