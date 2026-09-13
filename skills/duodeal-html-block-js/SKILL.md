@@ -32,7 +32,8 @@ in the Notion page "Duodeal JavaScript API — HTML Block" (last updated 2026-09
 **Sandbox:** `allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox
 allow-downloads`. Scripts, forms, `target="_blank"` and downloads work. There is **no
 access to the parent page, no cookies, no `localStorage`** — `localStorage` is not merely
-discouraged here, it is unavailable. To keep anything, use the state API (§3).
+discouraged here, it is unavailable. To keep anything, use the state API (§3). The frame also
+carries **no `allow` attribute**: the async clipboard API is refused, see §6 for copy buttons.
 
 For everything else about blocks (types, ordering, writing them through the connector, the
 shallow-merge trap), see **duodeal-v2-blocks**. For the look of a block, see
@@ -267,7 +268,49 @@ Full working example in **[references/recipes.md](references/recipes.md)**.
   (mandatory rule of the other skills):
   `<script>try{if(window.DuoDeal&&DuoDeal.autoResize){DuoDeal.autoResize()}}catch(e){}</script>`
 
-## 6. API summary
+## 6. Copy buttons and outside services
+
+Measured in Chrome on a live client link, 2026-09-13. Safari and Firefox not measured.
+
+**Copy to the clipboard.** `navigator.clipboard.write()` and `writeText()` are refused inside the
+block (`NotAllowedError`, blocked by permissions policy): Duodeal grants `clipboard-write` to its
+YouTube embeds, not to html blocks. The legacy copy event still works on a click, and puts exactly
+your content on the clipboard, rich HTML included:
+
+```javascript
+function copy(html, text) {           // call it in the click handler, before any await
+  let filled = false;
+  const onCopy = e => {
+    if (html) e.clipboardData.setData('text/html', html);
+    e.clipboardData.setData('text/plain', text);
+    e.preventDefault(); filled = true;
+  };
+  document.addEventListener('copy', onCopy);
+  let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+  document.removeEventListener('copy', onCopy);
+  return ok && filled;
+}
+```
+
+Try it first and keep `navigator.clipboard` only as a fallback, for the day the frame gains the
+permission. Selecting the text and copying it with the keyboard always works too.
+
+**Calling an outside service.** `fetch` to an HTTPS endpoint works. The request leaves with
+`Origin: null` and no cookies, so the service must answer `Access-Control-Allow-Origin: *`. Send
+the body as a JSON string with `Content-Type: text/plain;charset=utf-8`: it stays a simple
+request, with no preflight. Two rules:
+
+- **Never put an API key in a block.** Its code ships in the client page, readable by anyone
+  with the link. A key belongs in a small relay you host, which the block calls.
+- **Make writes idempotent.** Send an id with each request and let the block look the result up
+  when a reply is unreadable. Google Apps Script web apps, a common free relay, sometimes lose a
+  POST reply on their redirect (an HTML 404 reaches the block although the script ran).
+
+**A permanent public image is not a client upload.** `uploadFile()` links expire (§4). An image
+that must stay reachable outside Duodeal, such as a photo inside an email signature, goes to the
+media library through the relay.
+
+## 7. API summary
 
 **Quote data (read-only)** — `deal` · `quotation` · `lines` · `customFields`
 **State (read/write, auto-persisted)** — `get(k)` · `set(k,v)` · `update(obj|fn)` · `getData()` · `setData(obj)`
@@ -276,7 +319,7 @@ Full working example in **[references/recipes.md](references/recipes.md)**.
 **Reactivity** — `onUpdate(cb)`
 **Helpers** — `formatCurrency(n)` · `formatDate(d, opts?)` · `autoResize()`
 
-## 7. Before shipping a block (blocking)
+## 8. Before shipping a block (blocking)
 
 1. It renders correctly **from `state` alone**, with no interaction — otherwise the PDF
    comes out empty.
@@ -293,3 +336,4 @@ Full working example in **[references/recipes.md](references/recipes.md)**.
 10. A file field was tested **from the client link**, not from the builder preview.
 11. The user knows **where the answers land** (Client answers tab) and **whether they are
     encrypted**.
+12. A copy button uses the copy event first (§6), and no API key appears anywhere in the block.
