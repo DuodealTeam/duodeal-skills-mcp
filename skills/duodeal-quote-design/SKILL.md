@@ -213,7 +213,9 @@ Check on the LIVE quotation before delivering — one failing item = not done:
    is a manual copy to re-check after any line edit.
 7. No "—", no ★, no forgotten `{{…}}` placeholder, and **no `<!-- … -->` comment** left in
    any block (rule 10) — check the block `code` you sent, not the rendered text.
-7bis. **The PDF exports A4** (595 × 842 pt on every page, 10 mm margins, no section cut in two):
+7bis. **The PDF exports A4** (595 × 842 pt on every page, 10 mm margins, no section cut in two,
+   and no title left alone at the foot of a page: section heads in html blocks carry
+   `break-inside:avoid` + `break-after:avoid` inline, with no empty spacer before their content):
    the print rule sits in the first title line's `title`, never in an html block
    (**duodeal-mcp-best-practices** → PDF export). No copy that points at the screen ("the
    button at the top right of this page"): it is false on paper.

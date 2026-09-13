@@ -62,7 +62,7 @@ If the issuer has an intro video, add it before the final spacer:
 ```html
 <div style="height:71px" aria-hidden="true"></div>
 <div style="font-family:{{FONT}};max-width:860px;margin:0 auto;padding:0 18px">
-  <div style="margin:0 0 22px;break-inside:avoid">
+  <div style="margin:0 0 22px;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid">
     <p style="color:{{ACCENT}};font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 10px">{{Our answer}}</p>
     <h2 style="color:{{INK}};font-weight:800;font-size:24px;line-height:1.25;margin:0">{{Solution title, in the prospect's vocabulary}}</h2>
   </div>
@@ -133,7 +133,7 @@ REAL testimonials from the client; otherwise a logo wall. Stars as inline SVG:
 ```html
 <div style="height:71px" aria-hidden="true"></div>
 <div style="font-family:{{FONT}};max-width:860px;margin:0 auto;padding:0 18px">
-  <div style="text-align:center;margin:0 0 20px;break-inside:avoid">
+  <div style="text-align:center;margin:0 0 20px;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid">
     <p style="color:{{ACCENT}};font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px">{{Trusted by}}</p>
     <h2 style="color:{{INK}};font-weight:800;font-size:23px;margin:0">{{Social proof title}}</h2>
   </div>
@@ -170,7 +170,7 @@ html block, **never the native `faq` block**. 5-8 real objections from the deal:
 ```html
 <div style="height:71px" aria-hidden="true"></div>
 <div style="font-family:{{FONT}};max-width:780px;margin:0 auto;padding:0 18px">
-  <div style="text-align:center;break-inside:avoid;margin:0 0 22px">
+  <div style="text-align:center;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid;margin:0 0 22px">
     <p style="color:{{ACCENT}};font-weight:700;font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 10px">Frequently asked questions</p>
     <h2 style="color:{{INK}};font-weight:700;font-size:26px;margin:0">{{Title}}</h2>
   </div>
