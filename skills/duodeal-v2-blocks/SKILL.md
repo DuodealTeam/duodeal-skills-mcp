@@ -38,13 +38,14 @@ for versioning). Each block:
 | `customfields` | `{fields: [names]}` | |
 | `legalnotice` | `{companyName, legalText, other…}` | |
 | `faq` | `{items: [{id, question, answer}]}` | **RAW text** (`{{ }}` interpolation, no v-html) — HTML is rendered literally |
-| `contacts` | `[]` | |
-| `accept` | `{}` | "Accept & sign" button (opens the signature modal). **Disappears once signed** — always pair it with `signstamp` |
+| `contacts` | `{salesLabel, clientLabel}` (older blocks: `[]`) | Labels over the sender and recipient cards; empty = the app's defaults (« Commercial » / « Client »). The sender card shows the **deal owner** with their **login email** (not `publicEmail`): pick the owner accordingly |
+| `accept` | `{}` | Legacy "Accept & sign" button (opens the signature modal). **Disappears once signed** — always pair it with `signstamp`. New quotes use `signature` |
+| `signature` | `{heading, text, buttonLabel, mode: "signing", otp, showSummary, consent: {enabled, text}, termsBlockId, fields, signatories: [{id: "c<customerId>", customerId, firstName, lastName, email}], stampFields, stampLines: {thanks, signedOn, signedBy, signature, method, quotation, download}}` | The new Accept & sign block. `otp` = code sent by email before signing; `consent.enabled` = a tick the signer **must** check (its `text` is the sentence); `signatories` = who signs, written on the block (a block copied through the API keeps the source's list: rewrite it per deal). Once signed it shows **its own stamp**, no `signstamp` needed. `stampLines.quotation: false` hides the « quote · title · amount » line of that stamp (writable even after signature). Empty `heading`/`text` = the app's defaults. The code email and the "signed" email are sent by the platform and show the **deal name**: name deals the way the client should read them. Verified 2026-09-21 |
 | `signstamp` | `{}` | Signature proof (signed date, signer + email, validation CFs). Not signed → renders **nothing** client-side; signed → visible on both faces |
 
 Known types: header, contacts, wysiwyg, html, pricing, customfields, attachments,
 legalnotice, paymentschedule, pdfviewer, youtube, faq, pptx, googleslides, canva,
-gallery, accept, signstamp, pagebreak.
+gallery, accept, signstamp, signature, pagebreak.
 
 ## REST contract (off-spec) and MCP tools
 
