@@ -151,7 +151,51 @@ show();   // at load: restores the step reached
 
 Navigation buttons use inline `onclick="go(1)"` / `onclick="go(-1)"`.
 
-## The trap behind all five
+## 6. A document that fills itself from custom fields
+
+A contract or an order form written once, where the rep never edits the text: they fill
+**quotation custom fields** (and the price table), and each zone of the document prints its
+field. Built for a Solutions Order in September 2026.
+
+```html
+<p>Client legal name: <span data-f="so_client_legal_name" style="background:#fff3b0;padding:0 4px">[Client legal name]</span></p>
+<p>Billing: <span data-f="so_billing" style="background:#fff3b0;padding:0 4px">[annually / quarterly]</span></p>
+<script>
+function fill() {
+  var cf = DuoDeal.customFields || {};
+  document.querySelectorAll("[data-f]").forEach(function (e) {
+    if (!e.getAttribute("data-ph")) e.setAttribute("data-ph", e.textContent);
+    var v = cf[e.getAttribute("data-f")];
+    var empty = v === undefined || v === null || v === "" || (Array.isArray(v) && !v.length);
+    e.textContent = empty ? e.getAttribute("data-ph") : (Array.isArray(v) ? v.join(", ") : String(v));
+    e.style.background = empty ? "#fff3b0" : "transparent";   // yellow = still to fill
+    e.style.padding = empty ? "0 4px" : "0";
+  });
+  if (DuoDeal.autoResize) DuoDeal.autoResize();
+}
+fill();                  // at load: this is what the PDF prints
+DuoDeal.onUpdate(fill);
+</script>
+```
+
+- **The fields live in a native `customfields` block, set hidden** (eye off): the rep fills
+  them there, the client never sees them. Name them with one prefix (`so_…`) and list them in
+  the block in the document's reading order.
+- **Yellow = empty** is the rep's checklist: a zone turns into plain text once its field is
+  filled, so a client only sees yellow if something was forgotten.
+- **A fallback beats an empty zone** where one exists: the deal's contact
+  (`DuoDeal.deal.customer`), the total (`DuoDeal.quotation.amountHt` with `formatCurrency`), a
+  standard wording (« Date of last signature ») shown without yellow.
+- **Product ticks follow the price table**: a tick is on when the product is a counted line
+  (`DuoDeal.lines`), so the rep adds or removes products in the table, never in the text.
+- ⚠️ **Nothing inside the block can be clicked by the rep in the visual editor.** Visual
+  editing delivers no click to an html block's controls (a checkbox, a `<details>`, an
+  `onclick` all stay inert), and clicking an element there can **duplicate** it, which the
+  save keeps. Every choice the rep makes goes through a custom field or the price table.
+- The editor shows the block's static placeholders; check the result in the **client
+  preview** or on the client link.
+
+## The trap behind all six
 
 Every `render()` / `show()` above is **called at load**, not only from a handler. In the PDF
 there is no interaction and `onUpdate` never fires: a block that paints itself only inside

@@ -87,7 +87,12 @@ gallery, accept, signstamp, signature, pagebreak.
 - **Images inside blocks** (header `cover`/`logo`, `gallery`, `attachments`, `pdfviewer`):
   register the media first — ⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); **never `from_url`**, the URL import 500s on most CDNs whatever the tool description says (connector: `create_media` {`name`, `folder`, `file`}) —
   then reference its url/id in the **complete `data`** of the
-  target block. Line and product tools have **no media argument** — an image on a line is bound
+  target block. ⚠️ **In the `header`, `cover` and `logo` take the COMPLETE media object**
+  (`id`, `url`, `name`, `mime`, `path`, `thumbnail`, as `list_medias` returns it), never a bare
+  `{"id": N}`: a bare id is accepted and read back unchanged, then the editor shows empty
+  « Upload cover / Upload logo » slots while the client page falls back to the account's own
+  cover and logo, so the rep and the client see two different headers. Read the header back
+  and check `cover.url` / `logo.url` are there. Line and product tools have **no media argument** — an image on a line is bound
   by REST (`POST|PUT /quotation-lines {medias: [{id}]}`) when a key is already configured,
   otherwise in the Duodeal interface, and you say it is still pending.
 - **The quotation must already be V2** for any of this to apply: a quote created through the
