@@ -77,6 +77,9 @@ The four that matter most often:
   summing lines: it already accounts for hidden lines, unselected options, per-line and
   global discounts.
 - `DuoDeal.deal.customer` — the contact (`fullName`, `email`, `billingAddress`…).
+  The company's name is `deal.customer.customerCompany.name`. `deal.customerCompanyName` is a
+  snapshot that is **not refreshed** when the rep changes the contact live in the builder
+  (measured 25/09/2026); `customer.phone` is not exposed.
 - `line.productTitle` — the **plain** product name. `line.title` and `line.description`
   hold **HTML markup**: in `textContent` the client sees the tags, in `innerHTML` you
   execute whatever they contain. Either strip them, or insert them knowingly.
@@ -125,6 +128,8 @@ DuoDeal.onUpdate(render); // ← on every business-data update
 ```
 
 The callback receives `DuoDeal` as its argument. It **never fires in the PDF**.
+It does fire when the rep changes the deal's contact in the builder, so a block that names the
+customer or their company repaints itself.
 
 ## 3. Your own data: the state
 

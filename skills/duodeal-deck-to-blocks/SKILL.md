@@ -82,6 +82,44 @@ block's code roughly **3 x N times**, N being the number of blocks, so weight gr
 the square. A template that carries every colourway at once is heavy by construction; a
 real proposal drawn from it uses a fraction of the blocks and lands far lower.
 
+## When the deck becomes the PAGE, not blocks inside a proposal
+
+A pitch deck read on a link is a different object from a deck cut into editable sections: the
+slide IS the unit. What works, measured on a 21-slide investor deck (September 2026):
+
+- **One block per slide, each a 16:9 stage.** The stage declares `container-type:inline-size`
+  and `aspect-ratio:16/9`; every length inside is the source's own px divided by
+  `frame_width/100` expressed in `cqw`. The slide then keeps the designer's proportions at any
+  width the platform serves, with no calibration pass and no drift, and the text stays live html.
+- **Two layouts in one block, switched by `clamp()`.** The stage for desktop and print, a stacked
+  flow for the phone, each wrapped in `max-height:clamp(...)` with `overflow:hidden`.
+- ⚠️ **Shift the inactive layout off the page.** `autoResize` measures the block by the LOWEST
+  bounding box on the page, and a box clipped by `overflow:hidden` still has its rect. The hidden
+  phone layout therefore adds its full height under every slide: up to 1 400 px of blank space.
+  Give the inactive wrapper's child `position:relative;top:clamp(-50000px, …, 0px)` so its boxes
+  sit above the page and count for nothing. Verify by running the platform's own measurement
+  (the `duodeal-microapp-resize` routine in the client bundle) against your block: at desktop
+  width it must return exactly the stage height.
+- **Fit the text, do not eyeball it.** When the deck's font is replaced (a brand font that cannot
+  load, or the client's web font), text no longer fits its fixed box. Render every slide at frame
+  width in a headless browser, compare each text's `scrollWidth`/`clientWidth` and its height
+  against the source box, and shrink the ones that overflow, iterating until nothing moves. Group
+  the texts that must share a size (two columns read as one table, a row of card titles).
+- **A band is a slide with another height.** For a link out, a testimonial or a video, use the
+  same stage with `aspect-ratio:1920/420` and the platform's own card radius (16 px, read from its
+  stylesheet, in absolute px since the block is already the card's width). Wrap the whole stage in
+  an `<a>`: anchors survive the PDF export as real link annotations.
+
+### Three findings that cost time
+
+- **Figma's DM Sans renders at the optical size of its point size, capped at 40** — including the
+  face named « DM Sans 9pt ». Setting `font-variation-settings:'opsz' 9` makes every line 8 to 13 %
+  too wide. Measure a known string against the Figma render before trusting an axis value.
+- **Unicode line separators (U+2028) inside Figma text break the MCP transport**: the response is
+  truncated mid-string and the call fails with an opaque JSON error. Escape them in any extractor.
+- **Node exports come clipped to the frame**, not to the node's own box: an art layer whose box
+  starts at a negative coordinate is returned already cropped, so place it at `max(x,0), max(y,0)`.
+
 ## Non-negotiables when transposing
 
 - **No copy is ever baked into an image.** Slide text is redacted out of the page before

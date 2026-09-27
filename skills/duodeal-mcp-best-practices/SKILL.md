@@ -114,6 +114,33 @@ The export honours a CSS `@page` rule found in the page (`preferCSSPageSize` is 
 7. **Verify, always.** Download the PDF from the route above and read the page size: **595 × 842 pt on every page** (210 × 297 mm), and text no longer touching the edge. An unchanged export means the rule did not land, never that it was useless. Look at the pages too: each section whole, the totals with their table, and **the last lines of every page**: a title, a kicker or an article heading there, with its content on the next page, is a defect to fix before delivery. If you cannot fetch or measure a PDF, ask the user to download it and check the page size in their viewer, and say you have not seen it. A block taller than one page still breaks; that is expected.
 8. **Copy that points at the screen is false on paper.** "The button at the top right of this page" or "click here" describes nothing in a PDF. Word it so it holds in both: "the comment button beside any section of the online proposal".
 
+### Fonts and the PDF: declare them in the ROOT document
+
+A block's own `@import` (or `@font-face`) never reaches the PDF. The export renders each html
+block in a **shadow DOM**, and font rules declared inside a shadow tree are ignored: the page comes
+out in system fonts, every line reflows wider, and fixed-width layouts break — while the web view,
+where the block is an iframe, looks perfect.
+
+Put the font import where the print rule already lives: the **root document**, through the native
+`legalnotice` block's `other` field (or the first title line of the price table). Fonts declared
+there are available to every shadow tree, so one import serves the whole quote. Keep the same
+`<style>@import …</style>` inside each block as well: that is what the web view uses.
+
+Verify on the artefact, not on the code: export the PDF and list its embedded fonts
+(`page.get_fonts()`); the brand families must appear.
+
+### A deck prints landscape
+
+A quote prints A4 portrait, but a deck of 16:9 slides does not: put
+`@page { size: A4 landscape; margin: 10mm }` in the same carrier and each slide lands on its own
+page, 842 × 595 pt. Check every page's size after the export.
+
+### Links survive the PDF
+
+An `<a href>` inside a block becomes a real link annotation in the exported PDF, whatever its
+position, including a whole clickable band. Verified with `page.get_links()`: the URI and the
+clickable rectangle are both preserved.
+
 ## Prices, totals and currencies
 
 The native table exposes only ONE total and the platform can rescale amounts through a change rate.

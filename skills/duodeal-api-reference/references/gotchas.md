@@ -44,6 +44,19 @@ The connector hard-deletes only lines, blocks, product prices and comments (`del
 - **Per-quotation** (what shows on the selling page): upload the image (connector: `create_media`), then bind it as the quotation `logo` — same for `cover`. The binding is **not available to the connector** (`update_quotation` has no `logo` / `cover`): REST `PUT /quotations/{id}` with `{logo: {id}}` if a key is already configured, otherwise set it in the Duodeal interface and say so. `noLogo`/`noCover` rule: set them to `true` only if there is NOTHING to show, otherwise conflict (neither logo nor cover displayed).
 - **Tenant** (Settings → Company): the image must be **RAW base64 PNG** in `setLogo`/`setCover` (a data URI is silently ignored), and `"setLogo": "remove"` deletes it. **No connector tool for this** (`update_company` has no `setLogo`/`setCover`): REST `PUT /companies/{id}` with an already configured key, or the Duodeal interface. **Never overwrite existing branding**: check first, set only if absent.
 
+## Customer-company logo, and hiding the amount on one deal
+
+- **The client card's logo takes RAW base64 in `setLogo`, nothing else.** `PUT /customer-companies/{id}`
+  silently ignores `{"logo": {"id": N}}`, `{"logo": N}`, an IRI and a URL: the field stays `null`
+  and no error is raised. `{"setLogo": "<raw base64, no data: prefix>"}` works and the response
+  comes back with a hosted url. Same shape as the tenant logo. Upload the image to the media
+  library too if a block needs it: the two are separate.
+- **`displayQuoteAmount: false` on the DEAL** removes the amount from the client page (the
+  « 0,00 € » under the title). Per deal, no connector argument, `PUT /deals/{id}`. Use it on any
+  page that is not a priced proposal: a deck, an onboarding page, a portal.
+- **No per-deal setting hides the quotation number** (`Q-YYYY-NNNN`) on the client page: as of
+  September 2026 the quotation carries `number` and `hide`, and neither removes it from the header.
+
 ## Custom fields (data)
 
 - Custom fields carry structured **data**; in V2 they are displayed through the `customfields` block (a list of CF names), not through the legacy view. Read the definitions before writing values, and create the missing ones first (connector: `list_custom_fields`, `get_custom_field`, `create_custom_field` — `name`, `type` and `scope` all required on create).
