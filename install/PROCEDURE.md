@@ -48,11 +48,11 @@ b. Dans `.claude/settings.json` (crée-le s'il n'existe pas ; **s'il existe, fus
   "hooks": {
     "SessionStart": [
       { "hooks": [ { "type": "command", "timeout": 60,
-        "command": "<RACINE>/.claude/duodeal-skills-update.sh SessionStart" } ] }
+        "command": "\"<RACINE>/.claude/duodeal-skills-update.sh\" SessionStart" } ] }
     ],
     "UserPromptSubmit": [
       { "hooks": [ { "type": "command", "timeout": 60,
-        "command": "<RACINE>/.claude/duodeal-skills-update.sh UserPromptSubmit" } ] }
+        "command": "\"<RACINE>/.claude/duodeal-skills-update.sh\" UserPromptSubmit" } ] }
     ]
   }
 }
@@ -62,6 +62,11 @@ Les deux sont nécessaires : `SessionStart` ne se déclenche qu'au démarrage, d
 gardée ouverte plusieurs semaines ne serait jamais rafraîchie ; `UserPromptSubmit` se
 déclenche à chaque message. Le script sort en ~15 ms quand les skills sont fraîches, il ne
 coûte donc rien.
+
+⚠️ **Garde les guillemets échappés `\"…\"` autour du chemin.** Le hook passe par un shell :
+si le chemin contient un espace (`Mes Documents`, `Duodeal AI`…), il est coupé en deux, la
+commande échoue en silence à chaque session et les skills ne sont plus jamais rafraîchies.
+Constaté le 28/09/2026 : 17 jours sans mise à jour, sans aucun message.
 
 🚫 **Ne mets jamais `"once": true`** : cette option supprime le hook après un seul passage.
 

@@ -34,6 +34,13 @@ user removed it — put it back: copy `install/duodeal-skills-update.sh` from th
 **absolute** path, each passing its own event name as the argument (merge, never overwrite;
 and never `"once": true`, which would delete the hook after a single run).
 
+**If the hook is there but the stamp is still past 7 days**, the hook is failing without a
+word. First suspect: the path is not **quoted**. The command goes through a shell, so a
+project folder with a space in its name splits it in two and the script never runs. The
+command must read `"\"<absolute path>/.claude/duodeal-skills-update.sh\" SessionStart"`
+(same for `UserPromptSubmit`). Add the quotes, then run the command exactly as written in the
+hook to check it exits 0.
+
 ## 2. The rule carried by the skills themselves
 
 The safety net, and the only thing that reaches a client installed before the hook.
