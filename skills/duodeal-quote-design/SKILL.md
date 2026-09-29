@@ -219,6 +219,12 @@ Check on the LIVE quotation before delivering — one failing item = not done:
    the print rule sits in the first title line's `title`, never in an html block
    (**duodeal-mcp-best-practices** → PDF export). No copy that points at the screen ("the
    button at the top right of this page"): it is false on paper.
+   **No shadow on paper**: Apple's PDF viewer (Preview, Quick Look) draws every blurred
+   `box-shadow` as a flat tinted rectangle, darker where two overlap, while Chrome shows the
+   same PDF correctly. Keep screen shadows discreet and switch them off for print: add
+   `@media print{*{box-shadow:none !important}}` inside the `<style>` that carries each html
+   block's `@font-face` (an html block prints in its own root, out of reach of a page-level rule).
+   Check one exported page on a Mac (or with `sips -s format png page.pdf`) before delivering.
 8. **Real visual verification**: check the rendering, then deliver both links (client + edition).
    ⚠️ **Opening the CLIENT link is recorded as a prospect visit**: the client view posts a `visit`
    on load and a `heartbeat` every 15 s to `/api/access-sessions` (a plain server-side GET counts
