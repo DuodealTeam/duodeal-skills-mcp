@@ -1,6 +1,6 @@
 ---
 name: duodeal-quote-design
-description: Build a design-grade Duodeal quote in HTML, at premium selling page quality — token-based design system, narrative structure of the V2 blocks, proven HTML skeletons (intro, value cards, order recap, social proof, FAQ, CTA, legal pack), inline-first rule and delivery checklist. Use whenever someone wants a "beautiful quote", a "design" or "premium" quote, a quote with real wow factor, a polished selling page, a better-looking proposal, or wants to turn a raw quote into a visual proposal. Also covers reworking a quote that already exists: restyle it, rewrite the HTML of a block, add or remove a section, and edit the price table (add, change, reorder or delete lines) — the same way as when the quote was created.
+description: Build a design-grade Duodeal quote in HTML, at premium selling page quality — token-based design system, narrative structure of the V2 blocks, proven HTML skeletons (intro, value cards, order recap, social proof, FAQ, CTA, legal pack, a rail or slider for a book of work or many testimonials), inline-first rule and delivery checklist. Use whenever someone wants a "beautiful quote", a "design" or "premium" quote, a quote with real wow factor, a polished selling page, a better-looking proposal, or wants to turn a raw quote into a visual proposal. Also covers reworking a quote that already exists: restyle it, rewrite the HTML of a block, add or remove a section, and edit the price table (add, change, reorder or delete lines) — the same way as when the quote was created.
 ---
 
 # Duodeal design quote (HTML, V2 blocks)
@@ -114,6 +114,8 @@ Typographic details and choices: [references/design-system.md](references/design
    wall** (showing a client their own logo is an instant tell); and describe the **added
    perimeter only** — you do not know their current contract, and "this gives you a dedicated
    CSM" may promise as new what their tier already includes.
+   **Five or more references or testimonials with photos, or a book of realised work**: a rail
+   (slider), not a grid: [references/block-skeletons.md](references/block-skeletons.md) §10.
 9. **html FAQ** — 5-8 real objections + an "Another question?" card pointing to the
    native comment button. ⚠️ **Never the native `faq` block** (it renders HTML
    entities literally)

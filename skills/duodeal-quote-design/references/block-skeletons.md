@@ -290,3 +290,77 @@ slot. Field names come from the quotation you actually read (`get_quotation`,
 
 (Exception to "no script": the DuoDeal logic goes into THE final script, together with
 the autoResize.)
+
+---
+
+## 10. RAIL (slider) — many items of one kind, title per content ("Our work", "References")
+
+When a section has **5 or more items of the same kind to browse** (a book of realised work,
+references with photos, testimonials, inspiration photos, a team, the moments of an event), show
+them as a rail, not a grid: one item per slide, the next one peeking, a counter and two arrows. A
+grid of a dozen thumbnails reads as a catalogue; a rail gives each piece its own screen, it is the
+phone's native gesture, and it still prints as a grid. **Not** for 3 items or fewer (a row), steps
+to read in order (a vertical timeline), prices, or a logo wall (§4).
+
+What makes it work, each point learnt on a real proposal:
+- every slide carries `scroll-snap-stop:always`: without it a quick swipe on a phone skips a slide;
+- an empty **tail** after the last slide lets it align left like the others;
+- the arrows are 44 px tap targets and loop: "previous" on the first slide goes to the last,
+  "next" on the last goes back to the first;
+- the handlers are inline `onclick` / `onscroll` and contain **no `<` or `>` character** (tools
+  that rewrite HTML cut a tag there);
+- photos intact (never cropped to a detail that changes what they show), the caption UNDER the
+  photo, never over it;
+- slide width `clamp(86%,(100vw - 560px) * 999,90%)`: 14 % of the next slide shows on a phone,
+  10 % on a desktop (inside a block, `100vw` is the block's own width).
+
+Replace `{{NN}}` with the number of slides on two digits (`06`), in the counter AND in the
+`onscroll` handler; repeat the `<figure>` once per item.
+
+```html
+<div style="height:71px" aria-hidden="true"></div>
+<div style="font-family:{{FONT}};max-width:860px;margin:0 auto;padding:0 18px">
+  <div style="margin:0 0 20px;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid">
+    <p style="color:{{ACCENT}};font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px">{{Our work}}</p>
+    <h2 style="color:{{INK}};font-weight:800;font-size:23px;margin:0">{{Section title}}</h2>
+  </div>
+  <div data-carousel style="position:relative">
+    <div data-rail onscroll="var n=Math.round(this.scrollLeft/(this.firstElementChild.offsetWidth+12))+1,c=this.parentNode.querySelector('[data-count]');if(c){c.textContent=('0'+n).slice(-2)+' / {{NN}}'}" style="display:flex;flex-wrap:var(--rail-wrap,nowrap);gap:12px;overflow-x:var(--rail-ox,auto);overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain">
+      <figure style="flex:0 0 var(--slide-w,clamp(86%,(100vw - 560px) * 999,90%));min-width:0;scroll-snap-align:start;scroll-snap-stop:always;box-sizing:border-box;break-inside:avoid;page-break-inside:avoid;margin:0">
+        <img src="{{S3_PHOTO_1}}" alt="{{Project 1}}" style="display:block;width:100%;aspect-ratio:3/2;object-fit:cover"/>
+        <figcaption style="padding:12px 0 0">
+          <b style="display:block;color:{{INK}};font-size:16px">{{Client · Project}}</b>
+          <span style="display:block;color:{{MUTED}};font-size:14px;line-height:1.5">{{One line: what was done, the figure that proves it}}</span>
+        </figcaption>
+      </figure>
+      <div aria-hidden="true" data-tail style="flex:0 0 var(--rail-tail,calc(100% - clamp(86%,(100vw - 560px) * 999,90%) - 12px));height:1px"></div>
+    </div>
+    <div style="display:var(--rail-ui,flex);align-items:center;justify-content:space-between;gap:12px;margin:14px 0 0">
+      <span data-count style="font-weight:500;font-size:13px;letter-spacing:.08em;color:{{INK}}">01 / {{NN}}</span>
+      <div style="display:flex;gap:8px;flex:0 0 auto">
+        <button type="button" aria-label="{{Previous}}" onclick="var r=this.closest('[data-carousel]').querySelector('[data-rail]');if(Math.round(r.scrollLeft)===0){r.scrollTo({left:r.scrollWidth,behavior:'smooth'})}else{r.scrollBy({left:-(r.firstElementChild.offsetWidth+12),behavior:'smooth'})}" style="width:44px;height:44px;border:0;padding:0;margin:0;background:{{INK}};display:flex;align-items:center;justify-content:center;cursor:pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button type="button" aria-label="{{Next}}" onclick="var r=this.closest('[data-carousel]').querySelector('[data-rail]'),end=Math.max(0,r.scrollWidth-r.clientWidth-r.scrollLeft-4)===0;if(end){r.scrollTo({left:0,behavior:'smooth'})}else{r.scrollBy({left:r.firstElementChild.offsetWidth+12,behavior:'smooth'})}" style="width:44px;height:44px;border:0;padding:0;margin:0;background:{{INK}};display:flex;align-items:center;justify-content:center;cursor:pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+<div style="height:71px" aria-hidden="true"></div>
+<script>try{if(window.DuoDeal&&DuoDeal.autoResize){DuoDeal.autoResize()}}catch(e){}</script>
+```
+
+**On paper, a grid.** When printing, the block is a shadow DOM that page-level rules cannot reach,
+but CSS custom properties set on the root document are inherited inside it. The rail reads
+`var(--rail-wrap)`, `var(--rail-ox)`, `var(--rail-ui)`, `var(--rail-tail)` and `var(--slide-w)`
+inline, so add one rule to the quote's print `<style>` (the first title line of the price table,
+or the `legalnotice` block's `other` field: see the print section of
+**duodeal-mcp-best-practices**): `@media print{:root{--rail-wrap:wrap;--rail-ox:visible;--rail-ui:none;--rail-tail:0px;--slide-w:calc((100% - 12px) / 2)}}`
+(two per row; `calc((100% - 24px) / 3)` for three). Every slide then prints, the arrows do not.
+
+**An index of colour chips instead of the counter** (a sequence of moments, one colour each): one
+`<button>` per slide holding a 6 px colour bar (14 px for the current one) and its number, the
+name under it from a 560 px block width; each `onclick` scrolls the rail to
+`j*(r.firstElementChild.offsetWidth+12)`, and the rail's `onscroll` marks the current chip
+(`aria-current`). Same rules: no `<` or `>` in the handlers, 44 px of height to tap.
+
+Check it where it lives: in the client view at a phone width, "next" moves exactly one slide, the
+counter follows, both ends loop; in the exported PDF every slide is there.
