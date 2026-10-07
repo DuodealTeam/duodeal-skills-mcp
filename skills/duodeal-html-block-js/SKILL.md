@@ -266,6 +266,13 @@ Full working example in **[references/recipes.md](references/recipes.md)**.
 - `DuoDeal.formatCurrency(amount)` — the **company's** currency format (symbol, side,
   separators, precision): `1234.5` → `"1 234,50 €"` / `"$1,234.50"`. Use it instead of
   hand-rolling a format; it is what keeps the block consistent with the price table.
+  **A deal priced in another currency than the account's** (a £ or $ quote on a € account) is
+  NOT covered: `formatCurrency` still prints the company's €. The deal's own format is
+  `DuoDeal.deal.displayCurrencyFormat` — `{position: "left"|"right", symbol, precision,
+  separators: "space_comma"|"comma_dot"|"dot_comma"|"space_dot"}` (first part = thousands,
+  second = decimals). Read it when the block shows amounts, and fall back to
+  `formatCurrency` when it is missing. Static amounts written in the HTML (what the PDF and the
+  visual editor show, since neither runs scripts) must be typed in that currency too.
 - `DuoDeal.formatDate(date, intlOptions?)` — via `Intl.DateTimeFormat` in the current
   language. Takes an ISO string, a timestamp or a `Date`. Returns `''` on an invalid date.
 - `DuoDeal.autoResize()` — the iframe already resizes itself from a `MutationObserver`;
