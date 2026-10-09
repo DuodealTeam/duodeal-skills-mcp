@@ -191,6 +191,17 @@ In the builder, a block a client has answered gains a **Template / Client answer
 where the rep reviews, corrects or resets those answers without touching the template. Say
 this to the user when you deliver a data-collecting block: it is where they read the replies.
 
+### A form many people fill: a relay, not the state
+
+The client record is one per page, not one per visitor. A form shared publicly (a lead form posted
+on LinkedIn, a referral form) is opened by many people on the **same** link: they would read and
+overwrite each other's answers. For such a form keep the state empty and send each submission to
+a relay that stores one row per answer, such as an Airtable or Make webhook (measured on two such
+forms, September and October 2026). A webhook that sends no CORS header, as Airtable's
+does not, takes a simple request: `fetch(url, {method: 'POST', mode: 'no-cors', body: new
+URLSearchParams(fields)})`. The reply cannot be read, so the block shows its own thank-you, and the
+relay drops duplicates. A honeypot field stops most bots.
+
 ### Encryption, and the `_` prefix
 
 Client answers are **encrypted at rest by default**. That protects them and also makes them
