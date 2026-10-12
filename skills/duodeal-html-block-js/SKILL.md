@@ -202,6 +202,18 @@ does not, takes a simple request: `fetch(url, {method: 'POST', mode: 'no-cors', 
 URLSearchParams(fields)})`. The reply cannot be read, so the block shows its own thank-you, and the
 relay drops duplicates. A honeypot field stops most bots.
 
+**HubSpot as the relay.** When the answers belong in HubSpot, submit them to a HubSpot form:
+`fetch('https://api-eu1.hsforms.com/submissions/v3/integration/submit/<portalId>/<formGuid>',
+{method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({fields:
+[{objectTypeId: '0-1', name: 'email', value: email}, ...]})})` (`api.hsforms.com` for a portal
+outside the EU). The endpoint answers CORS and needs no key; the email ties the answer to the
+contact, and the form's own settings can email the contact owner. **Leave out
+`context.pageUri`**: a submission naming a domain the portal has not registered is quarantined as
+spam ("Unregistered Site Domain", in the form's Spam tab) while the API still answers 200, so
+nothing reaches the contact (measured October 2026). From an html block the request leaves with
+origin `null`, which HubSpot accepts. Submit once, when the answers are complete, and keep your own
+test runs from submitting.
+
 ### Encryption, and the `_` prefix
 
 Client answers are **encrypted at rest by default**. That protects them and also makes them
