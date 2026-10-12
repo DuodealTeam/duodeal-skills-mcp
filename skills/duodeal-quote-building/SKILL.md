@@ -5,9 +5,9 @@ description: End-to-end flow for building a Duodeal quote from A to Z with the d
 
 # Build a Duodeal quote from A to Z
 
-> 🔄 **Are these skills current?** They are a **copy** taken from the public repo — there is
-> no git remote behind them and nothing refreshes them on its own, so an install silently
-> stays on the version of the day it was made. Read the line `Skills Duodeal : mises à jour
+> 🔄 **Are these skills current?** Read through the Duodeal connector (`get_duodeal_skill`),
+> they are: the server always serves the latest version, so skip this check. Only a **copy**
+> installed locally can be stale (nothing refreshes it on its own): then read the line `Skills Duodeal : mises à jour
 > le …` in `DUODEAL-CONTEXT.md` (project root): **absent, or more than 7 days old → offer
 > the refresh in one sentence before working**. Procedure: [../duodeal-onboarding/references/updating-skills.md](../duodeal-onboarding/references/updating-skills.md). Ask **once per session**;
 > if the user declines, work with what is installed and drop it.
@@ -45,9 +45,8 @@ HTML blocks), chain the **duodeal-quote-design** skill after the creation step.
                                      status_id, price_category_id, customFields}: a
                                      created quotation is born with NO status and no
                                      price category, and a null status reads as
-                                     broken), then CHECK the primary flag: get_deal →
-                                     quotations[].primaryQuotation must be true, it
-                                     is born null too (§5)
+                                     broken). The first quotation of a deal is made
+                                     primary by the server: check it once (§5)
 8. Fill the price table             (add_quotation_lines {quotation_id, lines[]} as
                                      soon as there are 2+ lines, create_quotation_line
                                      for a single one)
@@ -156,21 +155,18 @@ connector the amount charged is the line's own `unitPrice`, so read the catalogu
 
 ## 5. Delivery — always the 2 links
 
-**Primary quotation — check it on every deal you built, before delivering (§1 and §2 alike).**
-A quotation created with `create_quotation` (connector) or `POST /quotations` (REST) is born with
-`primaryQuotation: null`, even the first and only quotation of a new deal: the deal's `primaryQuotationId` is filled, the
-quotation's own flag is not. The app's deals table lists deals **through their primary
+**Primary quotation — check it once before delivering (§1 and §2 alike).** Since 17 Sep 2026
+the server keeps one primary quotation per deal: the first quotation created on a deal, through the connector, REST, a clone or the app, is made primary automatically, and an additional one is not. The app's deals table lists deals **through their primary
 quotation** (status, amount, Hot Deal Score and number all come from it), so a deal without one
-is **missing from the table**: it exists, the API returns it, the client link works, and the rep
-still cannot find it. "A deal's first quotation is primary by default" is only guaranteed for deals
-created in the app: check, never assume.
+would be **missing from the table**.
 
-1. Read `get_deal {id}` → `quotations[].primaryQuotation`: one quotation of the deal must say `true`.
-2. If it is not `true`: a REST key already configured → `PUT /quotations/{id} {"primaryQuotation": true}`,
-   then read `get_deal` again. No key → the connector has no argument for it: tell the user plainly,
-   before delivering, that the deal will not appear in their deals table until the quotation is set
-   as primary (in the Duodeal interface, or by the Duodeal team), and list it as pending.
-3. A deal with several quotations (§2): ask the user which one should be primary before switching anything.
+1. Read `get_deal {id}` → `quotations[].primaryQuotation`: exactly one quotation of the deal says `true`.
+   (`primaryQuotationId` alone proves nothing: read the flags.)
+2. None says `true`: that is now a server bug. Tell the user before delivering and report it to Duodeal;
+   with a REST key already configured, `PUT /quotations/{id} {"primaryQuotation": true}` unblocks the deal.
+3. A deal with several quotations (§2) where ANOTHER one must be primary: ask the user first. The
+   connector has no argument for it: REST `PUT /quotations/{id} {"primaryQuotation": true}` if a key is
+   already configured (the server then demotes the previous one), otherwise in the Duodeal interface.
 
 No `get_links` tool exists: read the ids (`get_deal {id}` → deal `uid` + `id`,
 `get_quotation {id}` or `list_quotations {deal_id}` → quotation `id`) and build both links:

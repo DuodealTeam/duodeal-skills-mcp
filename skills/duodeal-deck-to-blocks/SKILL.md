@@ -5,9 +5,9 @@ description: Turn a designer's deck (a PDF, an Illustrator .ai, an exported slid
 
 # A designer's deck to Duodeal V2 blocks
 
-> 🔄 **Are these skills current?** They are a **copy** taken from the public repo — there is
-> no git remote behind them and nothing refreshes them on its own, so an install silently
-> stays on the version of the day it was made. Read the line `Skills Duodeal : mises à jour
+> 🔄 **Are these skills current?** Read through the Duodeal connector (`get_duodeal_skill`),
+> they are: the server always serves the latest version, so skip this check. Only a **copy**
+> installed locally can be stale (nothing refreshes it on its own): then read the line `Skills Duodeal : mises à jour
 > le …` in `DUODEAL-CONTEXT.md` (project root): **absent, or more than 7 days old → offer
 > the refresh in one sentence before working**. Procedure: [../duodeal-onboarding/references/updating-skills.md](../duodeal-onboarding/references/updating-skills.md). Ask **once per session**;
 > if the user declines, work with what is installed and drop it.
