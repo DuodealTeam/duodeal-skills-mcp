@@ -95,14 +95,17 @@ gallery, accept, signstamp, signature, pagebreak.
   and check `cover.url` / `logo.url` are there. Line and product tools have **no media argument** — an image on a line is bound
   by REST (`POST|PUT /quotation-lines {medias: [{id}]}`) when a key is already configured,
   otherwise in the Duodeal interface, and you say it is still pending.
-- **The quotation must already be V2** for any of this to apply: a quote created through the
-  connector starts at `builderVersion: 1, blocks: null`, and **no connector argument exposes
-  `builderVersion`**. Check it on the **`builderVersion` field itself** (`get_quotation` →
-  `builderVersion == 2`). ⚠️ **Non-empty `blocks[]` is NOT a proof of V2**: a quotation can carry
-  V2 blocks and still be `builderVersion: 1` — the menu then opens it in the **old (V1) editor**,
-  and the blocks are ignored. To flip it, `PUT
-  /quotations/{id}` with `{builderVersion: 2, blocks: [...]}` via REST if a key is configured,
-  otherwise convert it in the Duodeal interface — and say so to the user.
+- **The quotation must be V2** for any of this to apply. A quote created through the connector
+  (`create_quotation`) or `POST /quotations` is now born `builderVersion: 2, blocks: null`; an
+  older quote, or one created with `builder_version: 1`, can still be V1. Check it on the
+  **`builderVersion` field itself** (`get_quotation` → `builderVersion == 2`). ⚠️ **Non-empty
+  `blocks[]` is NOT a proof of V2**: a quotation can carry V2 blocks and still be
+  `builderVersion: 1` — the menu then opens it in the **old (V1) editor**, and the blocks are
+  ignored. To flip it: `update_quotation` with `builder_version: 2`. That only switches the
+  editor: V1-only content (text sections) is not turned into blocks, and the builder starts from
+  its default blocks (header, contacts, pricing, the pricing block taking the existing lines). To
+  carry V1 content over, convert in the Duodeal interface ("Convert to V2") — and say so to the
+  user.
 - `quotation.shareLinks` = V2 share links (filtered view of the blocks), **read-only** in
   `get_quotation`: the connector cannot create one.
 
