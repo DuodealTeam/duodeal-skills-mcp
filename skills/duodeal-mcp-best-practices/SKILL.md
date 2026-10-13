@@ -94,52 +94,25 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 
 ## PDF export: A4, 10 mm margins, no section cut in two
 
-The client's "Download PDF" button runs a headless Chrome print that passes **no paper format**: every export comes out **US Letter (612 × 792 pt) with near-zero margins**, and sections are sliced wherever the page ends, a totals card left alone on a page, a product line with its price on one page and its description on the next. A Letter file printed on A4 rescales and loses its margins. Clients who print proposals for meetings notice it first.
+The client's "Download PDF" exports **US Letter with near-zero margins** and slices sections
+wherever a page ends, unless the quote carries a print rule. **Before you write or change that
+rule, read [references/pdf-export.md](references/pdf-export.md) whole**: it holds the exact
+`<style>` to copy verbatim and the measured reasons behind each line. What you must never get
+wrong, even before opening it:
 
-The export honours a CSS `@page` rule found in the page (`preferCSSPageSize` is on), so the fix lives in the quote's content and needs no key and no dev:
-
-1. **The carrier: the `title` of the FIRST `lineType:"title"` line of the first VISIBLE price table**, in block order. Line weights restart at 0 in every price table, so with two tables "the lowest weight" is ambiguous; and a title line inside a table the rep has hidden is never rendered, so it carries nothing. Write it with the connector, `update_quotation_line {id, title}` on an existing line, or `title` in `create_quotation_line` / `add_quotation_lines` at build time. Put the `<style>` first and keep the section's visible text after it:
-
-   ```
-   <style>/*dd-print-v6*/@page { size: A4; margin: 10mm; } @media print { [data-block-type] { break-inside: avoid; page-break-inside: avoid; } .qv-row-stacked, .qv-summary, .qv-summary-card { break-inside: avoid; page-break-inside: avoid; } .qv-pricing-head, .qv-title-row, h1, h2, h3, h4, h5, h6, p:has(> strong:only-child), p:has(> b:only-child) { break-after: avoid; page-break-after: avoid; } .qv-row-stacked p, .qv-row-stacked li { break-after: auto !important; page-break-after: auto !important; } [data-block-type], [data-block-type] * { box-shadow: none !important; } [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head, [data-block-type="pricing"] .qv-row.grid { display: flex !important; column-gap: 12px !important; } [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col], [data-block-type="pricing"] .qv-row.grid > [data-qv-col] { flex: 0 0 76px; min-width: 0; } [data-block-type="pricing"] .qv-row.grid { flex-wrap: wrap !important; } [data-block-type="pricing"] .qv-row.grid > .qv-option-banner { flex: 0 0 calc(100% + 2rem); } [data-block-type="pricing"] .qv-row.grid > .qv-cell--data { white-space: nowrap; } [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_description], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_description], [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_product_title], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_product_title] { flex: 1 1 0; } [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_prictures], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_prictures] { flex-basis: 88px; } [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_prictures] img, [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_prictures] .cursor-pointer { width: 88px !important; height: 88px !important; } [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_qty], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_qty], [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_tax], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_tax] { flex-basis: 52px; } [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_amount_ht], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_amount_ht], [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_amount_ttc], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_amount_ttc] { flex-basis: 84px; } }</style><p>Your section title</p>
-   ```
-
-   Copy it verbatim. `@page` sets paper and margins; `[data-block-type]` keeps each block whole; the three `.qv-` classes keep a price-table row and the totals card whole, so a long table breaks between two lines instead of through one; the `break-after` group keeps a **title with what follows it**: the table's column header row (`.qv-pricing-head`), a price-table section title (`.qv-title-row`), a heading, a bold one-line paragraph used as a title (legal articles, rich text). Measured: a price-table section title left alone at the foot of a page moves to the next page with its lines. The `.qv-row-stacked p, li` override releases the paragraphs inside a boxed product card: without it, a description with one bold phrase chained every card to the next and pushed the whole table to the next page, leaving its header alone on a blank page. `box-shadow: none` is for Apple's PDF engine (Preview, Quick Look), which draws a soft shadow as a flat grey or coloured rectangle; Chrome and most other viewers draw it correctly, so look at the PDF in Preview before you trust it. The last group is for the **classic table layout** (`rowLayout:"inline"`): its number columns have fixed widths, so on an A4 page the description got about a fifth of the width and a description ran sixteen lines where eight suffice. On paper only, the row becomes a flex row with compact number columns and the description takes the rest; the option banner keeps its own line. It touches only tables that have inline rows: a boxed table prints identically with or without it (measured page by page).
-2. **Why a line title and never an html block.** A line title renders in the page's root document, where `@page` reaches the printed page. An `html` block is isolated from the printed page (a sandboxed iframe in the client view, a shadow DOM in the PDF export): a `@page` rule inside it never reaches the printed page, and the PDF stays Letter. This does not relax the inline-first rule above, which is about html blocks and still stands. The rule is print-only: nothing changes on the web page, and the section title keeps its exact look.
-3. **Exactly one rule per carrier, and a template carries it twice.** On a rework, replace the existing `<style>…@page…</style>` rather than adding a second one in the same field. A **template** carries the rule on its first title line AND in the `legalnotice` block's `other` field (step 5): a rep who deletes every line and rebuilds the table takes the title line with them, and the copy falls back to US Letter (measured: 3 of 7 copies of one template). Two identical copies of the rule do not conflict. Every deal created from the template inherits both, whether or not anyone uses Claude. A **hidden** title line (`hide: 1`) does not work: hidden means not rendered, so the rule never reaches the page.
-4. **Selectors come from the print DOM, not the client view.** When printing, each block is a `<div data-block-type="…">`, and the client view's own layout classes do not exist there. A rule written on a class read in the client view matches nothing, silently, and the PDF comes out unchanged, which looks like "CSS does not work here" when it is only a wrong selector. Use the rule above as is.
-4bis. **Titles inside html blocks need their own, inline protection.** When printing, an html block renders inside a **shadow DOM**, so the page-level rule above never matches anything in it, whatever the selector. Inline styles do apply there. So every section head in an html block carries `break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid` on its wrapper, with no empty spacer between it and its content (or the spacer carries `break-after:avoid` too), as in **HTML blocks** above. A legal article title written as a styled paragraph (`<p style="font-weight:600">8. Exclusivity</p>`) carries `break-after:avoid` inline as well.
-5. **A quote with no price table** has no title line. The native `legalnotice` block's `other` field also renders in the root document and carries the same `<style>`, as long as the block is **visible**: a hidden legal notice is not rendered and carries nothing, like a hidden title line (measured: four copies of one template exported US Letter after their rep hid the block) (measured by REST; through the connector it is `update_quotation_block` with the complete `data`, then verify, step 7).
-6. **An existing quote the client already has**: add the rule only when the user asks for it. It touches one line title and nothing visible, but it is still a write on a live quote.
-7. **Verify, always.** Download the PDF from the route above and read the page size: **595 × 842 pt on every page** (210 × 297 mm), and text no longer touching the edge. An unchanged export means the rule did not land, never that it was useless. Look at the pages too: each section whole, the totals with their table, and **the last lines of every page**: a title, a kicker or an article heading there, with its content on the next page, is a defect to fix before delivery. If you cannot fetch or measure a PDF, ask the user to download it and check the page size in their viewer, and say you have not seen it. A block taller than one page still breaks; that is expected.
-8. **Copy that points at the screen is false on paper.** "The button at the top right of this page" or "click here" describes nothing in a PDF. Word it so it holds in both: "the comment button beside any section of the online proposal".
-
-### Fonts and the PDF: declare them in the ROOT document
-
-A block's own `@import` (or `@font-face`) never reaches the PDF. The export renders each html
-block in a **shadow DOM**, and font rules declared inside a shadow tree are ignored: the page comes
-out in system fonts, every line reflows wider, and fixed-width layouts break — while the web view,
-where the block is an iframe, looks perfect.
-
-Put the font import where the print rule already lives: the **root document**, through the native
-`legalnotice` block's `other` field (or the first title line of the price table). Fonts declared
-there are available to every shadow tree, so one import serves the whole quote. Keep the same
-`<style>@import …</style>` inside each block as well: that is what the web view uses.
-
-Verify on the artefact, not on the code: export the PDF and list its embedded fonts
-(`page.get_fonts()`); the brand families must appear.
-
-### A deck prints landscape
-
-A quote prints A4 portrait, but a deck of 16:9 slides does not: put
-`@page { size: A4 landscape; margin: 10mm }` in the same carrier and each slide lands on its own
-page, 842 × 595 pt. Check every page's size after the export.
-
-### Links survive the PDF
-
-An `<a href>` inside a block becomes a real link annotation in the exported PDF, whatever its
-position, including a whole clickable band. Verified with `page.get_links()`: the URI and the
-clickable rectangle are both preserved.
+- **The carrier is the `title` of the FIRST `lineType:"title"` line of the first VISIBLE price
+  table** (or, with no price table, the visible `legalnotice` block's `other` field), never an
+  `html` block: a `@page` rule inside an html block never reaches the printed page.
+- **One rule per carrier**; a **template** carries it twice (first title line AND `legalnotice` →
+  `other`), so a rep who rebuilds the table does not fall back to Letter. A hidden carrier
+  carries nothing.
+- **Titles inside html blocks** need inline `break-after:avoid` / `break-inside:avoid`: the page
+  rule never reaches their shadow DOM. **Fonts** for the PDF are declared in the root document
+  too (same carrier), and a deck prints `A4 landscape`.
+- **Verify on the artefact**: 595 × 842 pt on every page, nothing touching the edge, no title
+  alone at the foot of a page. If you cannot measure the PDF, ask the user and say you have not
+  seen it. On a quote the client already has, add the rule only when asked.
+- **Copy that points at the screen is false on paper** ("click here", "top right of this page").
 
 ## Prices, totals and currencies
 
