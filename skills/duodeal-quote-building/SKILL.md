@@ -77,12 +77,13 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
   and give every included service a real row at **0.00** — a number can be audited, an adjective
   cannot. Confirm each zero line with the user: a 0.00 row is a deliberate gift, not an oversight.
 - **An image on EVERY product line** (blocking checklist item of **duodeal-quote-design**), on
-  the media of the LINE, square and centered on the subject. ⚠️ **No media argument exists on
-  the line tools, nor on the product tools** (`url` on a product is an external link, not an
-  image). Store the file (⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); `create_media {name, folder, file}`, **never `from_url`**, it 500s on most CDNs), then bind it to the line by REST `POST|PUT /quotation-lines
-  {medias: [{id}]}` if a key is already configured, otherwise attach it in the Duodeal
-  interface and say the images are still pending. Failing that, an image can only be shown in a
-  V2 block (`gallery.images`, `attachments`, `header.cover`) via `update_quotation_block`.
+  the media of the LINE, square and centered on the subject. A line created with `product_id`
+  **gets the catalog product's photos by itself** (unless you pass `media_ids`): check them with
+  `list_quotation_lines`. For a line without a product, or to change the photos, pass
+  `media_ids` (array of media ids, in order; `[]` clears them) on `create_quotation_line`,
+  `update_quotation_line` or each line of `add_quotation_lines`. Store the file first if it is
+  not in the library (⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); `create_media {name, folder, file}`, **never `from_url`**, it 500s on most CDNs).
+  The product tools still take no media (`url` on a product is an external link, not an image).
   Say which route you took.
 - V2 quotes (blocks): pass the pricing block's `blockId` (camelCase, inside the line) so the
   line lands in the right table — see the **duodeal-v2-blocks** skill.

@@ -89,8 +89,7 @@ Check the whole set on a white background AND on DARK before producing the block
   (20-40 px), centered rows `display:flex;justify-content:center;flex-wrap:wrap;gap:44px`.
 - Sales rep photo: a real photo, cropped square centered on the face, rendered round
   (`border-radius:50%`, 96 px, `object-fit:cover`).
-- Give every pricing product line an image. The connector cannot bind one: line tools
-  take no media argument, and product tools take none either. Host the file first
-  (`create_media`), then set `medias:[{id}]` on the line through the REST API with
-  `X-API-KEY` if a key is already configured in the environment; otherwise attach it
-  on the line in the Duodeal interface and tell the user that step is still to do.
+- Give every pricing product line an image. A line created with `product_id` carries
+  the catalog product's photos by itself; otherwise host the file (`create_media`) and
+  pass `media_ids` on `create_quotation_line` / `update_quotation_line` /
+  `add_quotation_lines`.

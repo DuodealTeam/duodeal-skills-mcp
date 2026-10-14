@@ -92,9 +92,9 @@ gallery, accept, signstamp, signature, pagebreak.
   `{"id": N}`: a bare id is accepted and read back unchanged, then the editor shows empty
   « Upload cover / Upload logo » slots while the client page falls back to the account's own
   cover and logo, so the rep and the client see two different headers. Read the header back
-  and check `cover.url` / `logo.url` are there. Line and product tools have **no media argument** — an image on a line is bound
-  by REST (`POST|PUT /quotation-lines {medias: [{id}]}`) when a key is already configured,
-  otherwise in the Duodeal interface, and you say it is still pending.
+  and check `cover.url` / `logo.url` are there. An image on a price-table line is not a block: a line
+  created with `product_id` gets the product's photos, otherwise pass `media_ids` on the line
+  tools (see **duodeal-quote-building**). Product tools take no media argument.
 - **The quotation must be V2** for any of this to apply. A quote created through the connector
   (`create_quotation`) or `POST /quotations` is now born `builderVersion: 2, blocks: null`; an
   older quote, or one created with `builder_version: 1`, can still be V1. Check it on the

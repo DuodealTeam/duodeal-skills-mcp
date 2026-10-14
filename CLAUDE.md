@@ -78,7 +78,7 @@ Tools come from the **official Duodeal MCP connector** (remote, OAuth): `get_cur
 
 Two gaps to plan for instead of stalling mid-course:
 - **No tool at all**: taxes, unities, quotation statuses, templates, user creation.
-- **Fields missing from the tools that do exist**: `update_company` has no `currencyFormat`, `setLogo`, `setCover`, `showUnboarding`; `create_deal`/`update_deal` have no `language`, `template`, `createQuotation`, `owner`; `update_quotation` has no `primaryQuotation`, `logo`/`cover`, `legalNoticeText` (it does take `builder_version`; `create_quotation` creates in V2 by default); `create_quotation_line`/`update_quotation_line` have no `medias`.
+- **Fields missing from the tools that do exist**: `update_company` has no `currencyFormat`, `setLogo`, `setCover`, `showUnboarding`; `create_deal`/`update_deal` have no `language`, `template`, `createQuotation`, `owner`; `update_quotation` has no `primaryQuotation`, `logo`/`cover`, `legalNoticeText` (it does take `builder_version`; `create_quotation` creates in V2 by default). Line photos are reachable: a line created with `product_id` gets the product's photos by itself; otherwise pass `media_ids` (array of media ids, in order) on `create_quotation_line`, `update_quotation_line` or each line of `add_quotation_lines` (`[]` clears them).
 
 Those writes go through the REST API with `X-API-KEY`, or through the Duodeal interface. The full map of what the connector can and cannot do: **duodeal-api-reference → `references/connector-tools.md`**.
 
