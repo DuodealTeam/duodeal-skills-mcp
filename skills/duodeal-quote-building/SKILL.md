@@ -143,10 +143,18 @@ Have its price            (create_product_price {product_id, price_category_id,
                            product × category pair; delete_product_price is a HARD delete)
 ```
 
-Then bind them to the lines: `product_id` on the line. The `productPrice{id}` reference
-exists on `POST|PUT /quotation-lines` (REST) but **is not a connector argument** — through the
-connector the amount charged is the line's own `unitPrice`, so read the catalogue price
-(`list_product_prices`) and carry it over yourself.
+Then bind them to the lines: `product_id` on the line, and leave out what the catalog should
+fill. A new line created with `product_id` takes, for every field it does not send, the
+product's name (`productTitle`), `description`, photos and unit, and the price of the
+quotation's price category with that price's tax (linked as `productPrice`). Send a field only
+to override it (a negotiated `unitPrice`, a shorter title). No price in the quotation's category
+→ the price stays 0: check `list_product_prices` and set `unitPrice` yourself.
+
+**Adding a product the user names** ("add a projector"): look it up in the catalog first, even
+when the catalog is not mentioned — `list_products {search: "<key words>"}` (name, reference and
+description; trashed products left out). One clear match → a catalog line as above. Several →
+ask which one, listing the candidates. None → say so and ask before typing a free line, or
+create the product first.
 
 ## 4. Custom fields (structured data)
 
