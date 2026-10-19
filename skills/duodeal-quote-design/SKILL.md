@@ -49,7 +49,8 @@ quote to change a section, and never re-post the full `blocks` array.
 
 - Rows are **not** in `block.data` (its `data` holds only `discountEnabled`, `discount`,
   `discountType`, `columns`): they are quotation-lines. List them first
-  (`list_quotation_lines {quotation_id}`), then `update_quotation_lines` to change several
+  (`list_quotation_lines {quotation_id}`; a long description comes as a preview, add
+  `line_ids` to read it in full before rewriting it), then `update_quotation_lines` to change several
   in ONE call (`update_quotation_line` for a single one),
   `add_quotation_lines` to add several, `create_quotation_line` for a single one,
   `delete_quotation_line` to remove one (nothing cascades: deleting the pricing block leaves

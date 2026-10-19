@@ -105,7 +105,9 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
                                      with the user which deal is the reference, and
                                      re-check what you got)
 2. Read the source completely       (get_deal, get_quotation → blocks[] with every id
-                                     and type, list_quotation_lines)
+                                     and type, list_quotation_lines, then again with
+                                     line_ids = every id: the plain listing gives
+                                     long descriptions as a preview only)
 3. Rebuild on a NEW deal            (no clone_deal / clone_quotation on the connector:
                                      create_deal → create_quotation →
                                      add_quotation_lines → per block
@@ -128,7 +130,8 @@ mailbox address or the wrong person's face fails it instantly.
 
 **2nd quotation on an existing deal**: there is no `clone_quotation`. Create it
 (`create_quotation {deal_id}` — `deal_id` is required, a REST `POST /quotations` without a
-deal fails 500), then copy the content block by block and re-run `add_quotation_lines`, then
+deal fails 500), then copy the content block by block and re-run `add_quotation_lines` with the lines read in full
+(`list_quotation_lines` with `line_ids`: the plain listing only previews long descriptions), then
 `update_quotation` on the new one (`title`…). The **primary** flag is not settable through the
 connector, and every quotation you create is born without it — see §5 before delivering.
 
