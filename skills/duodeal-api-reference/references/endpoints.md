@@ -31,9 +31,12 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 
 ## Deals
 
-- `GET /deals` — paginated: `page, itemsPerPage(def 10), archived, template, search` + filters. ⚠️ the `?template=1` filter is sometimes ignored by the API: re-check the `template` flag on every result.
+- `GET /deals` — paginated: `page, itemsPerPage(def 10), archived, search` + filters. **Never returns templates** (nor does `GET /quotations`, except filtered on one deal with `filters[deal.id][eq]`): list them with `GET /deal-templates`.
+- `GET /deal-templates` — the Template library, same query language (`filters[templateStatus][eq]=published`, `search`, `order`, `page`, `limit`). Each row: `id, name, template, templateStatus (draft|published), templateColor, templateWhenToUse, owner, createdBy, archived, createdAt, updatedAt, usedIn (deals created from it), primaryQuotation {id, builderVersion}|null`. Without the template permissions: published templates out of the trash only.
+- `PUT /deal-templates/{id}` — `{templateStatus}` (needs EDIT_DEAL_TEMPLATES) and/or `{archived}` (the trash, needs DELETE_DEAL_TEMPLATES). `POST /deal-templates/{id}/duplicate` — a new **draft** template (needs CREATE_DEAL_TEMPLATES).
+- **Template permissions**: creating a template (`template: true` on `POST /deals`, or turning a deal into one) needs CREATE_DEAL_TEMPLATES; any change to a template, its quotes or its lines needs EDIT_DEAL_TEMPLATES; the trash and `DELETE` need DELETE_DEAL_TEMPLATES. Administrator has the three by default; otherwise **403**. Reading and cloning a published template is open to every user.
 - `POST /deals` — **Req**: `name`. Opt: `customer{id}, owner{id}, archived, template, autoSave(def true), language("fr"/"en"), displayCurrencyFormat`. **Query `?createquotation=1`** → creates an empty quotation at the same time. A deal **with no quotation does NOT appear** in the list.
-- `POST /deals/clone/{id}` — clones deal + quotations + lines (+ V2 blocks, block ids preserved).
+- `POST /deals/clone/{id}` — clones deal + quotations + lines (+ V2 blocks, block ids preserved). From a template: the new deal is a plain deal, counted in the template's `usedIn`; a draft or trashed template cannot be cloned without the template permissions.
 - `GET /deals/{id}` — Resp: `id, uid(UUID v7), number(D-YYYY-N), name, owner, customer, company, archived, template, language, contactFullName, opportunityAmountHt/Ttc, primaryQuotationId, primaryQuotationUuid, quotations[], presentations[]`.
 - `PUT /deals/{id}` · `DELETE /deals/{id}` (soft delete).
 - **Public**: `GET /deals/uuid/{uuid}`, `GET /deals/custom-fields/{uuid}`, `GET /deals/pdf/{uuid}`.

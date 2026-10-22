@@ -109,10 +109,12 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
 ## 2. Start from an existing reference quote (recommended when one exists)
 
 ```
-1. Identify the reference deal      (list_deals {search: "..."} — there is NO template
-                                     flag or template tool on the connector: confirm
-                                     with the user which deal is the reference, and
-                                     re-check what you got)
+1. Identify the reference deal      (a template is NOT in list_deals — templates live in
+                                     the Template library, /app/templates: ask the user
+                                     which template or deal is the reference, and its
+                                     id or URL; get_deal reads a published template.
+                                     A plain reference deal: list_deals {search: "..."},
+                                     confirm with the user and re-check what you got)
 2. Read the source completely       (get_deal, get_quotation → blocks[] with every id
                                      and type, list_quotation_lines, then again with
                                      line_ids = every id: the plain listing gives
@@ -129,6 +131,11 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
                                      replace_quotation_block_text for large html/wysiwyg)
 5. Deliver                          (rebuild the 2 links — §5)
 ```
+
+**Templates are guarded.** Everyone sees and uses the published ones, but creating, editing or
+deleting a template takes the template permissions of the user's role (Administrator by
+default): without them every write on the template, its quotes or its lines answers **403**.
+Never edit the template itself to build a client's quote: rebuild on a new deal (step 3).
 
 ⚠️ **A clone inherits the identity of its source.** The owner avatar, the quotation title (the
 YEAR!), gallery media and custom fields all travel with the copy. Audit them before showing a
