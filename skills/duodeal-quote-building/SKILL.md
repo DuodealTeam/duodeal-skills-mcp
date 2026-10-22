@@ -72,6 +72,15 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
 - **Discounts**: a `normal` line with a negative `unitPrice`, OR `discount` + `discountType`
   (`percentage`/`amount`) on the line — `lineType: "discount"` does not exist.
 - `option: true` → "Option not included" badge (French deals: « Option non incluse »), excluded from the total.
+- **A price that follows the rest of the quote** (a deployment or setup fee equal to one month of
+  the contract, a 10 % project-management fee): set `unitPriceFormula` on the line instead of
+  computing `unitPrice` yourself — `"{total}"` or `"10% * {total}"`. The API recomputes the price
+  on every change (quantities, discounts, lines added or removed, options the client takes);
+  `{total}` = the other counted lines of the visible price tables, after line discounts and
+  before the table discount, `{blockTotal}` = the same for the line's own table,
+  `{quotation.<name>}` / `{line.<name>}` = a Number custom field of the quote / of the line
+  (empty = 0), e.g. `"{line.seats} * 150"`. Formula lines never count in those bases. Read the
+  result back in `unitPrice`; `""` returns to a fixed price.
 - **When the sender's loudest promise is transparency** ("no hidden fees"), the price table IS the
   demonstration: quote in the unit THEY publish (43/week × 52 on one row, so the reader can divide),
   and give every included service a real row at **0.00** — a number can be audited, an adjective

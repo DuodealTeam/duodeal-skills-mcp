@@ -48,9 +48,9 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 ## Quotation Lines
 
 - `GET /quotation-lines/quote/{id}` — all lines of a quotation sorted by `weight` (prefer it to `GET /quotation-lines`).
-- `POST /quotation-lines` — **Req**: `quotation{id}, tax{id}, lineType, weight`. Opt: `title, productTitle, description(HTML), quantity(def 1), unitPrice(def 0), coef(def 1), discount(def 0), discountType(def percentage), option(def false), hide, product{id}, productPrice{id}, unity{id}, parent{id}, medias[{id}], customFields, subTotalConfig, blockId (attachment to a V2 pricing block)`.
+- `POST /quotation-lines` — **Req**: `quotation{id}, tax{id}, lineType, weight`. Opt: `title, productTitle, description(HTML), quantity(def 1), unitPrice(def 0), coef(def 1), discount(def 0), discountType(def percentage), unitPriceFormula(def null), option(def false), hide, product{id}, productPrice{id}, unity{id}, parent{id}, medias[{id}], customFields, subTotalConfig, blockId (attachment to a V2 pricing block)`.
 - **`lineType`** ∈ `normal | title | subtotal` — ❌ `discount`, `product`, `text` do not exist (400). Discounts: a `normal` line with a negative `unitPrice` OR `discount`+`discountType` on a normal line.
-- Calculation: `baseTotal = unitPrice × quantity × coef`; `totalHt = baseTotal − discount` (or `× (1 − discount/100)`); `totalTtc = totalHt × (1 + taxRate)`. Totals are recalculated automatically on PUT.
+- Calculation: `baseTotal = unitPrice × quantity × coef`; `totalHt = baseTotal − discount` (or `× (1 − discount/100)`); `totalTtc = totalHt × (1 + taxRate)`. Totals are recalculated automatically on PUT. A line with `unitPriceFormula` (`{total}`, `{blockTotal}`, `{quotation.<name>}`, `{line.<name>}`, `+ - * / ( )`, `10%`) gets its `unitPrice` recomputed on every save of the quotation; formula lines never count in `{total}`.
 - `option: true` → the native "Option not included" badge (French deals: « Option non incluse »), excluded from the main total. Line image: `medias: [{id}]`; left out on a NEW line with `product{id}`, the product's medias are copied onto it (an explicit list, even `[]`, wins; an existing line is never touched). Inline HTML accepted in `title`.
 
 ## Quotation Status
