@@ -43,6 +43,8 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 - `POST /deals/clone/{id}` — clones deal + quotations + lines (+ V2 blocks, block ids preserved). From a template: the new deal is a plain deal, counted in the template's `usedIn`; a draft or trashed template cannot be cloned without the template permissions.
 - `GET /deals/{id}` — Resp: `id, uid(UUID v7), number(D-YYYY-N), name, owner, customer, company, archived, template, language, contactFullName, opportunityAmountHt/Ttc, primaryQuotationId, primaryQuotationUuid, quotations[], presentations[]`.
 - `PUT /deals/{id}` · `DELETE /deals/{id}` (soft delete).
+- **Deal validity**: `POST /deals` gives the deal a `validUntil` of creation + 30 days. It does not close the client link, but the date is shown. For a link with no end date, `PUT /deals/{id} {"validUntil": null}` right after creation; the quotation's own `validUntil` is set separately on `PUT /quotations/{id}`.
+- **Visit journal**: `GET /access-sessions/deals/{id}/sessions` → `items[]` with `startedAt`, `timeSpent` (ms), `deviceType`, plus `meta.total`. One session per opening of the client link, whoever opens it: your own check of the link counts as a visit, so date sessions before reading them as client engagement.
 - **Public**: `GET /deals/uuid/{uuid}`, `GET /deals/custom-fields/{uuid}`, `GET /deals/pdf/{uuid}`.
 
 ## Quotations
