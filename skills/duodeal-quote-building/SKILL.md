@@ -80,7 +80,10 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
   before the table discount, `{blockTotal}` = the same for the line's own table,
   `{quotation.<name>}` / `{line.<name>}` = a Number custom field of the quote / of the line
   (empty = 0), e.g. `"{line.seats} * 150"`. Formula lines never count in those bases. Read the
-  result back in `unitPrice`; `""` returns to a fixed price.
+  result back in `unitPrice`; `""` returns to a fixed price. A **catalog product** can carry
+  the formula itself (`unitPriceFormula` on `create_product` / `update_product`): a line added
+  with its `product_id` and no `unitPrice` then gets the formula and is priced at once — prefer
+  that when the same fee comes back on every deal (e.g. Trading Central's Deployment Fees).
 - **When the sender's loudest promise is transparency** ("no hidden fees"), the price table IS the
   demonstration: quote in the unit THEY publish (43/week × 52 on one row, so the reader can divide),
   and give every included service a real row at **0.00** — a number can be audited, an adjective

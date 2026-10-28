@@ -66,8 +66,8 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 
 ## Products / Product Prices / Price Categories
 
-- `GET /products` — filters (`filters[active][eq]`, `filters[customFields.category][eq]`). Resp: `id, name, reference, description, active, archived, url, tips, customFields, unity, medias[], prices[]`.
-- `POST /products` — **Req**: `name`. Opt: `reference, description, active(def true), archived, url, tips, customFields, unity{id}, medias[{id}]`.
+- `GET /products` — filters (`filters[active][eq]`, `filters[customFields.category][eq]`). Resp: `id, name, reference, description, unitPriceFormula, active, archived, url, tips, customFields, unity, medias[], prices[]`.
+- `POST /products` — **Req**: `name`. Opt: `reference, description, unitPriceFormula(def null; same syntax as a line's, checked on save, copied onto every line created from the product that sends no unitPrice), active(def true), archived, url, tips, customFields, unity{id}, medias[{id}]`.
 - `PUT /products/{id}` — `prices:[{id, price, priceCategory{id}}]` updates by `id` only; new prices via `/product-prices`. DELETE a product → deletes its product-prices.
 - `POST /product-prices` — **Req**: `priceCategory{id}, product{id}, price`. Opt: `tax{id}`. **Only one price per (product × category)**, otherwise 400.
 - `POST /price-categories` — **Req**: `name`. Opt: `byDefault, tax{id}`. Volume tiers = one category named per tier ("0-100", "100-500", "500+"). DELETE → cascades to its product-prices.
