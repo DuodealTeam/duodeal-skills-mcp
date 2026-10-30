@@ -27,6 +27,12 @@ Steps:
    the convention.)
 4. Safety check before staging: `git status --short | grep -i secret` must be empty, and no API
    key, client name or account id may enter this repo — these skills install on client machines.
+4bis. Print rules: `python3 ~/Projects/Duodeal/demo-kit-automated-v3/renderer/demo-kit-v2/print_rules_check.py`
+   must print `OK`. `skills/duodeal-mcp-best-practices/assets/print-rules.css` is the ONE source of the PDF
+   print rule (Maxime, 2026-10-28): the inline copy in `references/pdf-export.md` and the demo kit's and
+   internal skill's embedded copies must equal it. The check WARNS that GitHub differs when this publish
+   changes the file: expected, that is what you are publishing. A change to the rule bumps the marker on the
+   file's first line (`/*dd-print-vN*/`) and the plugin version (step 3), and Maxence resyncs the API bundle.
 5. `git add -A`, then commit with a message describing what got BETTER for whoever uses the
    skills (not "update files"). End it with the Co-Authored-By trailer for the Claude model you
    are currently running as (e.g. `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`) —

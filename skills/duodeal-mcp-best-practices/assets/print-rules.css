@@ -1,0 +1,17 @@
+/*dd-print-v6*/@page { size: A4; margin: 10mm; }
+@media print { [data-block-type] { break-inside: avoid; page-break-inside: avoid; }
+.qv-row-stacked, .qv-summary, .qv-summary-card { break-inside: avoid; page-break-inside: avoid; }
+.qv-pricing-head, .qv-title-row, h1, h2, h3, h4, h5, h6, p:has(> strong:only-child), p:has(> b:only-child) { break-after: avoid; page-break-after: avoid; }
+.qv-row-stacked p, .qv-row-stacked li { break-after: auto !important; page-break-after: auto !important; }
+[data-block-type], [data-block-type] * { box-shadow: none !important; }
+[data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head, [data-block-type="pricing"] .qv-row.grid { display: flex !important; column-gap: 12px !important; }
+[data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col], [data-block-type="pricing"] .qv-row.grid > [data-qv-col] { flex: 0 0 76px; min-width: 0; }
+[data-block-type="pricing"] .qv-row.grid { flex-wrap: wrap !important; }
+[data-block-type="pricing"] .qv-row.grid > .qv-option-banner { flex: 0 0 calc(100% + 2rem); }
+[data-block-type="pricing"] .qv-row.grid > .qv-cell--data { white-space: nowrap; }
+[data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_description], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_description], [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_product_title], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_product_title] { flex: 1 1 0; }
+[data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_prictures], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_prictures] { flex-basis: 88px; }
+[data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_prictures] img, [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_prictures] .cursor-pointer { width: 88px !important; height: 88px !important; }
+[data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_qty], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_qty], [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_tax], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_tax] { flex-basis: 52px; }
+[data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_amount_ht], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_amount_ht], [data-block-type="pricing"]:has(.qv-row.grid) .qv-pricing-head > [data-qv-col=line_amount_ttc], [data-block-type="pricing"] .qv-row.grid > [data-qv-col=line_amount_ttc] { flex-basis: 84px; }
+}
