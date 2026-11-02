@@ -52,7 +52,7 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 
 - `GET /quotations` — paginated + `search` + filters. Signature fields: `signed, signDate, signerFirstName/LastName/Email, signedPdfUrl`.
 - `POST /quotations` — ⚠️ **bare → 500** (verified): create via `POST /deals?createquotation=1`; a deal's second quotation via `POST /quotations/{id}/clone` then PUT on the clone.
-- `PUT /quotations/{id}` — **the main customization point**. Query `?bulk=1` → also updates the lines. Opt: `title, description, customFields, validUntil, sections, discount, discountType(percentage/amount), signed, signerFirstName/LastName/Email, primaryQuotation, noCover, noLogo, legalNoticeText, legalMentionText, logo{id}, cover{id}`. ⚠️ `customFields` and `blocks` replace the whole dict/array: read back + merge.
+- `PUT /quotations/{id}` — **the main customization point**. Query `?bulk=1` → also updates the lines. Opt: `title, description, customFields, validUntil, sections, discount, discountType(percentage/amount), signed, signerFirstName/LastName/Email, primaryQuotation, noCover, noLogo, legalNoticeText, legalMentionText, logo{id}, cover{id}, status{id}`. `status{id}` moves the quotation alone (resolve the id with `GET /quotation-status`, the one whose `onAction` is `deal-sent` to mark it sent): the deal keeps its own status, `send` stays as it was, nothing else on the quotation changes (checked field by field on 31 quotations, 02/11/2026). ⚠️ `customFields` and `blocks` replace the whole dict/array: read back + merge.
 - **Public**: `GET /quotations/uuid/{quoteUuid}`, `GET /quotations/custom-fields/{quoteUuid}`, `GET /quotations/pdf/{dealUuid}/{quotationUuid}`.
 
 ## Quotation Lines
