@@ -192,12 +192,80 @@ DuoDeal.onUpdate(fill);
   editing delivers no click to an html block's controls (a checkbox, a `<details>`, an
   `onclick` all stay inert), and clicking an element there can **duplicate** it, which the
   save keeps. Every choice the rep makes goes through a custom field or the price table.
+  (Measured in September 2026. On 04/11/2026 a block's range sliders responded in the editor once the block was
+  repaired: check on the account before relying on either behaviour.)
 - The editor shows the block's static placeholders; check the result in the **client
   preview** or on the client link.
 
-## The trap behind all six
+## 7. Content that follows a dropdown
+
+A `Select` custom field picks which version of a section shows: the terms for a haulage, a workshop or a combined proposal,
+say. The field sits in the rep's hidden `customfields` block, first; the block shows the matching part and, while nothing is
+chosen, a visible bracket.
+
+```html
+<div data-v="none"><b>[Choose the terms in the fields block]</b></div>
+<div data-v="haulage" style="display:none">Goods are accepted for carriage subject to …</div>
+<div data-v="workshop" style="display:none">Work is carried out under …</div>
+<script>
+function show() {
+  var v = String((DuoDeal.customFields || {}).terms || "");      // a Select gives its option's label
+  var h = /haulage/i.test(v), w = /workshop/i.test(v);             // « Haulage and workshop: both » shows both
+  document.querySelector('[data-v="none"]').style.display = (h || w) ? "none" : "";
+  document.querySelector('[data-v="haulage"]').style.display = h ? "" : "none";
+  document.querySelector('[data-v="workshop"]').style.display = w ? "" : "none";
+  if (DuoDeal.autoResize) DuoDeal.autoResize();
+}
+show();
+DuoDeal.onUpdate(show);
+</script>
+```
+
+- Never an empty card: nothing chosen prints the bracket, so a forgotten choice shows in the PDF and the rep sees it.
+- Match on a word of the label, not the whole label: a reworded option keeps working.
+
+## 8. A finished section folded behind an arrow
+
+A long section the reader rarely needs (answers already given, a done list) shrinks to one row that opens on a click. A
+button and a hidden panel, styled inline: a `<style>` is stripped by the editor, and a `<details>` marker cannot be hidden
+inline.
+
+```html
+<button type="button" aria-expanded="false" onclick="fold(this)"
+  style="display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;font:inherit;
+         padding:16px 20px;border:1px solid #e3e4e8;border-radius:16px;background:#f6f6f8">
+  <span style="flex:1"><b>Your answers</b><br><span style="font-size:13.5px;color:#55575e">Open to read or change them</span></span>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#21222d" stroke-width="2.4" style="transition:transform .2s"><path d="M9 6l6 6-6 6"/></svg>
+</button>
+<div style="display:none;padding-top:22px"> … the section, a form included … </div>
+<script>
+function fold(b) {
+  var o = b.getAttribute("aria-expanded") !== "true";
+  b.setAttribute("aria-expanded", o ? "true" : "false");
+  b.nextElementSibling.style.display = o ? "block" : "none";
+  b.querySelector("svg").style.transform = o ? "rotate(90deg)" : "";
+  if (DuoDeal.autoResize) DuoDeal.autoResize();          // the iframe follows the new height
+}
+</script>
+```
+
+- The PDF prints it closed.
+- A form inside keeps working and keeps its saved answers: the panel is only hidden.
+
+## The trap behind all of them
 
 Every `render()` / `show()` above is **called at load**, not only from a handler. In the PDF
 there is no interaction and `onUpdate` never fires: a block that paints itself only inside
 an event handler prints blank. That single line is the difference between a working block
 and an empty page in the PDF the client keeps.
+
+A second trap: **the rep can delete what the script reads.** Typing over a number in the visual editor can remove the element
+around it (a slider, a span): `document.querySelector(...)` then returns `null`, the first `.value` or `.addEventListener` on it
+throws, and nothing below runs, on the client link too. Make every lookup fall back to a detached element, so a missing part
+costs only itself:
+
+```js
+function q(k) { return document.querySelector('[data-k="' + k + '"]') || document.createElement("input"); }
+```
+
+Put the starting values a rep may want in custom fields, not in the block: typing in the block is what deletes its parts.

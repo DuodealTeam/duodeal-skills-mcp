@@ -11,7 +11,7 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 ## Custom Fields
 
 - `GET /custom-fields` — Opt query: `page, limit, order, direction` + filters. Resp: `id, name, label, type, scope, required, formula, options, weight, size, editable, public, activate, enableAi, hubspotMap, isMappedToHubspot`.
-- `POST /custom-fields` — **Req**: `name, label, type, scope, required`. Opt: `formula (required if type Formula), options {items:[{label}]}, weight, size (w-full/w-1/2…), editable(def true), public, activate(def true), enableAi, hubspotMap`. **Note**: `name` = key without spaces.
+- `POST /custom-fields` — **Req**: `name, label, type, scope, required`. Opt: `formula (required if type Formula), options {items:[{label}]}, weight, size (w-full/w-1/2…), editable(def true), public, activate(def true), enableAi, hubspotMap`. **Note**: `name` = key without spaces. A `Select` takes `options {items:[{label}]}`; the value stored, and read in a block as `DuoDeal.customFields[name]`, is the option's **label**. Send the full body (`required:false, editable:true, activate:true, size:"w-full"`): a sparse one answered 500 (03/11/2026).
 - `GET|PUT|DELETE /custom-fields/{id}` — PUT opt: `label, required, weight` (+ others); changing `type`/`scope` can break existing data.
 - **Types**: `Text, MultilineText, RichText, Number, Date, datetime, Select, MultiSelect, Image, User, Formula, Html, System` (+ `HtmlSimple` tolerated, rendered as HTML).
 - **Scopes**: `deal, customer, customer-company, product, quotation, quotation-line`.
@@ -43,6 +43,8 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 - `POST /deals/clone/{id}` — clones deal + quotations + lines (+ V2 blocks, block ids preserved). From a template: the new deal is a plain deal, counted in the template's `usedIn`; a draft or trashed template cannot be cloned without the template permissions.
 - `GET /deals/{id}` — Resp: `id, uid(UUID v7), number(D-YYYY-N), name, owner, customer, company, archived, template, language, contactFullName, opportunityAmountHt/Ttc, primaryQuotationId, primaryQuotationUuid, quotations[], presentations[]`.
 - `PUT /deals/{id}` · `DELETE /deals/{id}` (soft delete). `PUT /deals/{id} {"template": true}` turns an existing deal into a template **in place**: same deal id, same quotations, `templateStatus` `published` straight away, listed by `GET /deal-templates` and no longer by `GET /deals`. Resend `owner` and `users` in the same PUT.
+- **Owner and participants**: `PUT /deals/{id} {"owner": {"id": N}, "users": [{"id": N}]}` replaces both. A deal created through an API key or the connector gets that user as owner **and** as participant (`users`): on a deal or template built for someone else, hand both over and read them back (03/11/2026).
+- **Templates, measured 03/11/2026**: `PUT /deals/{id}` ignores `templateStatus`, `templateWhenToUse` and `templateAiBrief` (send them to `PUT /deal-templates/{id}`); `GET /deal-templates/{id}` answers **405** (read one template in the list); a **draft** template's client link still opens for anyone who has it, while it stays out of « New deal » and of the deals list, which makes it the home of a page proposals only link to (terms of carriage, say); a deal created from a template in the app keeps the template's **block ids**.
 - **Hot Deal Score reset**: the « Reset score » button of the deal's Analytics (Overview tab) sets `hotDealScoreResetAt` on the deal and brings the score of the deal and its quotes to zero. The visits stay in Analytics and in the visit journal below; from then on the score counts only visits after `hotDealScoreResetAt`. Reset a deal only when none of its visits came from the client: a real visit dropped by a reset never comes back into the score.
 - **Deal validity**: `POST /deals` gives the deal a `validUntil` of creation + 30 days. It does not close the client link, but the date is shown. For a link with no end date, `PUT /deals/{id} {"validUntil": null}` right after creation; the quotation's own `validUntil` is set separately on `PUT /quotations/{id}`.
 - **Visit journal**: `GET /access-sessions/deals/{id}/sessions` → `items[]` with `startedAt`, `timeSpent` (ms), `deviceType`, plus `meta.total`. One session per opening of the client link, whoever opens it: your own check of the link counts as a visit, so date sessions before reading them as client engagement.
@@ -53,6 +55,7 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 - `GET /quotations` — paginated + `search` + filters. Signature fields: `signed, signDate, signerFirstName/LastName/Email, signedPdfUrl`.
 - `POST /quotations` — ⚠️ **bare → 500** (verified): create via `POST /deals?createquotation=1`; a deal's second quotation via `POST /quotations/{id}/clone` then PUT on the clone.
 - `PUT /quotations/{id}` — **the main customization point**. Query `?bulk=1` → also updates the lines. Opt: `title, description, customFields, validUntil, sections, discount, discountType(percentage/amount), signed, signerFirstName/LastName/Email, primaryQuotation, noCover, noLogo, legalNoticeText, legalMentionText, logo{id}, cover{id}, status{id}`. `status{id}` moves the quotation alone (resolve the id with `GET /quotation-status`, the one whose `onAction` is `deal-sent` to mark it sent): the deal keeps its own status, `send` stays as it was, nothing else on the quotation changes (checked field by field on 31 quotations, 02/11/2026). ⚠️ `customFields` and `blocks` replace the whole dict/array: read back + merge.
+- `GET /quotations/{id}/block-submissions` — what clients entered in html blocks (form answers, files), by block id, decrypted for a key of the account. Each file URL is signed and expires: it changes at every read. `DELETE /quotations/{id}/block-submissions/{blockId}` wipes one block's answers and files.
 - **Public**: `GET /quotations/uuid/{quoteUuid}`, `GET /quotations/custom-fields/{quoteUuid}`, `GET /quotations/pdf/{dealUuid}/{quotationUuid}`.
 
 ## Quotation Lines
@@ -66,6 +69,9 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 ## Quotation Status
 
 - `GET /quotation-status` — Resp: `id, name, color, onAction`. POST/PUT: `name`(req), `color`, `onAction` ∈ `create | deal-sent | deal-signed | null` (**only one status per value** of onAction).
+- **The app shows the quotation status**, on the file page (the pill next to the signature button, with its dropdown) and in the deals list, never the deal status: a house status (« Traité », « À facturer »…) is a **quotation status** (`POST /quotation-status {name, color}`), set on the primary quotation with `PUT /quotations/{id} {status:{id}}`. A deal status created for the same purpose stays invisible in the app (measured 05/11/2026).
+- **Writing the deal status resets the primary quotation's status** to the matching one: `PUT /deals/{id} {status:{id: <Signé>}}` wiped a custom status from the quotation (05/11/2026). Keep a custom status on the quotation and leave the deal status alone.
+- **`color`**: a Tailwind background class (`bg-sky-200`, `bg-sky-600`, `bg-emerald-400`, `bg-rose-400`) is rendered by the app as a pastel fill with dark text; an unknown class renders no colour; a hex (`#86efac`) is applied as is. The app paints only the badge background: no text or border colour setting.
 
 ## Products / Product Prices / Price Categories
 
@@ -103,6 +109,16 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 - `/filter-views` — saved views (scope `deals|customers|quotations|products`).
 - `/pins` + `/comments/{uuid}` — pinned comments (offsetX/Y, zoneId). Public: `GET /pins/quotation/{quotationUuid}`. Deleting the **last** comment of a pin deletes the pin.
 
+## Company skill (Settings › AI)
+
+- `GET /company-skills` · `POST /company-skills {name, description, content}` · `PUT /company-skills/{id}` (the same three fields; `content` is Markdown). The account's own skill: how this company builds a proposal. The in-app AI reads it, and so does every AI on the connector, where it is listed beside the public skills as `skill://company/<name>/SKILL.md` (Claude and ChatGPT, checked 03/11/2026). Read it back after a write.
+
+## Block library
+
+- `GET /block-library` — the library: its « Blocks » template (deal and quotation), its categories and blocks. `POST /block-library/categories {name}`. `POST /block-library/from-quotation/{quotationId} {blockId, name, categoryId}` saves a block of a quotation to the library; a **pricing** block is refused (03/11/2026).
+
 ## Webhooks (not in openapi.yaml)
 
 - `GET /webhooks` — verified live on 2026-07-23 (200, `{data, meta}`). POST/PUT/DELETE inferred from REST conventions (contract undocumented: on a 400, read the error message for the exact fields).
+- In the app: Settings › Tool Integrations, which also shows the account's **API token**. Each webhook has a name, a URL and its events: Deal Created / Updated / Deleted / Signed / Status Changed, Quotation Created / Updated / Deleted / Signed / Status Changed, Customer Company Created / Updated / Deleted, Customer Created / Updated / Deleted, Product Created / Updated / Deleted, Access Session Created. In the API the events read `quotation.signed`, `quotation.status_changed`, `accesssession.created` (live on 03/11/2026).
+- **Someone must know when a client signs** (finance, operations): Duodeal emails the deal owner only. « Quotation Signed » to an automation tool (Make, Zapier, Power Automate), which reads the deal and the quotation through the API and emails whoever needs it, is the route.

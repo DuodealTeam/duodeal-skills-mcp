@@ -103,3 +103,15 @@ There is **no `get_links` tool** on the connector. Build both links by hand:
 `api_call`, `get_links`, `clone_deal`, `clone_quotation`, `list_quotation_blocks`, `delete_deal`, `delete_quotation`, `delete_customer`, `delete_product`, `delete_media`, `update_media`, `delete_webhook`, `create_tax`, `create_unity`, `create_deal_status`, `create_quotation_status`, `ensure_template`, `create_user`, `send_quotation`.
 
 Two more that exist under **another name**: `upload_media` → **`create_media`** · `get_me` → **`get_current_user`**.
+
+## Connecting from ChatGPT (checked on ChatGPT Plus, 03/11/2026)
+
+ChatGPT Plus, Pro, Business or Enterprise (on Business or Enterprise, the ChatGPT admin first allows custom MCP servers).
+Plugins › Add › **Add custom MCP server**: a name, the server URL `https://api.duodeal.app/api/mcp`, Authentication **OAuth**.
+Leave **Advanced OAuth settings** as they are: ChatGPT finds Duodeal's dynamic client registration and registers itself, no
+client ID to enter. Tick the risk box, **Create as a plugin**, **Connect**, sign in to Duodeal and allow. To check it: a new
+chat, Plugins under the message box, the Duodeal plugin, « List my Duodeal deals. ». ChatGPT reads the public skills and the
+account's company skill through the connector.
+- A name ChatGPT already holds is refused, and the error sits inside the dialog: the button seems to do nothing.
+- A plugin created while the connection failed stays broken (« Couldn't load plugin settings »); delete it, or uninstall it
+  when its delete answers « unavailable », and add a new one.
