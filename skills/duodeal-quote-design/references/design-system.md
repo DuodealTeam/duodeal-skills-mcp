@@ -78,8 +78,7 @@ Check the whole set on a white background AND on DARK before producing the block
 - Host every image in the Duodeal media library (S3) before using it — never hotlink
   an external URL. Reuse an existing media first (`list_medias`); otherwise `create_media`
   with `file` in **base64, which is the normal route** for the upload (no multipart, no local
-  path, ~4 MB ceiling). **Never `from_url`** despite the tool description — the URL import
-  500s on most CDNs.
+  path, ~4 MB ceiling), or `from_url` works for a public image URL (a refused download comes back with its reason, e.g. « the server answered 403 »: then download it yourself and send `file`).
 - 🚫 **The HTML carries the media url, never the base64.** A `data:` URI inside a block bugs
   every time: far too heavy for the editor and the PDF export.
 - Intro lockup logos: issuer tile ~96 px (radius 20 px), prospect wordmark

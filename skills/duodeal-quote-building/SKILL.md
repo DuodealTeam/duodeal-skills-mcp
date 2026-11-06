@@ -100,15 +100,15 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
   `list_quotation_lines`. For a line without a product, or to change the photos, pass
   `media_ids` (array of media ids, in order; `[]` clears them) on `create_quotation_line`,
   `update_quotation_line` or each line of `add_quotation_lines`. Store the file first if it is
-  not in the library (⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); `create_media {name, folder, file}`, **never `from_url`**, it 500s on most CDNs).
-  The product tools still take no media (`url` on a product is an external link, not an image).
+  not in the library (⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); `create_media {name, folder, file}`, or `from_url` for an image already online).
+  A product's own photos: `media_ids` on `create_product` / `update_product` (`url` on a product is an external link, not an image).
   Say which route you took.
 - V2 quotes (blocks): pass the pricing block's `blockId` (camelCase, inside the line) so the
   line lands in the right table — see the **duodeal-v2-blocks** skill.
 
 ### Quotation branding
 
-- Get the logo / cover **stored** (⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); `create_media {name, folder, file}`, never `from_url`) and then **shown**:
+- Get the logo / cover **stored** (⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); `create_media {name, folder, file}`, or `from_url` for an image already online) and then **shown**:
   `update_quotation` has **no `logo` / `cover` argument** on the connector → put the media in
   the native `header` block (`update_quotation_block` with the **complete** `data`), or set it
   via REST / the interface.

@@ -93,12 +93,12 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 
 ## Medias
 
-- `POST /medias` — **Req**: `name, mime, folder` + `file` (base64 data URI) **or** `fromUrl`. MIME: `image/jpeg|png|gif|webp|svg+xml`, `application/pdf`. ⚠️ `fromUrl` is unstable (500 on many CDNs) → download the file yourself and send it base64 as `file` — that is the normal route (connector: `create_media`; there is **no `upload_media`** tool, nothing base64-encodes for you). Limit ~4 MB. 🚫 The base64 stops there: the quote's HTML references the media **url**, never a `data:` URI.
+- `POST /medias` — **Req**: `name, mime, folder` + `file` (base64 data URI) **or** `fromUrl`. MIME: `image/jpeg|png|gif|webp|svg+xml`, `application/pdf`. `fromUrl`: public http(s) URL only (private, loopback and link-local addresses refused, redirects included), at most 20 MB; a failed download answers **400** `Could not import fromUrl: <reason>` → download the file yourself and send it base64 as `file` (connector: `create_media`; there is **no `upload_media`** tool, nothing base64-encodes for you). Limit ~4 MB. 🚫 The base64 stops there: the quote's HTML references the media **url**, never a `data:` URI.
 - `GET|PUT|DELETE /medias/{id}` — DELETE breaks references.
 
 ## Users / User Groups / Filter Views / Pins
 
-- `GET /users/me` — profile of the key + its `company` (`apiKey` is exposed here: **always mask it**). `GET /users`, `POST /users` (admin: `email, password` req), `PUT /users/{id}` (`language, firstName, lastName, jobTitle, active`…). DELETE user **400 if they own ≥ 1 deal** (reassign or `active:false`).
+- `GET /users/me` — profile of the key + its `company` (`apiKey` is exposed here: **always mask it**; the connector's `get_current_user` replaces it with a placeholder). `GET /users`, `POST /users` (admin: `email, password` req), `PUT /users/{id}` (`language, firstName, lastName, jobTitle, active`…). DELETE user **400 if they own ≥ 1 deal** (reassign or `active:false`).
 - `/user-groups` — `name`, `permissions[]`.
 - `/filter-views` — saved views (scope `deals|customers|quotations|products`).
 - `/pins` + `/comments/{uuid}` — pinned comments (offsetX/Y, zoneId). Public: `GET /pins/quotation/{quotationUuid}`. Deleting the **last** comment of a pin deletes the pin.

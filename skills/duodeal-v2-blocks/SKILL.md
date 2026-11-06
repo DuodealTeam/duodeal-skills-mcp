@@ -85,7 +85,7 @@ gallery, accept, signstamp, signature, pagebreak.
   replace the pricing block, re-attach the lines. Rows never live in `block.data`, and
   deleting a pricing block does **not** delete its lines — remove them explicitly.
 - **Images inside blocks** (header `cover`/`logo`, `gallery`, `attachments`, `pdfviewer`):
-  register the media first — ⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); **never `from_url`**, the URL import 500s on most CDNs whatever the tool description says (connector: `create_media` {`name`, `folder`, `file`}) —
+  register the media first — ⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); `from_url` works for a public image URL (a refused download comes back with its reason, e.g. « the server answered 403 »: then download it yourself and send `file`) (connector: `create_media` {`name`, `folder`, `file` | `from_url`}, or `create_medias` for several) —
   then reference its url/id in the **complete `data`** of the
   target block. ⚠️ **In the `header`, `cover` and `logo` take the COMPLETE media object**
   (`id`, `url`, `name`, `mime`, `path`, `thumbnail`, as `list_medias` returns it), never a bare
@@ -94,7 +94,7 @@ gallery, accept, signstamp, signature, pagebreak.
   cover and logo, so the rep and the client see two different headers. Read the header back
   and check `cover.url` / `logo.url` are there. An image on a price-table line is not a block: a line
   created with `product_id` gets the product's photos, otherwise pass `media_ids` on the line
-  tools (see **duodeal-quote-building**). Product tools take no media argument.
+  tools (see **duodeal-quote-building**). A product's own photos: `media_ids` on `create_product` / `update_product`.
 - **The quotation must be V2** for any of this to apply. A quote created through the connector
   (`create_quotation`) or `POST /quotations` is now born `builderVersion: 2, blocks: null`; an
   older quote, or one created with `builder_version: 1`, can still be V1. Check it on the

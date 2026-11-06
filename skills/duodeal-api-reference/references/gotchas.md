@@ -9,7 +9,7 @@
 | 400 on a discount line | `lineType:"discount"` does not exist | Book the discount as `lineType:"normal"` with a negative `unitPrice`, **or** as `discount` + `discountType` on the line |
 | 400 on a tax | `rate` outside [0,1] | Express the rate as a decimal (0.20, not 20) |
 | 409 when deleting a tax | the tax is still used by lines or products | Keep it and reassign what uses it. Not available to the connector anyway (only `list_taxes`, no create/delete): change taxes in the Duodeal interface (Settings), then re-read with `list_taxes` |
-| 500 creating a media from a URL | the source CDN refused the server-side fetch (Cloudinary, Shopify, S3…) | Do not retry `from_url`: download the file yourself and send it as `file` in base64 |
+| `Could not import fromUrl: …` creating a media from a URL | the source refused the server-side fetch (its reason follows: 403, 404, timeout…), or the address is internal | Do not retry the same URL: download the file yourself and send it as `file` in base64 |
 | 500 creating a media from base64 | file over ~4 MB | Supply a lighter image — nothing resizes it for you |
 | Block broken, unsaveable, editor or PDF export choking | a **`data:` URI (base64) inside the HTML** — image, background or font | Never inline an asset. Upload it to the media library (`create_media`) and reference **its url** in the block |
 | 500 creating a quotation on its own | a quotation cannot exist without a deal | Create the deal first, then the quotation on it (connector: `create_deal` → `create_quotation(deal_id=…)`). No `clone_deal` / `clone_quotation` on the connector: rebuild the content, or duplicate in the interface and read it back with `get_quotation` |
@@ -36,7 +36,7 @@ The connector hard-deletes only lines, blocks, product prices and comments (`del
 
 ## Media — image upload
 
-1. **Get the image into the library**: reuse an existing media first (`list_medias`, `search`), otherwise `create_media` with `file` in **base64 — the normal, supported route**. **Download the file yourself** (browser UA), check the MIME type and the size, base64-encode it and send it as `file` — nothing does those steps for you (`name` + `folder` both required, no local path, no multipart, no `upload_media` tool). ⚠️ **Never the URL import**, even though the connector's own description says `from_url` is preferred: `from_url` / `fromUrl` returns a 500 on most CDNs (Cloudinary, Shopify, S3…).
+1. **Get the image into the library**: reuse an existing media first (`list_medias`, `search`), otherwise `create_media` with `file` in **base64 — the normal, supported route**. An image already online can be imported by the server with `from_url` / `fromUrl` (public http(s) URL, at most 20 MB, the extension taken from the file when the URL has none). If it is refused, the error says why: then **download the file yourself**, check the MIME type and the size, base64-encode it and send it as `file` (`name` + `folder` both required, no local path, no multipart, no `upload_media` tool). A catalog's photos go up 20 at a time with `create_medias`.
 1bis. 🚫 **Base64 belongs in the upload, never in the HTML.** Once the media exists, the block references **its url**. A `data:` URI inside a block bugs every time: too heavy for the editor and the PDF export.
 2. Limit ~**4 MB**; beyond that the API returns 500. No automatic resizing anywhere: supply a lighter image.
 3. Accepted MIME types: png, jpeg, gif, webp, svg+xml, pdf.

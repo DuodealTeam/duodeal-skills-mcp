@@ -97,9 +97,9 @@ Typographic details and choices: [references/design-system.md](references/design
    mockup (SaaS)
 6. **`pricing`** — the priced quote (title "Your quote"); attach every line to this
    block (line tools carry the block's `blockId`) and give every product line an
-   **image** — not settable by the connector: line and product tools take no media
-   argument, so host the file first (`create_media`) then bind it via REST if a key is
-   configured, otherwise in the Duodeal interface, and tell the user
+   **image**: host the file first (`create_media`, or `create_medias` for several), then
+   `media_ids` on the line tools; a line created with `product_id` already gets the
+   product's photos (set them with `media_ids` on `create_product` / `update_product`)
 7. **html ORDER RECAP** — one-off vs recurring, spelled out. **Recurring lives HERE**
    (the native table has only one total per quote). An html block **can be bound to the
    price table** and display its real amounts live — offer it, see the rule below
@@ -161,8 +161,8 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
    `showTitle:false` when the block already carries its own title in HTML.
 7. Stars/icons as **inline SVG** (never ★ nor emoji); every image must be hosted on
    Duodeal storage, never hotlinked from a third-party site (connector: `create_media`
-   with `name` + `folder` + `file` in base64 — ⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); **never `from_url`**, the URL import 500s
-   on most CDNs; no `upload_media`, no local path; then reference the url it returns inside
+   with `name` + `folder` + `file` in base64 — ⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images); or `from_url` for an image already online (a refused download answers with its
+   reason: then send `file`); no `upload_media`, no local path; then reference the url it returns inside
    the block's `data`).
 8. No orphan lines: any isolated piece of info becomes a 2-line card
    (title + muted text).
