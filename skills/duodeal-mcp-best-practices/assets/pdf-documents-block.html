@@ -1,0 +1,46 @@
+<!-- Duodeal · PDF documents block (dd-pdf-documents-v1)
+     One html block that shapes the PDF of the quote: the downloaded PDF and the signed copy,
+     which the platform prints from the same render.
+     On screen: the line below, nothing else loads (no page image is downloaded).
+     In the PDF: hides the blocks listed in HIDE, removes this block's own card, and prints
+     PAGES, one image per A4 page, where this block sits (usually just before the signature).
+     One image per page, on purpose: one tall image holding several pages, cut page by page,
+     made the export fail (45 s, then "Failed to generate PDF", measured 06/11/2026).
+     Fill HIDE with block ids read from get_quotation (the `id` of each block, not its title),
+     PAGES with the media urls of the document pages in order, and write the line in the
+     quote's language. Recipe and measurements: references/pdf-export.md → "Choose what the PDF keeps". -->
+<div id="dd-pdf-note" style="font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#57534e;padding:4px 0">The full contract documents are attached to the PDF of this proposal.</div>
+<div id="dd-pdf-pages" style="margin:0;padding:0"></div>
+<script>
+var DOC=(typeof document!=="undefined"&&document.createElement)?document:((typeof document!=="undefined"&&document.ownerDocument)||window.document);
+var DD_PDF={
+  HIDE:[],      /* block ids to leave out of the PDF, e.g. ["<block id>", "<block id>"] */
+  PAGES:[],     /* media urls of the pages to print, in order, one image per page */
+  WIDTH:"92%"   /* of the block's width: 92% of a full-width block = 163 x 261 mm for an A4 portrait page image */
+};
+function ddPdf(){
+  if(!document.host) return;   /* screen: the block is a sandboxed iframe, it has no host and touches nothing */
+  var host=document.host, root=host.ownerDocument||window.document;
+  var card=host.closest?host.closest("[data-block-type]"):null;
+  if(!root.getElementById("dd-pdf-rules")){
+    var css="@media print{";
+    for(var i=0;i<DD_PDF.HIDE.length;i++) css+=(i?",":"")+"#qv-block-"+DD_PDF.HIDE[i];
+    if(DD_PDF.HIDE.length) css+="{display:none !important}";
+    if(card&&card.id) css+="#"+card.id+" > div{border:0 !important;padding:0 !important;background:none !important;box-shadow:none !important}";
+    css+="}";
+    var st=root.createElement("style"); st.id="dd-pdf-rules"; st.textContent=css;
+    (root.head||root.documentElement).appendChild(st);
+  }
+  var note=document.getElementById("dd-pdf-note"); if(note) note.style.display="none";
+  var box=document.getElementById("dd-pdf-pages"); if(!box||box.childNodes.length) return;
+  for(var j=0;j<DD_PDF.PAGES.length;j++){
+    var im=DOC.createElement("img");
+    im.src=DD_PDF.PAGES[j];
+    im.alt="Document, page "+(j+1)+" of "+DD_PDF.PAGES.length;
+    im.setAttribute("style","display:block;width:"+DD_PDF.WIDTH+";height:auto;max-width:"+DD_PDF.WIDTH+";margin:0 auto;break-before:page;page-break-before:always");
+    box.appendChild(im);
+  }
+}
+window.ddPdf=ddPdf;   /* the PDF render runs block scripts with new Function: export explicitly */
+ddPdf();
+</script>

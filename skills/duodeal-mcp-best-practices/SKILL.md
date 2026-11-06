@@ -113,6 +113,11 @@ wrong, even before opening it:
   alone at the foot of a page. If you cannot measure the PDF, ask the user and say you have not
   seen it. On a quote the client already has, add the rule only when asked.
 - **Copy that points at the screen is false on paper** ("click here", "top right of this page").
+- **Choose what the PDF keeps, and attach full documents** (the download and the signed copy are
+  the same render): a `pdfviewer` prints only its file name, so a contract shown in it is not in the
+  PDF. One html block, [assets/pdf-documents-block.html](assets/pdf-documents-block.html), hides the
+  sections you list and prints the document pages on paper only; recipe and measurements in
+  references/pdf-export.md → Choose what the PDF keeps.
 
 ## Prices, totals and currencies
 

@@ -60,6 +60,15 @@ Two consequences to design for, not to discover later:
    itself inside a `change` handler prints **empty**.
 2. **Test a file field from the client link**, never from the builder preview — there,
    `uploadFile()` rejects by design ("files cannot be attached from this view").
+3. **The PDF render is not an iframe.** Each html block runs inside a **shadow root**, in the
+   page's own window, through `new Function`. So: `document.host` exists there and nowhere else
+   (a reliable "am I in the PDF?" test); `document.createElement` does not exist, create nodes
+   through `var DOC = document.createElement ? document : (document.ownerDocument || window.document)`;
+   a function declared in the script stays local, export it (`window.render = render`) and call
+   it at load; `getElementById` and `querySelector` work, scoped to the block. Images with
+   `loading="lazy"` never load there and print blank. Without these, a block that is complete on
+   the page prints empty or with placeholder text. Recipe built on this:
+   **duodeal-mcp-best-practices** → PDF export → Choose what the PDF keeps.
 
 ## 2. Reading the quote (read-only)
 

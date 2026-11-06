@@ -95,6 +95,9 @@ gallery, accept, signstamp, signature, pagebreak.
   and check `cover.url` / `logo.url` are there. An image on a price-table line is not a block: a line
   created with `product_id` gets the product's photos, otherwise pass `media_ids` on the line
   tools (see **duodeal-quote-building**). A product's own photos: `media_ids` on `create_product` / `update_product`.
+- **A `pdfviewer` shows its PDF on the page but prints only its title and file name**: the document
+  is not in the quote's PDF, downloaded or signed. To put it there, see **duodeal-mcp-best-practices**
+  → PDF export → Choose what the PDF keeps.
 - **The quotation must be V2** for any of this to apply. A quote created through the connector
   (`create_quotation`) or `POST /quotations` is now born `builderVersion: 2, blocks: null`; an
   older quote, or one created with `builder_version: 1`, can still be V1. Check it on the
