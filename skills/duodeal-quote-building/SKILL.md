@@ -56,7 +56,7 @@ creation step, even when the request says nothing about design: `html` blocks ar
 9. Write the content blocks        (duodeal-quote-design: html intro, solution, recap,
                                      proof, FAQ, next steps around the native blocks;
                                      add_quotation_block then update_quotation_block)
-10. Attach T&Cs + legal notice      (no template tool on the connector — see the last
+10. Attach T&Cs + legal notice      (no text-template tool on the connector — see the last
                                      section)
 11. Hold the 2 delivery links       (rebuild them from get_deal + get_quotation — §5)
 ```
@@ -257,7 +257,8 @@ quotation** to the `deal-sent` status:
 
 ## T&Cs / legal notice / email templates
 
-**No template tool on the connector** (no `ensure_template`, no `list_templates`): reusable
+**No tool for text templates on the connector** (no `ensure_template`; `list_templates` lists the
+**deal** templates, not these): reusable
 T&Cs, legal notices and email templates are created in the Duodeal interface (Settings), then
 read back on the quotation. On the quote itself, the legal text goes in the native
 `legalnotice` block (`add_quotation_block {type: "legalnotice"}` then
