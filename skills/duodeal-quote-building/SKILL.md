@@ -34,7 +34,9 @@ creation step, even when the request says nothing about design: `html` blocks ar
 1. Know the tenant                  (get_current_user)
 2. Hold this tenant's ids           (list_taxes, list_unities,
                                      list_quotation_statuses, list_price_categories)
-3. Have the client organization     (create_customer_company {name})
+3. Have the client organization     (create_customer_company {name, logo_media_id}: the
+                                     logo is the recipient's in the contacts block;
+                                     upload it with create_media first if needed)
 4. Have the contact                 (create_customer {customer_company_id,
                                      first_name, last_name, email})
 5. Have the deal                    (create_deal {name, customer_id})

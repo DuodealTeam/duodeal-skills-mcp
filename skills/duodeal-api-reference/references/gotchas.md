@@ -48,11 +48,14 @@ The connector hard-deletes only lines, blocks, product prices and comments (`del
 
 ## Customer-company logo, and hiding the amount on one deal
 
-- **The client card's logo takes RAW base64 in `setLogo`, nothing else.** `PUT /customer-companies/{id}`
-  silently ignores `{"logo": {"id": N}}`, `{"logo": N}`, an IRI and a URL: the field stays `null`
-  and no error is raised. `{"setLogo": "<raw base64, no data: prefix>"}` works and the response
-  comes back with a hosted url. Same shape as the tenant logo. Upload the image to the media
-  library too if a block needs it: the two are separate.
+- **The client card's logo** (what the native contacts block shows for the recipient) is set by the
+  connector itself, no key needed: `logo_media_id` (an image already in the media library, copied
+  server-side, preferred) or `logo` (base64, raw or as a `data:` URL) on `create_customer_company` /
+  `update_customer_company`. Over REST the same fields are `setLogoMedia` and `setLogo` on
+  `POST`/`PUT /customer-companies`. PNG, JPEG, GIF or **WebP** (no need to convert it), checked on the
+  file's bytes: anything else, SVG included, answers 400. `{"logo": {"id": N}}`, an IRI or a URL
+  are still ignored silently. A company that already has a logo (`logo` in `get_customer_company`)
+  is only replaced on the user's request, and the connector cannot remove one.
 - **`displayQuoteAmount: false` on the DEAL** removes the amount from the client page (the
   « 0,00 € » under the title). Per deal, no connector argument, `PUT /deals/{id}`. Use it on any
   page that is not a priced proposal: a deck, an onboarding page, a portal.
