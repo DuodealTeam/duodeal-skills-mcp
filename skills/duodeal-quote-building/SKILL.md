@@ -1,6 +1,6 @@
 ---
 name: duodeal-quote-building
-description: End-to-end flow for building a Duodeal quote from A to Z with the duodeal MCP tools — tenant setup, customer, deal + quotation, lines (sections, discounts, options), branding, T&Cs / legal notice, links to deliver. Use whenever you need to create, duplicate or deliver a Duodeal quote or selling page, start from a template, clone a deal, add a second quotation, or set up a product catalog.
+description: End-to-end flow for building a Duodeal quote from A to Z with the duodeal MCP tools — tenant setup, customer, deal + quotation, lines (sections, discounts, options), branding, T&Cs / legal notice, links to deliver. Use whenever you need to create, duplicate or deliver a Duodeal quote or selling page, start from a template, clone a deal, add a second quotation, or set up a product catalog. Always chained with duodeal-quote-design, which builds the content blocks in HTML: no quote is delivered as text blocks and PDFs unless the user asks for them.
 ---
 
 # Build a Duodeal quote from A to Z
@@ -19,8 +19,9 @@ if a step needs something the connector does not expose, it says so and gives th
 (REST with `X-API-KEY` **only if a key is already configured**, otherwise the Duodeal
 interface — and tell the user it is pending).
 Two starting points: **from scratch** (§1) or **from an existing reference quote** (§2 —
-prefer this when one exists). For a visually premium quote (design selling page, polished
-HTML blocks), chain the **duodeal-quote-design** skill after the creation step.
+prefer this when one exists). **The content blocks are always built with the duodeal-quote-design skill**, right after the
+creation step, even when the request says nothing about design: `html` blocks are the default,
+`wysiwyg` text and `pdfviewer` only when the user asks for them (rule in CLAUDE.md → Quote content).
 
 ## 0. Before anything
 
@@ -50,9 +51,12 @@ HTML blocks), chain the **duodeal-quote-design** skill after the creation step.
 8. Fill the price table             (add_quotation_lines {quotation_id, lines[]} as
                                      soon as there are 2+ lines, create_quotation_line
                                      for a single one)
-9. Attach T&Cs + legal notice       (no template tool on the connector — see the last
+9. Write the content blocks        (duodeal-quote-design: html intro, solution, recap,
+                                     proof, FAQ, next steps around the native blocks;
+                                     add_quotation_block then update_quotation_block)
+10. Attach T&Cs + legal notice      (no template tool on the connector — see the last
                                      section)
-10. Hold the 2 delivery links       (rebuild them from get_deal + get_quotation — §5)
+11. Hold the 2 delivery links       (rebuild them from get_deal + get_quotation — §5)
 ```
 
 There is **no `get_links` tool** and no `links` field to rely on in the `create_deal`

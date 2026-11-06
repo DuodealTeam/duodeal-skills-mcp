@@ -138,7 +138,9 @@ connector tool validates the code you send.
 3. NEVER post a partial `blocks` array: through REST it replaces the whole page, and the
    connector has **no raw-HTTP tool** (`api_call` does not exist) — edit block by block, and
    send the complete `data` each time.
-4. Rich sections → `wysiwyg`; interactive code/logos → `html` (+ `autoResize()`).
+4. Content sections → `html` (+ `autoResize()`), built with **duodeal-quote-design**; `wysiwyg`
+   only when the user asks for plain text, or for a short note that must link to another block
+   (`#qv-block-<id>`, which an html block cannot do).
 5. Do not embed spacers (`<div style="height:71px">…`): each block handles its own
    spacing — the spacer turns into a white band at the top of the card.
 6. `faq`: raw text only.
@@ -150,11 +152,10 @@ connector tool validates the code you send.
    (`get_deal`) and the quotation `id`; the customer link is
    `https://duodeal.app/quotations/deal/{deal.uid}`.
 
-## Reference structure (validated — Onboarding Agent)
+## Reference structure
 
-Canonical order of a generated V2 quote: 1) `header` (native cover, `noLogo: true`) ·
-2) `html` block with sender + client logos side by side · 3) one `wysiwyg` block per section
-(cover, your project, who we are, product range, video, gallery, investment) ·
-4) `pricing` (lines attached via `blockId`) · 5) post-table wysiwyg (terms,
-testimonials, FAQ, contact) · 6) `contacts` then `legalnotice`. Do not change this reference
-structure without explicit approval.
+The canonical order of a generated V2 quote is the one in **duodeal-quote-design** → Step 2:
+native `header` → native `contacts` → html intro → html solution → native `pricing` → html
+recap → html social proof → html FAQ → html next steps → `signature` → `legalnotice`. Content
+sections are `html` blocks; the earlier "one `wysiwyg` block per section" structure is retired
+(it produced plain text proposals that never showed what Duodeal does).
