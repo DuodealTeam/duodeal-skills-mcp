@@ -69,6 +69,9 @@ gallery, accept, signstamp, signature, pagebreak.
     `from`+`to`+`replace`}). Anchors must be **short and unique**: no `replace_all`, no regex,
     no occurrence index. A non-text structure (one `faq.items` entry, one `gallery.images`)
     is **not** reachable this way → complete `data` instead.
+  - Anchor on the text as stored, not as you wrote it: a wysiwyg column written with
+    `&laquo;` / `&raquo;` can read back with plain `«` `»` (measured 06/11/2026), so a search
+    for the entity finds nothing. Read the block first and anchor on what it holds, or try both.
   - Delete / reorder: `delete_quotation_block` {`quotation_id`, `block_id`} ·
     `reorder_quotation_blocks` {`quotation_id`, `order`} where `order` is the **COMPLETE** list
     of ids top to bottom — a partial list silently pushes the omitted blocks to the end.
