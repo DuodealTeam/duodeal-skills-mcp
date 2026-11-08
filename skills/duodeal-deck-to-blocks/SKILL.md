@@ -1,6 +1,6 @@
 ---
 name: duodeal-deck-to-blocks
-description: Turn a designer's deck (a PDF, an Illustrator .ai, an exported slide deck) into Duodeal V2 html blocks that match the source at the pixel, and stay readable on a phone. Method for reading the real values out of the file instead of guessing from a render, cutting the artwork, hosting the brand font, sizing everything in vw, and closing the gap with a measured calibration loop. Use whenever someone hands over a deck, a PDF, an .ai, a Figma export or "the designer's file" and wants it rebuilt as a quote or a selling page, whenever a block "does not look like the design", and whenever a transposed block has to be checked on mobile.
+description: Turn a client document (a PowerPoint, a PDF, an Illustrator .ai, a Canva or Keynote export, an old quote) into a Duodeal deal made of V2 html blocks, with every image imported at the right quality, and a designer's deck into blocks that match the source at the pixel and stay readable on a phone. Starts by asking for the original file (the .pptx before the PDF), inventories every image, uploads them in batches and proves none is missing. Method for reading the real values out of the file instead of guessing from a render, cutting the artwork, hosting the brand font, sizing everything in vw, and closing the gap with a measured calibration loop. Use whenever someone hands over a deck, a presentation, a brochure, a PDF, a .pptx, an .ai, a Figma export or "the designer's file" and wants a deal, a quote or a selling page built from it ("create a deal from this PDF"), whenever images are missing or blurry after such an import, whenever a block "does not look like the design", and whenever a transposed block has to be checked on mobile.
 ---
 
 # A designer's deck to Duodeal V2 blocks
@@ -19,6 +19,23 @@ survives the visual editor, and that a designer will recognise as their own work
 This is not "design a quote" (that is **duodeal-quote-design**, which starts from a brand
 and invents the layout). Here the layout already exists and is not yours to reinterpret:
 the file is the specification.
+
+## Before anything: the source file, then the images
+
+Two steps come before every method below, for a pixel-faithful deck as for a plain "make me a
+deal from this PDF":
+
+1. **Ask once for the original file**: the `.pptx` (Keynote and Google Slides export to it)
+   before the `.ai`, the `.ai` before a Canva link, and the PDF only when there is nothing
+   else. A `.pptx` is a zip whose `ppt/media/` holds every image at full resolution with its
+   transparency: no PDF library, no cropping, no redaction.
+2. **Inventory every visual before uploading anything**, show the count to the user, and close
+   with the gate "source: N visuals / deal: N visuals". This is the step whose absence loses
+   images.
+
+The whole path (PDF types, tools to install, formats and sizes, batch upload with
+`create_medias`, completeness gate): **`references/from-a-client-document.md`**. Read it first
+whenever the request is to build a deal from a document.
 
 ## The one rule everything else follows from
 
@@ -139,7 +156,7 @@ slide IS the unit. What works, measured on a 21-slide investor deck (September 2
 
 ## What to hand back
 
-The links, and a drift table: block, source page, panel height against slide height. Give
+The links, the completeness line ("source: N visuals / deal: N visuals", every gap named), and a drift table: block, source page, panel height against slide height. Give
 the mean absolute drift and the worst case rather than a claim that it "matches". State
 the deliberate deviations (the reading floor, any hairline that a browser cannot draw),
 the copy issues you found, and the media that the build left unreferenced.
@@ -149,6 +166,8 @@ width. Never claim a render you have not seen.
 
 ## References
 
+- `references/from-a-client-document.md` — asking for the original file, the four kinds of
+  PDF, the image inventory, formats and sizes, batch upload, the completeness gate.
 - `references/reading-the-source.md` — where every value lives in the file: colours,
   opacities, radii, baselines, tracking, font instances, clip rectangles.
 - `references/art-fonts-and-qa.md` — cutting the artwork, hosting the brand font, the `vw`

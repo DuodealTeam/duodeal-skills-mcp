@@ -20,13 +20,13 @@ Duodeal is a B2B SaaS that turns quotes into **interactive HTML selling pages**,
 | Set up an account, get started, first time, "onboard me", no `DUODEAL-CONTEXT.md` yet, first template | **duodeal-onboarding** |
 | Create, duplicate or deliver a quote; start from a template; add a 2nd quotation; product catalog; customers | **duodeal-quote-building** for the structure (deal, quotation, lines), **then always duodeal-quote-design** for the content blocks |
 | The content of **every** quote, whatever the wording ("create a quote", "use the full power of the tool", "a beautiful / premium quote"); a real selling page; turn a raw quote into a visual proposal; **rework an existing quote** — restyle it, rewrite a block's HTML, add/remove a section, edit the price table | **duodeal-quote-design** |
-| A designer's deck to rebuild: a PDF, an `.ai`, an exported slide deck, "the designer's file"; a block that "does not look like the design"; checking a transposed block on mobile | **duodeal-deck-to-blocks** |
+| A deal, quote or page **built from a document**: a PDF, a PowerPoint, a Canva or Keynote export, an old quote ("create a deal from this PDF"); a designer's deck to rebuild (`.ai`, "the designer's file"); images missing or blurry after an import; a block that "does not look like the design"; checking a transposed block on mobile | **duodeal-deck-to-blocks** (ask for the `.pptx` first, inventory every image) |
 | Read or write V2 blocks, convert to V2, build an html micro-app, debug a render (iframe height, autoResize) | **duodeal-v2-blocks** |
 | Read live quote data inside a block, or **collect data from the client** — a form, a questionnaire, a choice, a document to upload, a configurator; where the answers land and whether they are encrypted | **duodeal-html-block-js** |
 | Golden rules, render contract, pre-delivery checklist, prices and currencies, write guardrails | **duodeal-mcp-best-practices** |
 | An endpoint, a field, a filter, a 4xx/5xx, an operation with no MCP tool | **duodeal-api-reference** |
 
-Skills combine: **every quote** = quote-building (create) then quote-design (HTML) then v2-blocks (write) then mcp-best-practices (check before delivery). There is no "plain" quote path: a request that says nothing about design gets the same HTML selling page. A designer's deck = quote-building (create) then **deck-to-blocks** (transpose) then v2-blocks (write) then mcp-best-practices (check).
+Skills combine: **every quote** = quote-building (create) then quote-design (HTML) then v2-blocks (write) then mcp-best-practices (check before delivery). There is no "plain" quote path: a request that says nothing about design gets the same HTML selling page. A document or a designer's deck = quote-building (create) then **deck-to-blocks** (original file first, image inventory, transpose, completeness gate) then v2-blocks (write) then mcp-best-practices (check).
 
 ## Permanent guardrails — non negotiable
 
