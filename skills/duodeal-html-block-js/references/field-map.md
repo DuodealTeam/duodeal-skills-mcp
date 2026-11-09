@@ -32,7 +32,7 @@ using. Anything not listed exists but is internal plumbing or unstable — read
 | `number` | string | Quote reference, e.g. `"DEVIS-2026-0206"` |
 | `amountHt` | number | **Total excl. tax, already computed** — prefer it to summing lines |
 | `amountTtc` / `taxAmount` | number | Total incl. tax, and the tax total |
-| `discount` / `discountType` | number / string | Global discount, `"percentage"` or `"amount"` |
+| `discount` / `discountType` | number / string | Quotation-level discount, `"percentage"` or `"amount"` — **legacy (V1) quotes only**. A V2 quote's discounts are on its pricing blocks and already in `amountHt` |
 | `validUntil` | ISO string or null | Quote expiry |
 | `signed` / `signDate` | boolean / ISO string | Whether the client signed, and when |
 | `signerFirstName` / `signerLastName` / `signerEmail` | string or null | Who signed |

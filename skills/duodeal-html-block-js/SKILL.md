@@ -83,8 +83,8 @@ The full field maps (41 fields on the deal, 44 on the quotation, 27 on a line) a
 The four that matter most often:
 
 - `DuoDeal.quotation.amountHt` — **total excl. tax, already computed.** Prefer it to
-  summing lines: it already accounts for hidden lines, unselected options, per-line and
-  global discounts.
+  summing lines: it already accounts for hidden lines, unselected options, per-line
+  discounts and each price table's own discount. In the builder it follows the table live.
 - `DuoDeal.deal.customer` — the contact (`fullName`, `email`, `billingAddress`…).
   The company's name is `deal.customer.customerCompany.name`. `deal.customerCompanyName` is a
   snapshot that is **not refreshed** when the rep changes the contact live in the builder
