@@ -33,8 +33,8 @@ deal from this PDF":
    with the gate "source: N visuals / deal: N visuals". This is the step whose absence loses
    images.
 
-The whole path (PDF types, tools to install, formats and sizes, batch upload with
-`create_medias`, completeness gate): **`references/from-a-client-document.md`**. Read it first
+The whole path (PDF types, tools to install, formats and sizes, upload from disk with
+`prepare_media_uploads` + `curl`, or `create_medias` without a shell, completeness gate): **`references/from-a-client-document.md`**. Read it first
 whenever the request is to build a deal from a document.
 
 ## The one rule everything else follows from

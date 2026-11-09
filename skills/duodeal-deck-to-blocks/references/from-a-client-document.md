@@ -94,11 +94,19 @@ Write a manifest, one row per visual:
 
 1. `list_medias` (with `search`) and reuse what is already in the library: logos and photos of
    an earlier proposal are often there.
-2. Upload with **`create_medias`, 20 files at most per call**, in one folder named after the
-   source document. `from_url` for an image that is already online (the client's website).
-3. Keep each file small **before** encoding it (step 4 sizes): a call carrying a dozen 4 MB
-   photos in base64 is where images get dropped.
-4. Fill the manifest's `media url` column from what each call returns, file by file. A file
+2. **With a shell (Claude Code): `prepare_media_uploads`**, the default. One call returns an
+   upload URL per file (50 at most per call, each usable once, valid one hour); then send
+   each file from disk with `curl -sS -F "file=@<path>" "<uploadUrl>"`. The answer is the
+   created media `{id, name, url, mime, size}`. Nothing passes through the conversation, so
+   the files keep the step 4 quality whatever their number, and nothing gets dropped. Name
+   the items after the manifest's file names, in one folder named after the source document.
+   A `404` means the URL was used or expired: prepare a new one; a `413` / `415` (size,
+   type) leaves the URL usable for a fixed file. Max 50 MB per file.
+3. **Without a shell**: **`create_medias`, 20 files at most per call**, base64 in `file`.
+   Keep each file small **before** encoding it (step 4 sizes): a call carrying a dozen 4 MB
+   photos in base64 is where images get dropped. `from_url` for an image that is already
+   online (the client's website), on either path.
+4. Fill the manifest's `media url` column from what each upload returns, file by file. A file
    that failed is retried or listed, never forgotten.
 
 ## Step 6: completeness gate (blocks "done")
