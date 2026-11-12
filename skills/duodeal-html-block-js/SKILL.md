@@ -200,6 +200,12 @@ In the builder, a block a client has answered gains a **Template / Client answer
 where the rep reviews, corrects or resets those answers without touching the template. Say
 this to the user when you deliver a data-collecting block: it is where they read the replies.
 
+Over the API, a block's `data.state` is the **template** only. The client's answers do not come
+back in `get_quotation`, and rewriting `data.state` does not clear them: they are laid over it
+again. To give a block a clean start after someone answered it on the live page (a demo clicked
+through on a call, a test run), reset it in the **Client answers** tab (it deletes the answers and
+files), or, to keep them, have the block read and write a **new key**. Measured November 2026.
+
 ### A form many people fill: a relay, not the state
 
 The client record is one per page, not one per visitor. A form shared publicly (a lead form posted

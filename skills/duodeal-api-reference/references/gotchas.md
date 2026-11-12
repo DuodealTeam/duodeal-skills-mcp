@@ -59,6 +59,14 @@ The connector hard-deletes only lines, blocks, product prices and comments (`del
 - **`displayQuoteAmount: false` on the DEAL** removes the amount from the client page (the
   « 0,00 € » under the title). Per deal, no connector argument, `PUT /deals/{id}`. Use it on any
   page that is not a priced proposal: a deck, an onboarding page, a portal.
+- **A deal with several pages** (several quotations, one client link). The left menu lists the
+  **primary** quotation first, then the others by id (creation order); no setting changes that order,
+  so name each page for what it holds, never « Page 2 ». The deal link opens the primary page;
+  `?q=<quotation id>` on the same link opens another page directly (a hidden page falls back to the
+  primary). `hide_amount` on one quotation (REST `hideAmount: true`) removes that page's amount from
+  the menu; `displayQuoteAmount: false` on the deal removes them all. A link from an html block to
+  another page of the deal opens in a **new tab** (`target="_blank"` with `?q=`): the block's frame
+  cannot reach the parent page, so it cannot switch the page in place. Measured November 2026.
 - **No per-deal setting hides the quotation number** (`Q-YYYY-NNNN`) on the client page: as of
   September 2026 the quotation carries `number` and `hide`, and neither removes it from the header.
 
