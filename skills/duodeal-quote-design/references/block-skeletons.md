@@ -273,8 +273,8 @@ try{
     put('dd-total', f(q.amountTtc||0));
     put('dd-ht', f(q.amountHt||0));
     put('dd-vat', f((q.amountTtc||0)-(q.amountHt||0)));
-    // one line by title, options excluded from the total
-    var setup=L.filter(function(l){return l.lineType==='normal'&&!l.option});
+    // one line by title; an option counts only once selected, like the native total
+    var setup=L.filter(function(l){return l.lineType==='normal'&&(!l.option||l.optionSelected)});
     put('dd-setup', f(setup.reduce(function(a,l){return a+(l.totalHt||0)},0)));
   }
   ddRender();if(DuoDeal.onUpdate){DuoDeal.onUpdate(ddRender)}

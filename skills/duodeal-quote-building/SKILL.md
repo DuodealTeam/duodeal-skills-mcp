@@ -77,7 +77,15 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
   that line's `title` when you create it, then check the export's page size before delivering.
 - **Discounts**: a `normal` line with a negative `unitPrice`, OR `discount` + `discountType`
   (`percentage`/`amount`) on the line — `lineType: "discount"` does not exist.
-- `option: true` → "Option not included" badge (French deals: « Option non incluse »), excluded from the total.
+- `option: true` → an optional line: the client adds or removes it from the client view, and it
+  counts in the totals only once selected. By default it is **not** selected ("Option not
+  included" badge; French deals: « Option non incluse »).
+- **`optionSelected: 1`** on an optional line pre-selects it: the client lands on it ticked, it
+  counts in the totals, the payment schedule and the signed amount, and the client can still
+  untick it. Use it when the rep wants the recommended items in the total and the client to
+  remove what they do not want (« auto-select the options »); `optionSelected: 0` goes back to
+  "not selected". A deal created from a template keeps the template's pre-selection. **Never tick
+  options from the client view**: every visit is recorded and raises the engagement score.
 - **A price that follows the rest of the quote** (a deployment or setup fee equal to one month of
   the contract, a 10 % project-management fee): set `unitPriceFormula` on the line instead of
   computing `unitPrice` yourself — `"{total}"` or `"10% * {total}"`. The API recomputes the price
