@@ -26,9 +26,6 @@ there as soon as the block loads. It is the single entry point for **reading the
 </script>
 ```
 
-Source: internal reference `app/components/quotation-v2/html/duodealBridge.js`, documented
-in the Notion page "Duodeal JavaScript API — HTML Block" (last updated 2026-09-07).
-
 **Sandbox:** `allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox
 allow-downloads`. Scripts, forms, `target="_blank"` and downloads work. There is **no
 access to the parent page, no cookies, no `localStorage`** — `localStorage` is not merely

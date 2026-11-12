@@ -3,8 +3,9 @@
 Replace the tokens `{{ACCENT}}`, `{{INK}}`, `{{MUTED}}`, `{{PAPER}}`, `{{LINE}}`,
 `{{DARK}}`, `{{FONT}}` with the values of the approved DS, and the `{{contents}}` with
 the real context. Everything is inline `style="…"` (no `<style>`: the editor strips
-them). Every html block ends with the autoResize script and opens/closes with a 71 px
-spacer (unless stated otherwise).
+them). Every html block ends with the autoResize script and opens/closes with the same
+responsive spacer, `clamp(39px,7vw,71px)`: 39 px on a phone, 71 px on a wide screen (unless
+stated otherwise; the client's own spacing wins).
 
 Mandatory block ending:
 
@@ -35,7 +36,7 @@ Mandatory block ending:
     <div style="color:rgba(255,255,255,.82);font-size:14.5px;line-height:1.55;padding:9px 0 9px 26px;position:relative;border-top:1px solid rgba(255,255,255,.10)"><span style="position:absolute;left:2px;top:16px;width:9px;height:9px;border-radius:50%;background:{{PAPER}}"></span>{{point 3, with a figure}}</div>
   </div>
 </div>
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 ```
 
 If the issuer has an intro video, add it before the final spacer:
@@ -60,7 +61,7 @@ If the issuer has an intro video, add it before the final spacer:
 ## 2. SOLUTION (value cards + KPI strip) — title "The solution"
 
 ```html
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 <div style="font-family:{{FONT}};max-width:860px;margin:0 auto;padding:0 18px">
   <div style="margin:0 0 22px;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid">
     <p style="color:{{ACCENT}};font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 10px">{{Our answer}}</p>
@@ -81,7 +82,7 @@ If the issuer has an intro video, add it before the final spacer:
     <!-- repeat: 4 KPIs -->
   </div>
 </div>
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 ```
 
 ---
@@ -92,7 +93,7 @@ If the issuer has an intro video, add it before the final spacer:
 between the amount rows: only the strong rule before the Total incl. tax.
 
 ```html
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 <div style="font-family:{{FONT}};max-width:780px;margin:0 auto;padding:0 18px">
   <div style="background:#fff;border:1px solid {{LINE}};border-radius:16px;padding:26px 28px;break-inside:avoid;page-break-inside:avoid">
     <p style="color:{{ACCENT}};font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px">{{Your order at a glance}}</p>
@@ -104,7 +105,7 @@ between the amount rows: only the strong rule before the Total incl. tax.
   </div>
   <p style="color:{{MUTED}};font-size:12.5px;line-height:1.6;margin:14px 4px 0">{{Terms: XX% deposit on order · lead time · cancellation. Options are presented separately and excluded from the total.}}</p>
 </div>
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 ```
 
 ⚠️ The amounts above are written as `{{X XXX.XX €}}` placeholders. Two ways to fill them:
@@ -131,7 +132,7 @@ REAL testimonials from the client; otherwise a logo wall. Stars as inline SVG:
 ```
 
 ```html
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 <div style="font-family:{{FONT}};max-width:860px;margin:0 auto;padding:0 18px">
   <div style="text-align:center;margin:0 0 20px;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid">
     <p style="color:{{ACCENT}};font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px">{{Trusted by}}</p>
@@ -147,7 +148,7 @@ REAL testimonials from the client; otherwise a logo wall. Stars as inline SVG:
     <!-- repeat -->
   </div>
 </div>
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 ```
 
 Logo wall (real files, balanced rows, height tuned PER logo):
@@ -168,7 +169,7 @@ Logo wall (real files, balanced rows, height tuned PER logo):
 html block, **never the native `faq` block**. 5-8 real objections from the deal:
 
 ```html
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 <div style="font-family:{{FONT}};max-width:780px;margin:0 auto;padding:0 18px">
   <div style="text-align:center;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid;margin:0 0 22px">
     <p style="color:{{ACCENT}};font-weight:700;font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin:0 0 10px">Frequently asked questions</p>
@@ -184,7 +185,7 @@ html block, **never the native `faq` block**. 5-8 real objections from the deal:
     <p style="color:{{INK}};font-size:13.5px;line-height:1.7;margin:0">The <b style="color:{{ACCENT}}">comment</b> button, at the top right of this page, lets you ask {{First name}} your question directly on the proposal.</p>
   </div>
 </div>
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 ```
 
 ---
@@ -192,7 +193,7 @@ html block, **never the native `faq` block**. 5-8 real objections from the deal:
 ## 6. NEXT STEPS + CTA + issuer card — title "Next steps"
 
 ```html
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 <div style="font-family:{{FONT}};max-width:780px;margin:0 auto;padding:0 18px">
   <div style="margin:0 0 30px;break-inside:avoid;page-break-inside:avoid">
     <div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0">
@@ -211,7 +212,7 @@ html block, **never the native `faq` block**. 5-8 real objections from the deal:
     <div><b style="color:{{INK}};font-size:20px;display:block;text-align:left;margin:0 0 4px">{{First name Last name}}</b><span style="color:{{MUTED}};font-size:13.5px;line-height:1.65;display:block;text-align:left">{{Job title · Company}}<br/>{{phone · email}}</span></div>
   </div>
 </div>
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 ```
 
 Real photo of the sales rep (square crop, face centered). No reminder of the legal
@@ -227,8 +228,10 @@ all other fields `""`, `logo: null` — a field left empty (`""`) surfaces the A
 data; the space neutralizes it. **All the design lives in `legalText`**
 (rich HTML): centered logo + legal entity name + pills (website · company number · VAT
 number) → centered "Terms and conditions of sale" title + small accent rule (48×3 px) →
-white card with the articles in 2 columns (`flex:1 1 340px`), each article:
-12.5 px ACCENT title + 11.5 px MUTED body. Leading spacer ~12 px only (the native zone
+white card with the articles in ONE column by default (two columns, `flex:1 1 340px`, only
+when the client's own T&Cs are laid out in two columns), each article:
+12.5 px ACCENT title + 11.5 px MUTED body. The wording of every article is the client's,
+reproduced verbatim: only the layout is restyled. Leading spacer ~12 px only (the native zone
 already takes up height), final spacer **≤ 16 px** (a large spacer creates a nearly
 empty PDF page). Official certification (Qualiopi, ISO…): official file in its original
 colors, ~80 px, centered, with its exact regulatory wording in small text.
@@ -242,7 +245,7 @@ colors, ~80 px, centered, with its exact regulatory wording in small text.
  "logo": {{COMPLETE media object of the issuer logo}}, "noLogo": false}
 ```
 
-Always filled in (logo + cover) — never hidden, never re-coded as an html block.
+Always filled in (logo; a cover is recommended) — never hidden, never re-coded as an html block.
 Upload: ⚠️ reuse an existing media first (`list_medias`); `file` in **base64 is the normal, supported route** for the upload itself. ⚠️ What is forbidden is base64 **inside the HTML**: reference the url the media returns, never a `data:` URI (see **duodeal-mcp-best-practices** → images). Via `create_media` (`name` + `folder` required, `file` in base64, or
 `from_url` works for a public image URL (a refused download comes back with its reason, e.g. « the server answered 403 »: then download it yourself and send `file`)) — there is **no `upload_media`** tool on the
 connector — then reference the complete media object returned inside the block's `data`
@@ -318,7 +321,7 @@ Replace `{{NN}}` with the number of slides on two digits (`06`), in the counter 
 `onscroll` handler; repeat the `<figure>` once per item.
 
 ```html
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 <div style="font-family:{{FONT}};max-width:860px;margin:0 auto;padding:0 18px">
   <div style="margin:0 0 20px;break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid">
     <p style="color:{{ACCENT}};font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px">{{Our work}}</p>
@@ -344,7 +347,7 @@ Replace `{{NN}}` with the number of slides on two digits (`06`), in the counter 
     </div>
   </div>
 </div>
-<div style="height:71px" aria-hidden="true"></div>
+<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>
 <script>try{if(window.DuoDeal&&DuoDeal.autoResize){DuoDeal.autoResize()}}catch(e){}</script>
 ```
 

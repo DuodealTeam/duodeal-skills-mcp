@@ -21,11 +21,13 @@ interface — and tell the user it is pending).
 Two starting points: **from scratch** (§1) or **from an existing reference quote** (§2 —
 prefer this when one exists). **The content blocks are always built with the duodeal-quote-design skill**, right after the
 creation step, even when the request says nothing about design: `html` blocks are the default,
-`wysiwyg` text and `pdfviewer` only when the user asks for them (rule in CLAUDE.md → Quote content).
+in the structure the client prefers (`DUODEAL-CONTEXT.md`, their existing quotes); `wysiwyg` text
+and `pdfviewer` when the user asks for them, and a plain quote when the user asks for one (rule in
+CLAUDE.md → Quote content).
 
 ## 0. Before anything
 
-1. Know which tenant you are writing to, and say it out loud (`get_current_user`, then `get_company` for the details). Writes: test/demo account only.
+1. Know which tenant you are writing to, and say it out loud (`get_current_user`, then `get_company` for the details). The target is the user's own account. Edit an existing deal or quotation in place when the user asks. Before any write, read and keep the data you will change: it is the undo (there is no history tool). Ask before changing a quotation that was already sent: the client may be reading it. A signed quotation is locked by the platform and cannot be edited at all: do not try; a change after signature is a new quotation or deal, made on the user's request. Never delete or archive without an explicit request.
 2. Collect the ids **of THIS tenant** before any line: taxes and units (`list_taxes`, `list_unities`), the quotation statuses (`list_quotation_statuses` — you need the Draft id for step 7) and the price categories (`list_price_categories` — the default one for step 7, all of them if there is a catalog). Never reuse the ids of another account (cause #1 of 400s). Rates come back as decimals (0.20 = 20 %).
 
 ## 1. Full from-scratch flow
@@ -97,13 +99,14 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
   result back in `unitPrice`; `""` returns to a fixed price. A **catalog product** can carry
   the formula itself (`unitPriceFormula` on `create_product` / `update_product`): a line added
   with its `product_id` and no `unitPrice` then gets the formula and is priced at once — prefer
-  that when the same fee comes back on every deal (e.g. Trading Central's Deployment Fees).
+  that when the same fee comes back on every deal (e.g. a setup fee).
 - **When the sender's loudest promise is transparency** ("no hidden fees"), the price table IS the
-  demonstration: quote in the unit THEY publish (43/week × 52 on one row, so the reader can divide),
-  and give every included service a real row at **0.00** — a number can be audited, an adjective
+  demonstration: quote in the unit THEY publish (a unit price times its quantity on one row, so the
+  reader can do the division), and give every included service a real row at **0.00** — a number can be audited, an adjective
   cannot. Confirm each zero line with the user: a 0.00 row is a deliberate gift, not an oversight.
-- **An image on EVERY product line** (blocking checklist item of **duodeal-quote-design**), on
-  the media of the LINE, square and centered on the subject. A line created with `product_id`
+- **An image on product lines when the client has product images** (recommended, not
+  blocking: a service business often has none), on the media of the LINE, square and centered on
+  the subject. A line created with `product_id`
   **gets the catalog product's photos by itself** (unless you pass `media_ids`): check them with
   `list_quotation_lines`. For a line without a product, or to change the photos, pass
   `media_ids` (array of media ids, in order; `[]` clears them) on `create_quotation_line`,
@@ -156,8 +159,7 @@ Never edit the template itself to build a client's quote: rebuild on a new deal 
 
 ⚠️ **A clone inherits the identity of its source.** The owner avatar, the quotation title (the
 YEAR!), gallery media and custom fields all travel with the copy. Audit them before showing a
-clone-based build: a photo of someone else is worse than no photo, and a rep's verdict on an
-inherited avatar was "the sales contact is completely wrong". Delivery test: *would this page
+clone-based build: a photo of someone else is worse than no photo. Delivery test: *would this page
 embarrass the client if they sent it tomorrow, unedited, to a real customer of theirs?* A demo
 mailbox address or the wrong person's face fails it instantly.
 
@@ -234,8 +236,8 @@ either (do it from the app).
 
 A deal created through the API is born `Draft` and stays there. `Draft` should mean **not yet sent
 out**: when it also holds everything already delivered, the rep's pile stops meaning anything.
-So at handoff — whether the rep sends the quote as is or edits it first — move **the deal AND its
-quotation** to the `deal-sent` status:
+So move **the deal AND its quotation** to the `deal-sent` status only when the quote is actually
+sent; at handoff, if you do not know whether it was, ask the user rather than moving it:
 
 - Status ids are **per company**: resolve them (`list_deal_statuses`, `list_quotation_statuses`,
   take the one whose `onAction == "deal-sent"`), never hard-code an id seen on another account.

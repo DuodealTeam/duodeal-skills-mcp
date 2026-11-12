@@ -1,4 +1,5 @@
-/*dd-print-v6*/@page { size: A4; margin: 10mm; }
+/*dd-print-v7*/@page { size: A4; margin: 10mm; }
+[data-block-type="header"] .bg-gradient-to-b { display: none !important; }
 @media print { [data-block-type] { break-inside: avoid; page-break-inside: avoid; }
 .qv-row-stacked, .qv-summary, .qv-summary-card { break-inside: avoid; page-break-inside: avoid; }
 .qv-pricing-head, .qv-title-row, h1, h2, h3, h4, h5, h6, p:has(> strong:only-child), p:has(> b:only-child) { break-after: avoid; page-break-after: avoid; }

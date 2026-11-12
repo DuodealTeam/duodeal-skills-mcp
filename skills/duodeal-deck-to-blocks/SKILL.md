@@ -102,7 +102,7 @@ real proposal drawn from it uses a fraction of the blocks and lands far lower.
 ## When the deck becomes the PAGE, not blocks inside a proposal
 
 A pitch deck read on a link is a different object from a deck cut into editable sections: the
-slide IS the unit. What works, measured on a 21-slide investor deck (September 2026):
+slide IS the unit. What works, measured on a full pitch deck (September 2026):
 
 - **One block per slide, each a 16:9 stage.** The stage declares `container-type:inline-size`
   and `aspect-ratio:16/9`; every length inside is the source's own px divided by
@@ -144,11 +144,12 @@ slide IS the unit. What works, measured on a 21-slide investor deck (September 2
   decoration only. A diagram whose labels are baked in becomes 3 px type on a phone.
 - **Reproduce, do not reinterpret.** If the source indents a block by 19 px, indent it by
   19 px. Ratios that "look about right" are what a designer notices first.
-- **Reproduce typos verbatim, and say so.** A misspelled standard or product name in the
-  client's copy is theirs to correct. Flag it; never silently rewrite it.
-- **Except dashes.** Replace every em dash and en dash in the copy (a colon, a semicolon or
-  a comma), because the platform truncates a title at a dash server side. Say which lines
-  you changed.
+- **The client's copy stays exactly as they wrote it**: deck copy, documents, legal texts,
+  T&Cs, dashes included. **Reproduce typos verbatim, and say so.** A misspelled standard or
+  product name in the client's copy is theirs to correct. Flag it; never silently rewrite it.
+- **One platform exception: a product title in the price table.** The server truncates a
+  `productTitle` at an em dash, so there only, replace it with ":", "·" or ",", and say which
+  lines you changed.
 - **The reading floor wins over fidelity, and you say where.** Body copy on a deck is
   often 11 px once scaled to block width; the floor for something read on a phone is 13.
   Anything held at the floor no longer scales with the slide, and that is the one place a

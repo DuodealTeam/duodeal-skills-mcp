@@ -21,7 +21,7 @@ text is exact"):
 | 3 | **Canva** | Ask for the share link or a `.pptx` export (Share → Download → PowerPoint). |
 | 4 | **PDF** | Only when the user says they have nothing else. Say plainly what it costs: on a flattened PDF, visuals are cropped from a render; with no text layer, the copy is retyped. |
 
-Measured on our own builds: a deck that came as a PowerPoint-born file was rebuilt markedly
+Measured on real builds: a deck that came as a PowerPoint-born file was rebuilt markedly
 faster than one that came from Illustrator. Its images were clean objects, so no redaction,
 no background removal and no flood fill were needed.
 
@@ -124,4 +124,6 @@ Before saying the deal is ready:
 
 Then the usual delivery checks of this skill and of **duodeal-mcp-best-practices**: client link at
 desktop and phone width (a real visual check), PDF export, served page weight measured with `curl`
-on the client link, fonts loaded through a Google Fonts `<link>` and never as base64 in a block.
+on the client link, fonts loaded through a `<link>` (a Google Fonts css2 URL with `&display=swap`,
+or a `.css` hosted in the media library) with the system stack as fallback, and never as base64 in a
+block.

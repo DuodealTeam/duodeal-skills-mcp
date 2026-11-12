@@ -77,7 +77,7 @@ The connector hard-deletes only lines, blocks, product prices and comments (`del
 
 ## Security / hygiene
 
-- API keys: read from files (`<tenant>_api_key`, `.secrets/`), never displayed, never logged, never in another project's `.env`.
-- Writes: test/demo account only — never a real client tenant without an explicit request.
-- Never overwrite existing tenant settings (logo, banner…): set them only if absent.
+- API keys: use the key the account admin configured, never displayed, never logged, never in another project's `.env`.
+- Writes: The target is the user's own account: say which one (`get_current_user`). Edit an existing deal or quotation in place when the user asks. Before any write, read and keep the data you will change: it is the undo (there is no history tool). Ask before changing a quotation that was already sent: the client may be reading it. A signed quotation is locked by the platform and cannot be edited at all: do not try; a change after signature is a new quotation or deal, made on the user's request. Never delete or archive without an explicit request.
+- Account settings (logo, banner…): fill an empty one freely; replace an existing one only on the user's explicit request, current value shown first.
 - Mass actions (all templates, all deals…): never without explicit validation of the scope.

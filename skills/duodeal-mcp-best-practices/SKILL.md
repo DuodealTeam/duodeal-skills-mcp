@@ -19,14 +19,19 @@ These rules apply as soon as you generate, edit or deliver a quote through the o
 
 One failed item = redo the quote.
 
-1. **Native header filled in** with the sender's logo + cover, never hidden nor recoded in HTML.
-2. **Native contacts block present**, sender (dedicated, named owner) AND recipient filled in.
+1. **Native header filled in** with the sender's logo, never hidden nor recoded in HTML.
+2. **Native contacts block present**, sender AND recipient filled in.
 3. **Every block carries a non-empty `title`** (otherwise the interface displays "html" instead of the title).
-4. **Every product line has an image**, square and centered, on the media of the LINE. A line created with `product_id` gets the catalog product's photos by itself; any other line takes `media_ids` (array of media ids) on `create_quotation_line` / `update_quotation_line` / `add_quotation_lines`, after `create_media` if the file is not in the library yet. A product's own photos: `media_ids` on `create_product`/`update_product`.
-5. **Every HTML block ends with `DuoDeal.autoResize()`** and stays presentable once its `<style>` tags are stripped (everything styled inline, no decorative `<script>`).
-6. **`builderVersion` 2 enabled**, language and currency set at deal level, without touching the account settings. A quotation from `create_quotation` is born V2; `create_deal`/`update_deal` accept no language and no currency. Check what you have on the **`builderVersion` field** in `get_quotation` (`builderVersion == 2`, **not** the mere presence of `blocks[]` — blocks can sit on a `builderVersion: 1` quote, which then opens in the old V1 editor): a V1 quote is switched with `update_quotation` `builder_version: 2`; language and currency are set through REST or in the app, saying which.
-7. **No `{{...}}` placeholder and no em dash left**, rendering verified on the PDF export and the rendered page (not on code reading alone). ⚠️ No connector tool returns a render: look yourself, or ask the user to look and say you have not seen it. ⚠️ **But opening the CLIENT link counts as a prospect visit** (see the tracking rule below): decide with the user before you open it.
-8. **The PDF exports in A4, with margins, no section cut in two.** Left alone, the export is US Letter with no margins. One `<style>` in the `title` of the first title line fixes it, through the connector: see **PDF export** below.
+4. **Every HTML block ends with `DuoDeal.autoResize()`** and stays presentable once its `<style>` tags are stripped (everything styled inline, no decorative `<script>`).
+5. **`builderVersion` 2 enabled**, language and currency set at deal level, without touching the account settings. A quotation from `create_quotation` is born V2; `create_deal`/`update_deal` accept no language and no currency. Check what you have on the **`builderVersion` field** in `get_quotation` (`builderVersion == 2`, **not** the mere presence of `blocks[]` — blocks can sit on a `builderVersion: 1` quote, which then opens in the old V1 editor): a V1 quote is switched with `update_quotation` `builder_version: 2`; language and currency are set through REST or in the app, saying which.
+6. **No `{{...}}` placeholder left, and no em dash in a product title**, rendering verified on the PDF export and the rendered page (not on code reading alone). ⚠️ No connector tool returns a render: look yourself, or ask the user to look and say you have not seen it. ⚠️ **But opening the CLIENT link counts as a prospect visit** (see the tracking rule below): decide with the user before you open it.
+7. **The PDF exports in A4, with margins, no section cut in two.** Left alone, the export is US Letter with no margins. One `<style>` in the `title` of the first title line fixes it, through the connector: see **PDF export** below.
+
+**Recommended, not blocking.** Follow the client's preference first (`DUODEAL-CONTEXT.md`, their existing quotes):
+
+- A cover in the native header.
+- A named person as the sender (name, job title, real photo) rather than the company or a generic account.
+- An image on product lines when the client has product images, square and centered, on the media of the LINE. A service business often has none: a line without an image is fine. A line created with `product_id` gets the catalog product's photos by itself; any other line takes `media_ids` (array of media ids) on `create_quotation_line` / `update_quotation_line` / `add_quotation_lines`, after `create_media` if the file is not in the library yet. A product's own photos: `media_ids` on `create_product`/`update_product`.
 
 ## Checking your work without polluting the prospect's statistics
 
@@ -41,12 +46,12 @@ One failed item = redo the quote.
 
 Native blocks carry the sender's identity, the signature and the legal notices: keep them filled in and properly populated.
 
-- ⚠️ **Native header**: the sender's logo + cover, never empty nor recoded in HTML (emptying it or rebuilding it breaks the rendering and forces a rework).
+- ⚠️ **Native header**: the sender's logo (a cover is recommended), never empty nor recoded in HTML (emptying it or rebuilding it breaks the rendering and forces a rework).
 - ⚠️ **Native contacts block** (sender + recipient), never rebuilt in HTML; check that the recipient is present (otherwise the information is out of sync and the delivery is non-compliant).
 - Give every block a non-empty `title`; if the visible title lives in the HTML, keep the `title` and set `showTitle:false`.
-- An image on every product line, on the media of the LINE, square, centered on the subject (`object-fit: cover`); a catalog line (`product_id`) inherits the product's photos, otherwise set `media_ids` on the line tools (upload first with `create_media`).
+- Recommended when the client has product images: an image on each product line, on the media of the LINE, square, centered on the subject (`object-fit: cover`); a catalog line (`product_id`) inherits the product's photos, otherwise set `media_ids` on the line tools (upload first with `create_media`). A line without an image is fine.
 - Consistent logos (same format, background, size) across all quotes of the same account.
-- Deal owner = a dedicated, named sender user (person + job title) with their real photo, never the company nor a generic account. Pick the owner among the existing users (`list_users`, `get_user`); the connector creates no user and `create_deal`/`update_deal` take no owner — assign it in the app (or by REST) and say so.
+- Recommended, unless the client prefers otherwise: the deal owner is a named sender user (person + job title) with their real photo, rather than the company or a generic account. Pick the owner among the existing users (`list_users`, `get_user`); the connector creates no user and `create_deal`/`update_deal` take no owner — assign it in the app (or by REST) and say so.
 - ⚠️ **On a REST `PUT /deals/{id}`, always resend `users`.** A partial PUT resets `deal.users` to the API key's own owner, and `deal.users` drives the **sender identity displayed on the client page**: another prospect's contact then ships in the delivered HTML, silently and beautifully. Read the deal, keep its `users`, send them back with every write, and re-read them afterwards.
 - Choose a plausible login address for the owner: the sender card displays the LOGIN email. That address is set when the user is created, which only the client's admin does in the app.
 - Set language and currency at deal level (per-deal), without touching the account. ⚠️ Not reachable from the connector (`create_deal`/`update_deal` have neither, and currency exists only company-wide via `update_company`, which you must not overwrite): do it by REST if a key is configured, otherwise in the app.
@@ -56,7 +61,7 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 - Every quote is `builderVersion` 2 before any block is written. `create_quotation` creates it in V2 (never pass `builder_version: 1`); confirm the state with `get_quotation` on the **`builderVersion` field** (`builderVersion == 2`). ⚠️ Having blocks proves nothing: a `builderVersion: 1` quotation can hold V2 blocks and will still open in the **old editor**. If it is still V1 (an older quote), switch it with `update_quotation` `builder_version: 2` before writing any block.
 - **Primary quotation.** The server keeps one primary quotation per deal (since 17 Sep 2026): the first quotation created on a deal, through the connector, REST, a clone or the app, is made primary automatically, and an additional one is not. The app's deals table lists deals **through their primary quotation**, so check it once before delivering: `get_deal` → `quotations[].primaryQuotation`, exactly one `true` (`primaryQuotationId` alone proves nothing). None is a server bug to report, not a step to do. Making ANOTHER quotation primary has no connector argument: REST when a key is already configured, otherwise in the app. Procedure: **duodeal-quote-building** §5.
 - Structure into dedicated blocks (one topic = one block), favoring native blocks (header, contacts, pricing, legalnotice, attachments).
-- Consistent visual identity: one reference font, one fixed palette with defined roles (background, accent, primary, contrast).
+- Consistent visual identity, taken from the client's brand (**duodeal-quote-design** → Step 1): one reference font, one fixed palette with defined roles (background, accent, primary, contrast).
 
 ## HTML blocks: surviving the visual editor and the PDF
 
@@ -67,7 +72,7 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 - Before delivery, check that every block stays presentable once its `<style>` tags are stripped: that is the state the prospect will see.
 - End every block with `DuoDeal.autoResize()` inside a `try/catch`; ⚠️ otherwise the iframe keeps a fixed height and cuts off the bottom.
 - A block that **reads the quote or collects data from the client** (bound recap, form, upload, configurator) follows **duodeal-html-block-js**. The one that ships broken blocks: it must render **from its saved state alone, at load** — in the PDF there is no interaction and `onUpdate` never fires, so a block painted only inside an event handler prints empty.
-- Brand font: ship the **system fallback stack**, full stop. No CDN `<link>` (CORS, and missing from the PDF), no base64 `@font-face` (far too heavy), no `@font-face` on a media url (fonts are not in the accepted MIME list) — and every `@font-face` route dies anyway, because it needs a `<style>` and the editor strips `<style>` on the first rep edit. Carry the brand through color, weights, scale and spacing instead. The typeface is preserved where it counts by shipping the **logo as SVG** (`image/svg+xml` is accepted): outlines, not a font.
+- Brand font: the client's brand font is loaded by a `<link rel="stylesheet">` at the top of the block, either a Google Fonts css2 URL with `&display=swap` or a `.css` hosted in the account's media library (**duodeal-deck-to-blocks** → `references/art-fonts-and-qa.md`). A `<link>` is not a `<style>`, so the editor does not strip it. Every `font-family` ends on the system stack (`-apple-system,'Segoe UI',Roboto,sans-serif`), the fallback. No `@font-face` in the block (it needs a `<style>`, which the editor strips on the first rep edit), no base64 font in the block (far too heavy), no font file as a media (fonts are not in the accepted MIME list). For the PDF the font is declared in the root document too: see **PDF export** below. The **logo as SVG** (`image/svg+xml` is accepted) keeps the exact brand type as outlines.
 - Images/logos in the Duodeal media library, `max-width:100%; height:auto`; never an external hotlink. A media cannot be renamed, moved or deleted from the connector, so create a new one and re-point the block rather than trying to replace it.
 - **Getting an image into the library:**
   1. **Reuse what is already there** (`list_medias`, `search`) before uploading anything.
@@ -80,8 +85,8 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 - **A section title never sits alone at the foot of a page.** The head (kicker + title in one wrapper) carries `break-inside:avoid;page-break-inside:avoid;break-after:avoid;page-break-after:avoid`, and nothing empty sits between it and its content. The PDF engine does honour `break-after:avoid`, but only at that exact boundary: with a spacer `<div style="height:26px">` between head and content, it simply breaks after the spacer and the title is orphaned all the same. Space the head with its own `margin-bottom`, or give the spacer `break-after:avoid` too. Without `break-inside:avoid` on the head, the break lands between kicker and title instead. The page-level print rule cannot do this for you inside an html block: see **PDF export** below.
 - Height determined by the content: no fixed `height`, no `vh`, no forced page break.
 - ⚠️ No internal scroller (`max-height` + `overflow-y:auto`): auto-sizing injects thousands of pixels of blank space in the client view and the PDF, invisible in the editor.
-- One print override for every mobile media query; cap spacers on mobile and restore the desktop value in print.
-- Consistent spacers at the top (and bottom) of every section block, except the cover/intro that follows the header; one spacer before the pricing table.
+- One print override for every mobile media query. Spacers need neither: `clamp(39px,7vw,71px)` shrinks on a phone by itself.
+- The same spacer at the top and at the bottom of every section block (`clamp(39px,7vw,71px)` by default; the client's own spacing wins), except the cover/intro that follows the header; one spacer before the pricing table.
 - Namespace every CSS class with a short prefix specific to the block (avoids collisions between blocks on the same page).
 - Icons as inline SVG (no exotic unicode glyphs → tofu), no gradient text (`background-clip:text` → stray hairline), no `box-shadow` on critical blocks (prefer a 1px border, better PDF rendering).
 - ⚠️ No native FAQ block: it renders the HTML literally (entities show up as-is). Build the FAQ as an HTML block.
@@ -95,7 +100,7 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 ## PDF export: A4, 10 mm margins, no section cut in two
 
 The client's "Download PDF" exports **US Letter with near-zero margins** and slices sections
-wherever a page ends, unless the quote carries a print rule. **Before you write or change that
+wherever a page ends, unless the quote carries a print rule. The same rule removes the dark gradient the platform paints over the bottom of the cover (client view and PDF). **Before you write or change that
 rule, read [references/pdf-export.md](references/pdf-export.md) whole**: it holds the exact
 `<style>` to copy verbatim and the measured reasons behind each line. What you must never get
 wrong, even before opening it:
@@ -130,23 +135,23 @@ The native table exposes only ONE total and the platform can rescale amounts thr
 
 ## Content and copy
 
-- ⚠️ Never use an em dash "—" anywhere (the server truncates a `productTitle` at the em dash); prefer ":", ";", "·" or the comma.
-  ⚠️ **Floor of the rule: it targets U+2014 "—" and U+2013 "–", never the ASCII hyphen of compound words.** Keep « ce soir-là », « ci-dessus », « c'est-à-dire », « quarante-huit ». A too-broad de-hyphenation pass has already shipped those as spelling errors on a live client page.
+- ⚠️ No em dash "—" in a product title: the server truncates a `productTitle` at the em dash; use ":", "·" or the comma there. The rule targets U+2014 "—" and U+2013 "–", never the ASCII hyphen of a compound word (« ci-dessus », « c'est-à-dire »).
+- The client's copy stays exactly as they wrote it: legal texts, T&Cs, documents, deck copy. Flag a typo, never silently rewrite it.
 - Real logo files (official SVG/PNG), never a brand name typed as styled text; do not stretch, distort, recolor or rotate it.
 - A real photo of the sales rep (square portrait centered on the face) in the sender card; an initials monogram as a last resort, never a fabricated face.
 - No `{{...}}` placeholder and no unreplaced generic content on the client page.
 - ⚠️ Accented characters as literal UTF-8 everywhere; never HTML entities in a plain text field (an `&eacute;` shows up literally).
 - Line descriptions in the native table: curly apostrophe, not straight (the PDF does not draw the straight apostrophe).
-- Cover image used only once; no reuse in a gallery or on a product line.
-- One single accent color reserved for details; only the colors and fonts of the validated design system.
-- No disclaimer-style captions under images (they weigh the page down and cheapen the premium rendering).
+- Recommended: use the cover image once rather than repeating it in a gallery or on a product line.
+- Colors and fonts: the client's brand first (**duodeal-quote-design** → Step 1), then the validated design system; one accent color reserved for details is the default when the brand sets nothing else.
+- Keep captions under images short. Photo credits and legal mentions under an image are allowed, and sometimes required.
 
 ## Process and API write guardrails
 
 The server state is authoritative; writes are partial or destructive.
 
-- ⚠️ Always a NEW deal and a NEW quotation (`create_deal` then `create_quotation`); never modify, delete, archive nor clone an existing deal, quote, user or media. A rework is isolated on a new deal, the old version stays intact. The connector has no clone and no hard-delete tool for them anyway: do not route around that in the app either.
-- Never overwrite the account's global settings (name, currency, logo, banner, taxes, numbering — the `update_company` and `update_numbering_setting` territory): all customization goes into the new deal (the account is shared between senders and quotes).
+- ⚠️ The target is the user's own account: say which one (`get_current_user`). Edit an existing deal or quotation in place when the user asks. Before any write, read and keep the data you will change: it is the undo (there is no history tool). Ask before changing a quotation that was already sent: the client may be reading it. A signed quotation is locked by the platform and cannot be edited at all: do not try; a change after signature is a new quotation or deal, made on the user's request. Never delete or archive without an explicit request.
+- The account's global settings (name, currency, logo, banner, taxes, numbering: the `update_company` and `update_numbering_setting` territory) apply to every quote of every rep: change them only on the user's explicit request, current value and new value shown first (currency and numbering are frozen once a deal exists). Styling one quote goes into its deal, never into the account.
 - Have the design (structure, data, colors, font, tone) validated by the human BEFORE generating any HTML.
 - Server state (the quotation JSON) = the only source of truth: re-read it before any edit (`get_quotation` for the inventory of `blocks[]`, `get_quotation_block` for one block), re-check after every write.
 - Surgical edits block by block (`replace_quotation_block_text` for long html/wysiwyg, `update_quotation_lines` for the lines, all changes in one call); ⚠️ never rewrite the whole `blocks` array blindly (it wipes the sales rep's manual edits) — re-read and merge. The connector offers no bulk write of the blocks; keep the same discipline when falling back to REST.

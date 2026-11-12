@@ -38,6 +38,8 @@ Steps:
    are currently running as (e.g. `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`) —
    never hardcode an older model name.
 6. `git push`.
+7. Regenerate the zip attached to the team's Notion install page: clients who do not install
+   from GitHub download that zip, so a push without it leaves them on the old skills.
 7. Confirm the short hash and the new version, then hand me this, ready to paste to the team:
 
    > Update my Duodeal plugins to the latest published version.

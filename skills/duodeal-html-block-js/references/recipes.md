@@ -155,11 +155,11 @@ Navigation buttons use inline `onclick="go(1)"` / `onclick="go(-1)"`.
 
 A contract or an order form written once, where the rep never edits the text: they fill
 **quotation custom fields** (and the price table), and each zone of the document prints its
-field. Built for a Solutions Order in September 2026.
+field.
 
 ```html
-<p>Client legal name: <span data-f="so_client_legal_name" style="background:#fff3b0;padding:0 4px">[Client legal name]</span></p>
-<p>Billing: <span data-f="so_billing" style="background:#fff3b0;padding:0 4px">[annually / quarterly]</span></p>
+<p>Client legal name: <span data-f="doc_client_legal_name" style="background:#fff3b0;padding:0 4px">[Client legal name]</span></p>
+<p>Billing: <span data-f="doc_billing" style="background:#fff3b0;padding:0 4px">[annually / quarterly]</span></p>
 <script>
 function fill() {
   var cf = DuoDeal.customFields || {};
@@ -179,7 +179,7 @@ DuoDeal.onUpdate(fill);
 ```
 
 - **The fields live in a native `customfields` block, set hidden** (eye off): the rep fills
-  them there, the client never sees them. Name them with one prefix (`so_…`) and list them in
+  them there, the client never sees them. Name them with one prefix (`doc_…`) and list them in
   the block in the document's reading order.
 - **Yellow = empty** is the rep's checklist: a zone turns into plain text once its field is
   filled, so a client only sees yellow if something was forgotten.
@@ -199,21 +199,21 @@ DuoDeal.onUpdate(fill);
 
 ## 7. Content that follows a dropdown
 
-A `Select` custom field picks which version of a section shows: the terms for a haulage, a workshop or a combined proposal,
+A `Select` custom field picks which version of a section shows: the terms for a service, a product or a combined proposal,
 say. The field sits in the rep's hidden `customfields` block, first; the block shows the matching part and, while nothing is
 chosen, a visible bracket.
 
 ```html
 <div data-v="none"><b>[Choose the terms in the fields block]</b></div>
-<div data-v="haulage" style="display:none">Goods are accepted for carriage subject to …</div>
-<div data-v="workshop" style="display:none">Work is carried out under …</div>
+<div data-v="service" style="display:none">Services are provided under …</div>
+<div data-v="product" style="display:none">Products are supplied under …</div>
 <script>
 function show() {
   var v = String((DuoDeal.customFields || {}).terms || "");      // a Select gives its option's label
-  var h = /haulage/i.test(v), w = /workshop/i.test(v);             // « Haulage and workshop: both » shows both
+  var h = /service/i.test(v), w = /product/i.test(v);              // « Service and product: both » shows both
   document.querySelector('[data-v="none"]').style.display = (h || w) ? "none" : "";
-  document.querySelector('[data-v="haulage"]').style.display = h ? "" : "none";
-  document.querySelector('[data-v="workshop"]').style.display = w ? "" : "none";
+  document.querySelector('[data-v="service"]').style.display = h ? "" : "none";
+  document.querySelector('[data-v="product"]').style.display = w ? "" : "none";
   if (DuoDeal.autoResize) DuoDeal.autoResize();
 }
 show();

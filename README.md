@@ -95,9 +95,6 @@ complète est dans
 ⚠️ **Les skills se chargent au démarrage de la session** : un rafraîchissement s'applique à
 partir de la session **suivante**. Le message le dit.
 
-Côté équipe Duodeal : après toute modification poussée ici, **régénérer le zip** joint à la
-page Notion — c'est lui que récupèrent les clients qui n'installent pas depuis GitHub.
-
 ## Les 8 skills
 
 | Skill | Rôle |
@@ -126,7 +123,7 @@ la règle d'entrée de toute façon et se déclenche seul.
 
 Le savoir-faire de ces skills s'appuie sur les outils du **connecteur MCP officiel
 Duodeal** (serveur distant, OAuth). Il s'ajoute dans Claude via **Personnaliser →
-Connecteurs** (voir la doc interne « Installer l'extension Duodeal dans Claude »). Une
+Connecteurs**. Une
 fois le connecteur autorisé, ces skills disent à Claude comment l'utiliser
 correctement.
 
@@ -135,11 +132,11 @@ cause n°1 d'un premier essai qui ne produit rien.
 
 ## Ce qui n'est PAS dans ce paquet
 
-Ce dépôt est **public** et installé par tous les clients Duodeal : il ne porte que le
-savoir-faire qui sert **le compte d'un client**. Le savoir-faire qui décrit **nos propres
-systèmes** vit dans le dépôt privé `DuodealTeam/duodeal-internal-skills`, réservé à
-l'équipe. Le test avant d'ajouter une skill ici : *un client qui la lit y apprend-il
-quelque chose sur nous plutôt que sur son propre compte ?* Si oui, elle va dans le privé.
+Ce dépôt est **public** et installé par tous les clients Duodeal : il ne porte que ce qui
+sert **le compte de chaque client**, c'est-à-dire les faits de la plateforme et les bonnes
+pratiques générales. Les choix de style de Duodeal n'y figurent que comme **valeurs par
+défaut**, que la marque du client ou sa préférence exprimée remplacent. Les détails propres
+à un client, les outils internes et les références internes n'y ont pas leur place.
 
 ## Statut
 

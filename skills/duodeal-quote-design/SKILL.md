@@ -43,7 +43,7 @@ quote to change a section, and never re-post the full `blocks` array.
   `update_quotation_block` to fill it, then `reorder_quotation_blocks` with the **complete**
   ordered list of ids if it must move.
 - The Step 3 golden rules apply to every edit, including a one-line fix: still inline-first,
-  still `DuoDeal.autoResize()` at the end, still no "—".
+  still `DuoDeal.autoResize()` at the end.
 
 **Editing the price table** (native `pricing` block):
 
@@ -61,43 +61,56 @@ quote to change a section, and never re-post the full `blocks` array.
 - Ids are per tenant: re-read `list_taxes` / `list_unities` on THIS account, never reuse ids seen
   on another quote.
 
-**Before touching anything**: a real client quote is only edited on explicit request, the Duodeal
-editor tab must be closed on that deal (auto-save overwrites API writes with its in-memory copy),
-and the changes are re-checked on the live page afterwards (Step 4).
+**Before touching anything**: the target is the user's own account, say which one
+(`get_current_user`). Edit in place when the user asks, and keep the data you read before any
+write: it is the undo (there is no history tool). Ask before changing a quotation that was already
+sent: the client may be reading it. A signed quotation is locked by the platform and cannot be
+edited at all: do not try; a change after signature is a new quotation or deal, made on the
+user's request. Never delete or archive without an explicit request. The Duodeal editor tab must
+be closed on that deal (auto-save overwrites API writes with its in-memory copy), and the changes
+are re-checked on the live page afterwards (Step 4).
 
 ## Step 1 — Lock the design system (BEFORE any HTML)
 
-Define 7 tokens from the sender's branding, and stick to them in ALL blocks:
+**The client's brand wins.** Take their values first: their brand guide, logo colors, fonts and
+website, and what `DUODEAL-CONTEXT.md` records (section 2). The third column below holds
+Duodeal's defaults: use one only where the client's brand says nothing.
 
-| Token | Role | Rule |
+Define 7 tokens from those values, and stick to them in ALL blocks:
+
+| Token | Role | Default when the brand sets nothing |
 |---|---|---|
-| `ACCENT` | Accent color | **ONE only** — the brand's signature color |
-| `INK` | Heading ink | Brand near-black (not pure #000) |
+| `ACCENT` | Accent color | The brand's signature color; one accent only, unless the brand works with a wider palette |
+| `INK` | Heading ink | A near-black rather than pure #000 |
 | `MUTED` | Secondary text | Readable mid grey |
-| `PAPER` | Light card background | Often cream/ivory, **not pure white** |
+| `PAPER` | Light card background | A tinted cream or ivory rather than pure white |
 | `LINE` | Soft borders | Very light grey |
 | `DARK` | Brand dark background | For "problem" cards and CTA |
-| `FONT` | Font + fallback | `'Police',-apple-system,'Segoe UI',Roboto,sans-serif` (replace "Police" with the brand's font name) |
+| `FONT` | Font + fallback | `'Police',-apple-system,'Segoe UI',Roboto,sans-serif` (replace "Police" with the brand's font name, loaded by a `<link>`: see the font rule in `references/design-system.md`) |
 
-Validate mentally: sufficient contrast, accent used sparingly
-(eyebrows, key figures, ONE word of the H1 — never whole paragraphs).
+Check the contrast. Default use of the accent, when the brand says nothing else: eyebrows, key
+figures, a word of the H1, never whole paragraphs.
 Typographic details and choices: [references/design-system.md](references/design-system.md).
 
-## Step 2 — Narrative structure (canonical block order)
+## Step 2 — Narrative structure (recommended default order)
 
-1. **native `header`** — sender logo + cover, filled in, never hidden nor recoded in HTML
+**Follow the client's stated preference first**: the structure recorded in `DUODEAL-CONTEXT.md`,
+or the one their existing quotes follow. With none, the order below is the recommended default.
+If the user asks for a plain quote, build a plain quote: the native blocks (header, contacts,
+pricing, signature, legal notice) with little or no html around them.
+
+1. **native `header`** — sender logo (a cover is recommended), filled in, never hidden nor recoded in HTML
 2. **`contacts`** — native
-3. **html INTRO** — 2-logo lockup (sender · separator · prospect) → eyebrow
-   "PROSPECT × SENDER" → H1 (ink + ONE accent word) → personalized hook
-   (contact name, their context) → dark "what the current situation costs" card
-   (3-4 bullets, the last one quantified) → 1-click video if available
-4. **html SOLUTION** — 3-4 value cards (the prospect's vocabulary) + a strip of
-   4 quantified KPIs
+3. **html INTRO** — a hook, for example: a 2-logo lockup (sender · separator · prospect),
+   an eyebrow, an H1, a personalized hook (contact name, their context), what the current
+   situation costs (3-4 bullets, the last one quantified), a 1-click video if available
+4. **html SOLUTION** — value cards in the prospect's vocabulary, and the figures the client
+   can back up (a KPI strip, for example)
 5. *(optional)* **html GALLERY / DEMO** — real photos (physical business) or interface
    mockup (SaaS)
 6. **`pricing`** — the priced quote (title "Your quote"); attach every line to this
-   block (line tools carry the block's `blockId`) and give every product line an
-   **image**: host the file first (`create_media`, or `create_medias` for several), then
+   block (line tools carry the block's `blockId`) and, when the client has product images,
+   give product lines an **image**: host the file first (`create_media`, or `create_medias` for several), then
    `media_ids` on the line tools; a line created with `product_id` already gets the
    product's photos (set them with `media_ids` on `create_product` / `update_product`)
 7. **html ORDER RECAP** — one-off vs recurring, spelled out. **Recurring lives HERE**
@@ -107,7 +120,7 @@ Typographic details and choices: [references/design-system.md](references/design
    files, never names typed as text). **If neither exists, there is a third rung before
    dropping the block: quote the sender itself.** Reproduce sentences they publish on their
    own site, WORD FOR WORD and attributed, plus figures drawn only from those sentences —
-   never a testimonial you wrote. If two of their own pages disagree (160 vs 150 years), the
+   never a testimonial you wrote. If two of their own pages disagree, the
    contradiction does not give you a fact, it forbids two: omit it if it is decorative, quote
    ONE attributed sentence if it carries the argument, never arbitrate and never restate the
    number in the document's own voice.
@@ -118,24 +131,25 @@ Typographic details and choices: [references/design-system.md](references/design
    CSM" may promise as new what their tier already includes.
    **Five or more references or testimonials with photos, or a book of realised work**: a rail
    (slider), not a grid: [references/block-skeletons.md](references/block-skeletons.md) §10.
-9. **html FAQ** — 5-8 real objections + an "Another question?" card pointing to the
+9. **html FAQ** — the real objections + an "Another question?" card pointing to the
    native comment button. ⚠️ **Never the native `faq` block** (it renders HTML
    entities literally)
-10. **html NEXT STEPS + CTA** — 3-4 step stepper → dark CTA card pointing to
-    the native "Accept & sign" button (French deals: « Accepter et signer ») → **large sender card**
-    (real round 96 px photo, name, contact — humanize)
+10. **html NEXT STEPS + CTA** — a short stepper → a CTA card pointing to
+    the native "Accept & sign" button (French deals: « Accepter et signer ») → a **sender card**
+    (the rep's real photo, name, contact)
 11. **`accept` + `signstamp`, side by side** — the signature block and its stamp always
     ship as a pair: once signed, `accept` disappears and only `signstamp` shows the
     signature (see the pairing rule in **duodeal-mcp-best-practices**)
-12. **`legalnotice`** — designed legal pack (T&Cs as a grid of cards)
+12. **`legalnotice`** — designed legal pack (T&Cs as cards, one column by default; the
+    client's wording stays verbatim)
 
-Adapt (remove/add sections depending on the offer), but keep the logic:
-hook → problem → solution → proof → price → reassurance → action.
+Adapt (remove/add sections depending on the offer and the client's preference); as a default,
+the logic is: hook → problem → solution → proof → price → reassurance → action.
 HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-skeletons.md).
 
 ## Step 3 — Golden rules for the HTML (non-negotiable)
 
-1. **INLINE-FIRST**: **no `<style>` at all** in a delivered block — there is no `@font-face` exception any more (see the font rule in `references/design-system.md`: no custom-font route survives the editor).
+1. **INLINE-FIRST**: **no `<style>` at all** in a delivered block, and no `@font-face` exception: the brand font comes in through a `<link>` (see the font rule in `references/design-system.md`).
    The Duodeal visual editor **strips `<style>` tags** as soon as the sales rep edits the
    block → the whole design breaks. So: everything in `style="…"` on each element.
 2. **Responsive without media queries**: never `grid`, never `@media` — use containers
@@ -149,14 +163,16 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
      recap, a form, a file upload, a configurator) carries its logic in that same final
      script — see **duodeal-html-block-js**. That is a micro-app, not decoration: the rule
      above bans decorative scripts, not the `DuoDeal` logic.
-4. **Spacing**: spacer `<div style="height:71px" aria-hidden="true"></div>` at the top
-   AND at the bottom of each html block (legal pack: bottom ≤ 16 px, otherwise an empty PDF page).
-5. **Never use an em dash "—"** anywhere (titles, cards, T&Cs, product lines):
-   use ":", ";", "·", ",".
-   ⚠️ **Floor of this rule: it targets U+2014 "—" and U+2013 "–", NEVER the ASCII hyphen of
-   compound words.** Write « ce soir-là », « ci-dessus », « c'est-à-dire », « quarante-huit »,
-   « au cœur ». A de-hyphenation pass applied too broadly has already shipped those five as
-   spelling mistakes on a live client page: a typographic rule with no floor eats the text.
+4. **Spacing**: the same spacer at the top AND at the bottom of each html block,
+   `<div style="height:clamp(39px,7vw,71px)" aria-hidden="true"></div>`: about 39 px on a phone,
+   71 px on a wide screen, inside the card the platform already draws around every block
+   (**duodeal-v2-blocks**, rule 5). A default: the client's own spacing wins. Legal pack:
+   bottom ≤ 16 px, otherwise an empty PDF page.
+5. **No em dash "—" in a product title**: the server truncates a `productTitle` at the em
+   dash, so use ":", "·" or "," there. The rule targets U+2014 "—" and U+2013 "–", never the
+   ASCII hyphen of a compound word (« ci-dessus », « c'est-à-dire »).
+   Everywhere else, the client's copy stays exactly as they wrote it: legal texts, T&Cs,
+   documents, deck copy. Flag a typo, never silently rewrite it.
 6. **Every block has a non-empty `title`** (otherwise the interface shows "html"),
    `showTitle:false` when the block already carries its own title in HTML.
 7. Stars/icons as **inline SVG** (never ★ nor emoji); every image must be hosted on
@@ -195,7 +211,7 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
     A check that reads the RENDERED text is structurally blind to it (ten such comments once
     shipped across seven of eight blocks, one of them explaining at length why the sender's
     previous copy was false). Rationale belongs in the conversation, never in the payload.
-    ⚠️ Grepping the served page also returns comments and em dashes that are **not yours**:
+    ⚠️ Grepping the served page also returns comments that are **not yours**:
     the platform injects its own `DuoDeal` bootstrap into each block iframe. Check the strings
     YOU authored, not the host's chrome.
 
@@ -204,10 +220,10 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
 Check on the LIVE quotation before delivering — one failing item = not done:
 
 1. Every block has a non-empty `title`.
-2. Native header filled in (sender logo + cover).
-3. Every product line has an image — out of reach of the connector: bind it via REST if a
-   key is configured, otherwise hand the step to the user in the Duodeal interface and say
-   it is still pending.
+2. Native header filled in (sender logo; a cover is recommended).
+3. Product lines carry an image when the client has product images (recommended, not
+   blocking: a service business often has none): `media_ids` on the line tools, or a catalog
+   line (`product_id`) that inherits the product's photos.
 4. No leftover `<style>` at all (mental test: if you strip all
    `<style>` tags, the block still looks presentable).
 5. `DuoDeal.autoResize()` at the end of every html block.
@@ -215,7 +231,7 @@ Check on the LIVE quotation before delivering — one failing item = not done:
 6bis. Every amount duplicated from the price table is bound to `DuoDeal`, not retyped —
    or, if it is hard-coded on purpose, it matches the table today and the user knows it
    is a manual copy to re-check after any line edit.
-7. No "—", no ★, no forgotten `{{…}}` placeholder, and **no `<!-- … -->` comment** left in
+7. No "—" in a product title, no ★, no forgotten `{{…}}` placeholder, and **no `<!-- … -->` comment** left in
    any block (rule 10) — check the block `code` you sent, not the rendered text.
 7bis. **The PDF exports A4** (595 × 842 pt on every page, 10 mm margins, no section cut in two,
    and no title left alone at the foot of a page: section heads in html blocks carry

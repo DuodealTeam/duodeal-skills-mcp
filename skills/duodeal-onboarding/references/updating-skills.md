@@ -4,7 +4,7 @@ These skills are **copied** out of the public repo, not cloned: the install prom
 into a temporary folder, copies `skills/`, then deletes the clone. There is therefore **no
 git remote on the client's machine and nothing to `git pull`** — refreshing means redoing
 that copy. Left alone, an install silently stays on the version of the day it was made
-(one client ran for two weeks on skills frozen at 2026-08-26).
+(it can run for weeks on skills that were already fixed).
 
 Two mechanisms cover this, and the second exists because the first can fail.
 

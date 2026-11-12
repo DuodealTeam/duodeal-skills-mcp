@@ -5,8 +5,8 @@
 # the public repo with no git remote behind them, so nothing refreshes them on its own.
 # This script re-copies them whenever they are more than MAX_AGE_DAYS old — the stamp is
 # rewritten at each refresh, so the check recurs every week, it is not a one-shot — and it
-# shouts when it cannot. A silent staleness is what let a client work five weeks on rules
-# we had already fixed.
+# shouts when it cannot. A silent staleness can leave an install running for weeks on rules
+# that were already fixed.
 #
 # It never fails a session: every path exits 0. The worst case is a warning.
 #
