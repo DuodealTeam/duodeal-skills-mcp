@@ -114,8 +114,8 @@ wrong, even before opening it:
 - **Titles inside html blocks** need inline `break-after:avoid` / `break-inside:avoid`: the page
   rule never reaches their shadow DOM. **Fonts** for the PDF are declared in the root document
   too (same carrier).
-- **A4 for a document, one page per slide for a deck.** A quote that reads as slides (a 16:9
-  deck, a replica of a presentation) prints at the slide's size, 297 × 167.5 mm with no margin,
+- **A4 for a document, slide-size pages for a deck.** A quote built from a presentation (a 16:9
+  deck, a replica, or a deck reworked into a web page) prints at the slide's size, 297 × 167.5 mm,
   one slide per page, like a PowerPoint exported to PDF; never on A4. See references/pdf-export.md
   → "Pick the paper".
 - **Verify on the artefact**: 595 × 842 pt on every page (842 × 475 pt for a deck), nothing touching the edge, no title

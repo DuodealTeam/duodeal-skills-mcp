@@ -75,8 +75,12 @@ Decide the format before you write the rule, from what the reader sees on screen
 
 | The quote looks like | The PDF prints | Rule |
 |---|---|---|
-| A document, a letter, a web-style proposal, a price table, a reworked deck that reads as a page (tabs, accordions, text sections) | **A4 portrait, 10 mm margins** | step 1 above (`dd-print-v6`) |
+| A document, a letter, a proposal with a price table, a quote built from scratch | **A4 portrait, 10 mm margins** | step 1 above (`dd-print-v6`) |
 | **Slides**: a 16:9 deck, a slide-for-slide replica of a presentation, one full-width slide after another | **One page per slide, at the slide's own size** (297 × 167.5 mm for 16:9, no margin), like a PowerPoint exported to PDF | below (`dd-print-deck-16x9`) |
+| **A deck reworked into a web page** (the client's presentation turned into tabs, accordions, carousels) | **Slide-size pages too** (297 × 167.5 mm, 8 × 10 mm margins), each section starting a page, the slide images scaled to fit one page | below, "A reworked deck" |
+
+The source decides: what came in as a presentation goes back out in presentation format, even
+when the web version was redesigned. The client prints it next to their own deck.
 
 Never print slides on A4 (portrait or landscape): each slide shrinks into a white frame, and a
 reader who downloads the deck expects the same deck back, page for page. A4 landscape is no
@@ -120,6 +124,21 @@ The root rule cannot reach a block's shadow DOM, so each slide carries its own b
   slide.
 - **No `loading="lazy"`** on slide images: lazy images print blank (measured: every slide image
   missing, only the live text left).
+
+### A reworked deck (web page built from a presentation)
+
+Same paper, but the content flows, so the page keeps margins: in the carrier, replace the A4
+`@page` of `dd-print-v6` with `@page { size: 297mm 167.5mm; margin: 8mm 10mm; }` and add, inside
+`@media print`: `.qv-public__body, .qv-public__content, .qv-public__content > * { gap: 0 }`,
+`[data-block-type] { break-before: page }`, `[data-block-type] > div { border: 0; border-radius: 0 }`
+and `[data-block-type="html"] > div > div { padding: 0 }` (all `!important`). Without the last two,
+the block's frame and padding spill onto a **blank page at the end of each block**.
+Inside the blocks:
+- Each section or tab panel starts a page: inline `break-before:page` on its print title.
+- A slide image kept as a figure is narrower on paper so it fits one landscape page with its
+  title: `width:var(--fw,100%);margin:0 auto` on the figure, `--fw:82%` set in the carrier's
+  print rule (a custom property crosses the shadow DOM, a selector does not).
+- Titles keep `break-after:avoid`, and no `loading="lazy"`.
 
 ### Verify on the artefact
 
