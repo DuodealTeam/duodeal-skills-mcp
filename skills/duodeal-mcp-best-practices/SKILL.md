@@ -113,8 +113,12 @@ wrong, even before opening it:
   carries nothing.
 - **Titles inside html blocks** need inline `break-after:avoid` / `break-inside:avoid`: the page
   rule never reaches their shadow DOM. **Fonts** for the PDF are declared in the root document
-  too (same carrier), and a deck prints `A4 landscape`.
-- **Verify on the artefact**: 595 × 842 pt on every page, nothing touching the edge, no title
+  too (same carrier).
+- **A4 for a document, one page per slide for a deck.** A quote that reads as slides (a 16:9
+  deck, a replica of a presentation) prints at the slide's size, 297 × 167.5 mm with no margin,
+  one slide per page, like a PowerPoint exported to PDF; never on A4. See references/pdf-export.md
+  → "Pick the paper".
+- **Verify on the artefact**: 595 × 842 pt on every page (842 × 475 pt for a deck), nothing touching the edge, no title
   alone at the foot of a page. If you cannot measure the PDF, ask the user and say you have not
   seen it. On a quote the client already has, add the rule only when asked.
 - **Copy that points at the screen is false on paper** ("click here", "top right of this page").

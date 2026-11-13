@@ -69,11 +69,64 @@ what the web view uses.
 Verify on the artefact, not on the code: export the PDF and list its embedded fonts
 (`page.get_fonts()`); the brand families must appear.
 
-## A deck prints landscape
+## Pick the paper by what the quote looks like: A4, or one page per slide
 
-A quote prints A4 portrait, but a deck of 16:9 slides does not: put
-`@page { size: A4 landscape; margin: 10mm }` in the same carrier and each slide lands on its own
-page, 842 × 595 pt. Check every page's size after the export.
+Decide the format before you write the rule, from what the reader sees on screen:
+
+| The quote looks like | The PDF prints | Rule |
+|---|---|---|
+| A document, a letter, a web-style proposal, a price table, a reworked deck that reads as a page (tabs, accordions, text sections) | **A4 portrait, 10 mm margins** | step 1 above (`dd-print-v6`) |
+| **Slides**: a 16:9 deck, a slide-for-slide replica of a presentation, one full-width slide after another | **One page per slide, at the slide's own size** (297 × 167.5 mm for 16:9, no margin), like a PowerPoint exported to PDF | below (`dd-print-deck-16x9`) |
+
+Never print slides on A4 (portrait or landscape): each slide shrinks into a white frame, and a
+reader who downloads the deck expects the same deck back, page for page. A4 landscape is no
+longer the deck rule.
+
+### The deck rule
+
+In the same carrier (first title line, or the visible `legalnotice` block's `other`; a deck has
+no price table, so it is usually the `legalnotice`, which you may have to add), copy verbatim:
+
+```html
+<style>/*dd-print-deck-16x9*/@page { size: 297mm 167.5mm; margin: 0; } @media print { html, body { margin: 0 !important; padding: 0 !important; } .qv-public__layout { padding: 0 !important; } .qv-public__body, .qv-public__content, .qv-public__content > * { gap: 0 !important; } [data-block-type] { break-before: page; page-break-before: always; margin: 0 !important; } [data-block-type="legalnotice"] { display: none !important; } [data-block-type] > div { border: 0 !important; border-radius: 0 !important; box-shadow: none !important; } [data-block-type="html"] > div > div { padding: 0 !important; } [data-block-type], [data-block-type] * { box-shadow: none !important; } }</style>
+```
+
+What each part does, measured on a 135-slide deck (from 69 fragmented Letter pages to 137 clean
+slide pages, 22 to 38 s export):
+
+- **`size: 297mm 167.5mm`, not 167 mm.** 16:9 of 297 mm is 167.06 mm: the slide renders about
+  474 pt high, a 167 mm page holds 473 pt, so every slide spilled 1 pt onto a new page and the
+  PDF had a **blank page after every slide** (272 pages for 136).
+- **`.qv-public__body` gap set to 0.** The page body is a flex column with a 20 px gap: without
+  this, the first slide of each block starts 12 pt down the page.
+- **`[data-block-type] { break-before: page }`**: every block (header, contacts, each chapter)
+  starts on a new page.
+- **`legalnotice` hidden on paper.** It is only the carrier here; its `<style>` still applies
+  when it is hidden with `display:none` (a block hidden with `visible:false` is not rendered and
+  carries nothing).
+
+### Inside the html blocks: one slide, one page
+
+The root rule cannot reach a block's shadow DOM, so each slide carries its own break:
+
+- Each slide element: inline `break-before:page;page-break-before:always;break-inside:avoid`,
+  `width:100%;aspect-ratio:16/9`, and **no margin**.
+- Space the slides on screen with a flex column `row-gap` on their wrapper, and cancel it on
+  paper with one print-only rule placed **inside the block** (a forced page break keeps the gap
+  above the slide):
+  `<style>@media print{[data-deck]{row-gap:0!important}}</style><div data-deck style="display:flex;flex-direction:column;row-gap:12px">…slides…</div>`.
+  This is the one `<style>` tolerated in a block, because it only exists for the PDF: if the
+  editor strips it, the PDF keeps working and only gains a thin white band at the top of each
+  slide.
+- **No `loading="lazy"`** on slide images: lazy images print blank (measured: every slide image
+  missing, only the live text left).
+
+### Verify on the artefact
+
+Export, then check: every page is **842 × 475 pt**; the page count is the number of slides plus
+the header and contacts pages; each slide's background image starts at y = 0 and fills the page
+(`page.get_image_rects()`); no page without an image. Render a contact sheet of the first pages
+and look at it before you say it is done.
 
 ## Links survive the PDF
 

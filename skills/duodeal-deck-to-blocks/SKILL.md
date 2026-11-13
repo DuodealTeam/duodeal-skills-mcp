@@ -126,6 +126,9 @@ slide IS the unit. What works, measured on a full pitch deck (September 2026):
   same stage with `aspect-ratio:1920/420` and the platform's own card radius (16 px, read from its
   stylesheet, in absolute px since the block is already the card's width). Wrap the whole stage in
   an `<a>`: anchors survive the PDF export as real link annotations.
+- **The PDF of a deck is one page per slide, at the slide's size**, never A4: 297 × 167.5 mm with
+  no margin for 16:9, each slide breaking before itself, no lazy images. The exact rule and its
+  checks: **duodeal-mcp-best-practices** → references/pdf-export.md → "Pick the paper".
 
 ### Three findings that cost time
 
