@@ -1,6 +1,6 @@
 ---
 name: duodeal-html-block-js
-description: The window.DuoDeal JavaScript API available inside an html block of a Duodeal V2 quote — read the deal, quotation, lines and custom fields, keep your own state persisted per block, collect answers from the client (forms, choices), let the client attach files, format currency and dates, react to live edits with onUpdate. Use whenever a block has to READ live quote data, COLLECT or STORE data from the client, hold a form, a questionnaire, an onboarding journey, a configurator or a file upload, whenever the user asks to "get data from the client", "recover data", "save the answers", "a form in the quote", "upload a document", or when a block's saved answers, their encryption, or where the sales rep reads them comes up.
+description: The window.DuoDeal JavaScript API available inside an html block of a Duodeal V2 quote — read the deal, quotation, lines and custom fields, and the deal's other quotations, keep your own state persisted per block, collect answers from the client (forms, choices), let the client attach files, format currency and dates, react to live edits with onUpdate. Use whenever a block has to READ live quote data or another quotation of the same deal (an order filled from the proposal, an addendum), COLLECT or STORE data from the client, hold a form, a questionnaire, an onboarding journey, a configurator or a file upload, whenever the user asks to "get data from the client", "recover data", "save the answers", "a form in the quote", "upload a document", or when a block's saved answers, their encryption, or where the sales rep reads them comes up.
 ---
 
 # `window.DuoDeal` — the JS API of html blocks
@@ -120,6 +120,39 @@ the page your client reads. Hard rule:
 Render prices, quantities and the client's own information. When in doubt, leave it out.
 Never loop over `Object.keys(...)` to print "everything" — that is exactly how a margin
 coefficient reaches a buyer.
+
+### The deal's other quotations
+
+A deal can hold several quotations (a proposal, then the order built from it, then an
+addendum). A block reads them too:
+
+- `DuoDeal.quotations` — the list, the block's own included:
+  `{ id, number, title, primary, current, quotation, lines, customFields }`.
+  `current: true` is the block's own quotation, `primary: true` the deal's main one.
+  `lines` and `customFields` sit **beside** `quotation`, not inside it.
+- `DuoDeal.getQuotation(ref)` — one entry, or `null`. `ref` is an id, `'primary'`,
+  `'current'` (or nothing), or the quotation's **title** (case and spaces ignored).
+
+```javascript
+function render() {
+  const proposal = DuoDeal.getQuotation('Solutions Proposal') || DuoDeal.getQuotation('primary');
+  if (!proposal || proposal.current) { /* no source quotation: say so, or fill by hand */ return; }
+  const taken = proposal.lines.filter(l => (!l.lineType || l.lineType === 'normal') && !l.hide && (!l.option || l.optionSelected));
+  /* paint `taken` */
+}
+render(); DuoDeal.onUpdate(render);
+```
+
+- **In a template, name the quotation by its title or `'primary'`, never by its id**: a
+  deal made from the template copies the titles, but its quotations get new ids.
+- **What a block sees**: the client page gives the deal's non-hidden quotations; a **share
+  link only its own** (`getQuotation('primary')` can be `null` there: plan for it); the
+  builder loads the other quotations a moment after opening, then fires `onUpdate`; the PDF
+  has them. Hidden quotations are never given.
+- Read-only, like the rest: nothing here changes another quotation. The values are live: a
+  signed quotation that reads another one shows what that one says **now**.
+- The same rules as for `DuoDeal.lines` apply: an option counts only once taken, a hidden line
+  is not shown, and the fields of « Never displayed » stay out of the page.
 
 ### `onUpdate` — following live edits
 
@@ -360,6 +393,7 @@ media library through the relay.
 ## 7. API summary
 
 **Quote data (read-only)** — `deal` · `quotation` · `lines` · `customFields`
+**The deal's quotations (read-only)** — `quotations` · `getQuotation(id | 'primary' | 'current' | title)`
 **State (read/write, auto-persisted)** — `get(k)` · `set(k,v)` · `update(obj|fn)` · `getData()` · `setData(obj)`
 **Files** — `uploadFile(file)` → descriptor · `removeFile(x)` · `isFile(v)`
 **Context (read-only)** — `storage` (`'encrypted'`|`'plain'`) · `locale`

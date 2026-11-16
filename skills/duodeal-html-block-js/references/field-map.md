@@ -56,6 +56,19 @@ using. Anything not listed exists but is internal plumbing or unstable — read
 | `unity` | object or null | `id`, `name`, e.g. "Days" |
 | `customFields` | object | Per-line custom fields |
 
+## `DuoDeal.quotations[]` / `DuoDeal.getQuotation(ref)`
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | number | Changes when a deal is made from a template: refer by `title` or `'primary'` there |
+| `number` | string or null | e.g. `D-2026-0751` |
+| `title` | string or null | What `getQuotation('…')` matches, case and spaces ignored |
+| `primary` | boolean | The deal's main quotation |
+| `current` | boolean | The quotation holding this block |
+| `quotation` | object | The quotation's other fields (as `DuoDeal.quotation`, without `blocks`, `uuid`, lines and custom fields) |
+| `lines` | array | Its lines, same fields as `DuoDeal.lines[]` |
+| `customFields` | object | Its custom fields, key → value |
+
 ## Never displayed
 
 | Entity | Fields |
