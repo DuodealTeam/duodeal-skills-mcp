@@ -75,7 +75,7 @@ Decide the format before you write the rule, from what the reader sees on screen
 
 | The quote looks like | The PDF prints | Rule |
 |---|---|---|
-| A document, a letter, a proposal with a price table, a quote built from scratch | **A4 portrait, 10 mm margins** | step 1 above (`dd-print-v6`) |
+| A document, a letter, a proposal with a price table, a quote built from scratch | **A4 portrait, 10 mm margins** | step 1 above (`dd-print-v7`) |
 | **Slides**: a 16:9 deck, a slide-for-slide replica of a presentation, one full-width slide after another | **One page per slide, at the slide's own size** (297 × 167.5 mm for 16:9, no margin), like a PowerPoint exported to PDF | below (`dd-print-deck-16x9`) |
 | **A deck reworked into a web page** (the client's presentation turned into tabs, accordions, carousels) | **Slide-size pages too** (297 × 167.5 mm, 8 × 10 mm margins), each section starting a page, the slide images scaled to fit one page | below, "A reworked deck" |
 
@@ -92,7 +92,7 @@ In the same carrier (first title line, or the visible `legalnotice` block's `oth
 no price table, so it is usually the `legalnotice`, which you may have to add), copy verbatim:
 
 ```html
-<style>/*dd-print-deck-16x9*/@page { size: 297mm 167.5mm; margin: 0; } @media print { html, body { margin: 0 !important; padding: 0 !important; } .qv-public__layout { padding: 0 !important; } .qv-public__body, .qv-public__content, .qv-public__content > * { gap: 0 !important; } [data-block-type] { break-before: page; page-break-before: always; margin: 0 !important; } [data-block-type="legalnotice"] { display: none !important; } [data-block-type] > div { border: 0 !important; border-radius: 0 !important; box-shadow: none !important; } [data-block-type="html"] > div > div { padding: 0 !important; } [data-block-type], [data-block-type] * { box-shadow: none !important; } }</style>
+<style>/*dd-print-deck-16x9*/@page { size: 297mm 167.5mm; margin: 0; } [data-block-type="header"] .bg-gradient-to-b { display: none !important; } @media print { html, body { margin: 0 !important; padding: 0 !important; } .qv-public__layout { padding: 0 !important; } .qv-public__body, .qv-public__content, .qv-public__content > * { gap: 0 !important; } [data-block-type] { break-before: page; page-break-before: always; margin: 0 !important; } [data-block-type="legalnotice"] { display: none !important; } [data-block-type] > div { border: 0 !important; border-radius: 0 !important; box-shadow: none !important; } [data-block-type="html"] > div > div { padding: 0 !important; } [data-block-type], [data-block-type] * { box-shadow: none !important; } }</style>
 ```
 
 What each part does, measured on a 135-slide deck (from 69 fragmented Letter pages to 137 clean
@@ -105,6 +105,7 @@ slide pages, 22 to 38 s export):
   this, the first slide of each block starts 12 pt down the page.
 - **`[data-block-type] { break-before: page }`**: every block (header, contacts, each chapter)
   starts on a new page.
+- **The `header` line, outside `@media print`**: removes the dark gradient the native header paints over the bottom of the cover, on screen and on paper, as in the A4 rule. A deck rule without it is the earlier version: replace it whole.
 - **`legalnotice` hidden on paper.** It is only the carrier here; its `<style>` still applies
   when it is hidden with `display:none` (a block hidden with `visible:false` is not rendered and
   carries nothing).
@@ -128,7 +129,7 @@ The root rule cannot reach a block's shadow DOM, so each slide carries its own b
 ### A reworked deck (web page built from a presentation)
 
 Same paper, but the content flows, so the page keeps margins: in the carrier, replace the A4
-`@page` of `dd-print-v6` with `@page { size: 297mm 167.5mm; margin: 8mm 10mm; }` and add, inside
+`@page` of `dd-print-v7` with `@page { size: 297mm 167.5mm; margin: 8mm 10mm; }` (keep the rest of the rule, its `header` line included: the cover loses its gradient here too) and add, inside
 `@media print`: `.qv-public__body, .qv-public__content, .qv-public__content > * { gap: 0 }`,
 `[data-block-type] { break-before: page }`, `[data-block-type] > div { border: 0; border-radius: 0 }`
 and `[data-block-type="html"] > div > div { padding: 0 }` (all `!important`). Without the last two,
