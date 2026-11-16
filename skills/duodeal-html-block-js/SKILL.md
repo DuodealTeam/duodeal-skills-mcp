@@ -1,6 +1,6 @@
 ---
 name: duodeal-html-block-js
-description: The window.DuoDeal JavaScript API available inside an html block of a Duodeal V2 quote — read the deal, quotation, lines and custom fields, and the deal's other quotations, keep your own state persisted per block, collect answers from the client (forms, choices), let the client attach files, format currency and dates, react to live edits with onUpdate. Use whenever a block has to READ live quote data or another quotation of the same deal (an order filled from the proposal, an addendum), COLLECT or STORE data from the client, hold a form, a questionnaire, an onboarding journey, a configurator or a file upload, whenever the user asks to "get data from the client", "recover data", "save the answers", "a form in the quote", "upload a document", or when a block's saved answers, their encryption, or where the sales rep reads them comes up.
+description: The window.DuoDeal JavaScript API available inside an html block of a Duodeal V2 quote — read the deal, quotation, lines and custom fields, and the deal's other quotations, take an option, set a field or add a product, keep your own state persisted per block, collect answers from the client (forms, choices), let the client attach files, format currency and dates, react to live edits with onUpdate. Use whenever a block has to READ live quote data or another quotation of the same deal (an order filled from the proposal, an addendum), COLLECT or STORE data from the client, hold a form, a questionnaire, an onboarding journey, a configurator or a file upload, whenever the user asks to "get data from the client", "recover data", "save the answers", "a form in the quote", "upload a document", or when a block's saved answers, their encryption, or where the sales rep reads them comes up.
 ---
 
 # `window.DuoDeal` — the JS API of html blocks
@@ -149,10 +149,46 @@ render(); DuoDeal.onUpdate(render);
   link only its own** (`getQuotation('primary')` can be `null` there: plan for it); the
   builder loads the other quotations a moment after opening, then fires `onUpdate`; the PDF
   has them. Hidden quotations are never given.
-- Read-only, like the rest: nothing here changes another quotation. The values are live: a
-  signed quotation that reads another one shows what that one says **now**.
+- Reading changes nothing. To change a quotation, see « Writing to the quotations » below.
+  The values are live: a signed quotation that reads another one shows what that one says
+  **now**.
 - The same rules as for `DuoDeal.lines` apply: an option counts only once taken, a hidden line
   is not shown, and the fields of « Never displayed » stay out of the page.
+
+### Writing to the quotations
+
+A block can change the native quote, not only read it: the client clicks « add » in your
+designed block, and the native price table, the totals and the signature amount follow.
+Each call returns a **Promise**: it resolves with what was done, or rejects with a message
+already translated for the person in front of the page. Show it; never swallow it.
+
+| Call | What | Where |
+|---|---|---|
+| `DuoDeal.selectOption(lineId, selected, quotation?)` | Take or drop an **option** line (the rep marked it « option »; a plain line is refused) | editor and client page |
+| `DuoDeal.setCustomField(name, value, quotation?)` | Set a **quotation** custom field (text, number, boolean, null or a list of those) | editor and client page, **only the fields ticked in the block's settings** |
+| `DuoDeal.addProduct(productId, { quantity, quotation, pricingBlock })` | Add a **catalogue product** to a price table (price of the quote's price category, tax and photos from the catalogue), in `pricingBlock` or the first visible table | **editor only**: refused on the client page |
+
+`quotation` names the target like `getQuotation` (an id, `'primary'`, a title; nothing = the
+block's own).
+
+```javascript
+document.querySelector('#add-pod').onclick = () =>
+  DuoDeal.selectOption(podLineId, true, 'Solutions Proposal')
+    .then(() => show('Added to your quote'))
+    .catch((e) => show(e.message));
+```
+
+Rules (the server checks them again on the client page):
+- **Fields**: tick the fields the block may write in the block's settings (« Fields this block
+  may write »); any other is refused, so a visitor cannot rewrite an internal field from the
+  browser console. When the API creates or updates the block, it is `data.writableFields`
+  (a list of quotation custom-field names).
+- **Products** only from the editor. On the client page, offer the products as **option
+  lines** the rep put in the table, and take them with `selectOption`.
+- A **signed** quotation is never changed. A **share link** changes only its own quotation;
+  the deal link changes any visible quotation of the deal. Nothing is written from the PDF or
+  the builder's « Client » preview.
+- After a write, the data comes back through `onUpdate`: repaint there rather than by hand.
 
 ### `onUpdate` — following live edits
 
@@ -394,6 +430,7 @@ media library through the relay.
 
 **Quote data (read-only)** — `deal` · `quotation` · `lines` · `customFields`
 **The deal's quotations (read-only)** — `quotations` · `getQuotation(id | 'primary' | 'current' | title)`
+**Writing to them (Promises)** — `selectOption(lineId, selected, q?)` · `setCustomField(name, value, q?)` (declared fields only) · `addProduct(productId, opts)` (editor only)
 **State (read/write, auto-persisted)** — `get(k)` · `set(k,v)` · `update(obj|fn)` · `getData()` · `setData(obj)`
 **Files** — `uploadFile(file)` → descriptor · `removeFile(x)` · `isFile(v)`
 **Context (read-only)** — `storage` (`'encrypted'`|`'plain'`) · `locale`
