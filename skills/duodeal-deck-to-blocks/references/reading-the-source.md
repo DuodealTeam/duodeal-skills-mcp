@@ -64,6 +64,23 @@ for it in dr["items"]:
         break
 ```
 
+## Shapes: the geometry, not the frame
+
+In a `.pptx`, every shape's `<p:spPr>` declares what it really is: `<a:prstGeom prst="…">`
+(a preset such as `rtTriangle`, `chevron`, `homePlate`, `ellipse`, with its `<a:avLst>`
+adjustments) or `<a:custGeom>` (the path itself, in EMU). The `<a:xfrm>` around it only gives
+the frame, with `flipH`, `flipV` and `rot` (in 60 000ths of a degree). Drawing the frame gives
+a rectangle where the designer drew a right triangle, a chevron or an arrow, and the slide no
+longer reads as theirs. So, for every decorative shape:
+
+- read `prst` (or the `custGeom` path) and draw that exact shape in SVG, at the frame's
+  position and size;
+- apply the flips and the rotation before placing it, or a triangle points the wrong way;
+- an illustration made of grouped shapes (`<p:grpSp>`) is exported as one SVG from its own
+  paths, never rebuilt from the group's frame.
+
+Check on the slide render that every shape has the same outline, not just the same box.
+
 ## Text: baselines, not ink boxes
 
 Use `page.get_text("rawdict")` and take `span["origin"]`: that is the **baseline**, the only

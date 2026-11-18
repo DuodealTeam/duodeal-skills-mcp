@@ -122,6 +122,12 @@ slide IS the unit. What works, measured on a full pitch deck (September 2026):
   width in a headless browser, compare each text's `scrollWidth`/`clientWidth` and its height
   against the source box, and shrink the ones that overflow, iterating until nothing moves. Group
   the texts that must share a size (two columns read as one table, a row of card titles).
+- **The title slide as the native cover: plan for the crop.** The header block's frame is the
+  page width by `coverHeight` (at most 640 px, see **duodeal-v2-blocks**), drawn with
+  `object-fit: cover`. A 16:9 slide used as the cover therefore shows only its middle band on a
+  wide screen (about 4:1 at 2560 px), and the logo or title in its top or bottom third
+  disappears. Keep the logos and words of the cover inside the middle third of its height, or
+  compose the picture on a canvas shaped for the frame, and look at it at 1440 and 2560 px.
 - **A band is a slide with another height.** For a link out, a testimonial or a video, use the
   same stage with `aspect-ratio:1920/420` and the platform's own card radius (16 px, read from its
   stylesheet, in absolute px since the block is already the card's width). Wrap the whole stage in
