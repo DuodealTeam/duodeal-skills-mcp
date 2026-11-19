@@ -116,7 +116,7 @@ Format: `METHOD /path` — summary. **Req** = required fields; **Opt** = notable
 
 ## Block library
 
-- `GET /block-library` — the library: its « Blocks » template (deal and quotation), its categories and blocks. `POST /block-library/categories {name}`. `POST /block-library/from-quotation/{quotationId} {blockId, name, categoryId}` saves a block of a quotation to the library; a **pricing** block is refused (03/11/2026).
+- `GET /block-library` — the library: its « Blocks » template (deal and quotation), its categories and blocks. `POST /block-library/categories {name}`. `POST /block-library/from-quotation/{quotationId} {blockId, name, categoryId}` saves a block of a quotation to the library; a **pricing** block is refused (03/11/2026). `POST /block-library/{blockId}/insert/{quotationId} {position?}` inserts an independent copy of a library block into a quotation (0-based `position`, absent = the end), and returns it (201) with a new `id` and `sourceLibraryBlockId`. Connector: `list_block_library`, `insert_library_block` (November 2026).
 
 ## Webhooks (not in openapi.yaml)
 

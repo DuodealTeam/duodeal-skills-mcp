@@ -55,9 +55,13 @@ CLAUDE.md → Quote content).
 8. Fill the price table             (add_quotation_lines {quotation_id, lines[]} as
                                      soon as there are 2+ lines, create_quotation_line
                                      for a single one)
-9. Write the content blocks        (duodeal-quote-design: html intro, solution, recap,
-                                     proof, FAQ, next steps around the native blocks;
-                                     add_quotation_block then update_quotation_block)
+9. Write the content blocks        (FIRST list_block_library: a block the company
+                                     already wrote (references, method, terms, FAQ…)
+                                     goes in with insert_library_block, never rewritten;
+                                     then duodeal-quote-design for the rest: html intro,
+                                     solution, recap, proof, FAQ, next steps around the
+                                     native blocks; add_quotation_block then
+                                     update_quotation_block)
 10. Attach T&Cs + legal notice      (no text-template tool on the connector — see the last
                                      section)
 11. Hold the 2 delivery links       (rebuild them from get_deal + get_quotation — §5)
@@ -125,6 +129,24 @@ result: both links are rebuilt by hand from the deal `uid` / `id` and the quotat
   via REST / the interface.
 - `noLogo` / `noCover: true` only if there is NOTHING to show (otherwise conflict) — they are
   `header` block fields, sent inside its `data`, not quotation arguments.
+
+### Block library (« Blocks ») — reuse before you write
+
+The company keeps reusable blocks in its block library (« Blocks », in the Templates
+section). Before writing a content block, call `list_block_library` (filter with `search`,
+`type` or `category_id`): each entry has its name, type, category, title and a text preview.
+When one fits the section (company presentation, references, method, terms, FAQ, a video),
+**insert it** with `insert_library_block {quotation_id, library_block_id, position}` instead
+of rebuilding it, after telling the user which library block you use:
+- the quote gets an **independent copy**, with a new block `id`. Read it back with
+  `get_quotation` before editing it, and edit it only if this quote must differ (say so).
+  Editing the copy never changes the library;
+- `position` is 0-based among the quote's blocks, and absent means at the end;
+- a library block may be **locked** (`locked: true`): the copy is read only in a deal
+  (see **duodeal-v2-blocks**). Leave it as it is;
+- nothing in the library fits: write the block (**duodeal-quote-design**). Saving a block to
+  the library is done in the app (block menu › « Save to the block library »), not through
+  the connector.
 
 ## 2. Start from an existing reference quote (recommended when one exists)
 
