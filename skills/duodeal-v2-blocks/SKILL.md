@@ -47,6 +47,25 @@ Known types: header, contacts, wysiwyg, html, pricing, customfields, attachments
 legalnotice, paymentschedule, pdfviewer, youtube, faq, pptx, googleslides, canva,
 gallery, accept, signstamp, signature, pagebreak.
 
+**Locked blocks (« Lock in deals », November 2026).** A template can lock a content block
+(`html`, `wysiwyg`, `faq`, `header`, `legalnotice`, `attachments`, `pdfviewer`, `youtube`,
+`pptx`, `googleslides`, `canva`, `embed`, `gallery`). The block then carries `locked: true` at
+its top level, next to `visible`, and keeps it in every deal made from the template. In a
+deal, such a block is read only for everyone, you included:
+- `update_quotation_block` only accepts `visible` on it. Anything else, and
+  `replace_quotation_block_text`, is refused with **HTTP 423**. A whole-quote save keeps its
+  stored content.
+- It can still be hidden, moved (`reorder_quotation_blocks`) or deleted on the user's request.
+- **Never unlock it** (`locked: false`) to get your change through, even when the user is an
+  admin and the API would accept it. Tell the user the block is locked by the template, and
+  that an admin unlocks it in the editor (chain icon) before it can be changed. Offer to edit
+  the template itself instead, where the lock does not apply and only deals created
+  afterwards get the change.
+- Pricing, signature, contacts, custom fields and payment schedule blocks never lock, even
+  with `locked: true`.
+- In a template, `locked` lives on the block, not in `data`: an `update_quotation_block` call
+  that sends only `data` keeps the lock. Set or remove it only when the user asks.
+
 ## REST contract (off-spec) and MCP tools
 
 - **Take the inventory before touching anything** — every block `id`, `type` and the current
@@ -141,6 +160,7 @@ connector tool validates the code you send.
 1. The target is the user's own account: say which one (`get_current_user`). Edit an existing deal or quotation in place when the user asks. Before any write, read and keep the data you will change: it is the undo (there is no history tool). Ask before changing a quotation that was already sent: the client may be reading it. A signed quotation is locked by the platform and cannot be edited at all: do not try; a change after signature is a new quotation or deal, made on the user's request. Never delete or archive without an explicit request.
 2. Read the existing blocks first — understand what exists before touching anything
    (connector: `get_quotation` → `blocks[]`, then `get_quotation_block` for the ones you edit).
+   A block with `locked: true` in a deal is read only: say so, do not try to edit or unlock it.
 3. NEVER post a partial `blocks` array: through REST it replaces the whole page, and the
    connector has **no raw-HTTP tool** (`api_call` does not exist) — edit block by block, and
    send the complete `data` each time.
