@@ -157,6 +157,12 @@ render(); DuoDeal.onUpdate(render);
 
 ### Writing to the quotations
 
+> **A hidden table must be kept in the total.** When your html block shows the price
+> and the native table is hidden (`visible: false`), set `countWhenHidden: true` in the
+> table's `data` (« Keep in the total when hidden » in its settings). Otherwise a hidden
+> table counts for nothing: the stored amount, the signature amount and the deal amount
+> are 0, and the client signs €0. `addProduct` adds to the first table that counts.
+
 A block can change the native quote, not only read it: the client clicks « add » in your
 designed block, and the native price table, the totals and the signature amount follow.
 Each call returns a **Promise**: it resolves with what was done, or rejects with a message

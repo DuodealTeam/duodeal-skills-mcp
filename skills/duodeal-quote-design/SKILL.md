@@ -115,7 +115,8 @@ pricing, signature, legal notice) with little or no html around them.
    product's photos (set them with `media_ids` on `create_product` / `update_product`)
 7. **html ORDER RECAP** — one-off vs recurring, spelled out. **Recurring lives HERE**
    (the native table has only one total per quote). An html block **can be bound to the
-   price table** and display its real amounts live — offer it, see the rule below
+   price table** and display its real amounts live — offer it, see the rule below. When the
+   native table is then hidden, set its `data.countWhenHidden: true`, or the quote signs €0
 8. **html SOCIAL PROOF** — real testimonials, otherwise a logo wall (real logo
    files, never names typed as text). **If neither exists, there is a third rung before
    dropping the block: quote the sender itself.** Reproduce sentences they publish on their
