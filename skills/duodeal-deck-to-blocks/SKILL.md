@@ -136,6 +136,45 @@ slide IS the unit. What works, measured on a full pitch deck (September 2026):
   no margin for 16:9, each slide breaking before itself, no lazy images. The exact rule and its
   checks: **duodeal-mcp-best-practices** → references/pdf-export.md → "Pick the paper".
 
+### A deck, or a long document, as ONE slider block
+
+Two forms, chosen by what is sent. When the deck IS what the reader receives, the page is the deck:
+one block per slide and no slider, as above. When the slides sit INSIDE a proposal (a company
+presentation, a methodology memo, a technical brief) and the reader should swipe through them in
+one place, put a selection of the pages in one block, as the items of a rail at 100 % width
+(scroll-snap, arrows, a counter), rebuilt as live html in the document's own grammar. Prefer it to
+the `pdfviewer` block, which shows the browser's PDF reader (not rendered in an iframe by Chrome on
+Android, a screenshot on paper, unreadable on a phone), and keep the full document as a download
+that holds every page the slider shows. Measured October 2026 on a 6-slide group deck and a 14-page
+memo:
+
+- **Size the slides to keep the arrows in view.** As big as the frame allows while the controls
+  stay on screen: the slide gives way, never the arrows.
+- ⚠️ **`autoResize` counts the off-screen slides.** Their boxes keep their rects, so the frame stays
+  as tall as the LONGEST slide and a short one sits above a screen of blank. Fit the height: once a
+  swipe settles (`onscroll` + a 160 ms timeout), collapse every other slide to the visible one's
+  height (its wrapper `height:H;overflow:hidden`, its content `transform:translateY(-50000px)`, the
+  wrapper keeping the slide's ground so the next one still peeks), give the rail that height and
+  call `DuoDeal.autoResize()`; the first scroll event of the next swipe restores them.
+- ⚠️ **The PDF export runs block scripts.** It renders the blocks in the page itself, not in an
+  iframe: an unguarded fit collapses slides 2 to N on paper and only the first one prints. Start
+  the script with `if (window.parent === window) return;`.
+- **Controls above the slides** when their heights differ (a phone always): below a slide whose
+  height changes, the arrows run away from the finger after every tap.
+- **No tail spacer on 100 % slides**: the rail's "next" end test misses by the gap, and "next"
+  never loops back from the last slide.
+- **Full bleed, when the slide must be bigger**: the platform wraps each block in a card with 32 px
+  of padding. A root rule in `legalnotice.data.other`,
+  `#qv-block-<id>>div{overflow:hidden}#qv-block-<id>>div>div{padding:0!important}`, gives the
+  block the card's full width (890 px instead of 826 on desktop), and `margin:0 -8px` on the
+  block's root takes back the iframe body's margins. To line the slides up with the other blocks'
+  column, size them `calc(100% - 116px)` and recompute the reading floor at that width.
+- **Dense pages (body text at 11 to 14 pt): one layout, not two.** A frame with
+  `min-height:56.25cqw` (16:9 of its own width), the content in flow, flex rows that wrap, text at
+  `max(13.5px, Ncqw)`: on desktop it reads as the slide, on a phone it grows into a portrait card.
+  No switch and no duplicated copy, which also keeps the block light.
+- **On paper** the rail prints as a column, one slide per row, through the rail's print variables.
+
 ### Three findings that cost time
 
 - **Figma's DM Sans renders at the optical size of its point size, capped at 40** — including the

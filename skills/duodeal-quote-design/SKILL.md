@@ -60,6 +60,17 @@ quote to change a section, and never re-post the full `blocks` array.
   the line so it lands in the right table.
 - Ids are per tenant: re-read `list_taxes` / `list_unities` on THIS account, never reuse ids seen
   on another quote.
+- **Line images (an icon or a photo per line)**: attach the media to the LINE, not the product
+  (`update_quotation_line {medias: [{id}]}`), and show them by adding `line_prictures` (sic) to the
+  pricing block's `columns`. ⚠️ The table displays the media's **thumbnail** (`thumb_…`, 156 px)
+  in a fixed slot of about 104 css px: soft on every retina screen, whatever the size uploaded. An
+  **SVG media gets no thumbnail and is served as uploaded**, so wrap the drawing in one (a 400 px
+  JPEG or PNG as a data URI inside `<svg><image/></svg>`, in the uploaded file, never in a block):
+  sharp up to about 4x. The slot does not change size: to show an icon smaller, draw it smaller
+  inside the SVG (left-anchored, it keeps the line titles' edge), on a pure white ground (a 254 grey
+  ground reads as a box on the white card). A `title` line shows no image. In the stacked layout
+  each image takes its own row and lengthens every card: say so when the table is long. Measured
+  October 2026.
 
 **Before touching anything**: the target is the user's own account, say which one
 (`get_current_user`). Edit in place when the user asks, and keep the data you read before any
