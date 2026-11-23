@@ -67,7 +67,7 @@ Native blocks carry the sender's identity, the signature and the legal notices: 
 
 ⚠️ The visual editor strips `<style>` tags and neutralizes `<script>` tags the first time the sales rep edits; the final rendering also goes through a PDF export. Every block must hold up in both states.
 
-- All styling inline (`style="..."`); **no `<style>` at all** (no `@font-face` exception — see the font rule below), no decorative `<script>` (presentation interactivity through inline `onclick`). A block that reads the quote or collects client data keeps its `DuoDeal` logic in the block's **final** script, never before the first element — the editor deletes what precedes it (**duodeal-html-block-js**).
+- All styling inline (`style="..."`); **no `<style>` at all** (no `@font-face` exception — see the font rule below; the one exception is a print-only `<style>`, `@media print{…}`, which the screen never reads, such as the shadow rule of **duodeal-quote-design** step 7bis), no decorative `<script>` (presentation interactivity through inline `onclick`). A block that reads the quote or collects client data keeps its `DuoDeal` logic in the block's **final** script, never before the first element — the editor deletes what precedes it (**duodeal-html-block-js**).
 - Responsive without media queries: `flex` + `flex-wrap` + `flex:1 1 basis` (never `grid-template-columns`), falling back to a single column on narrow screens and in print.
 - Before delivery, check that every block stays presentable once its `<style>` tags are stripped: that is the state the prospect will see.
 - End every block with `DuoDeal.autoResize()` inside a `try/catch`; ⚠️ otherwise the iframe keeps a fixed height and cuts off the bottom.
@@ -141,7 +141,7 @@ The native table exposes only ONE total and the platform can rescale amounts thr
 
 - ⚠️ No em dash "—" in a product title: the server truncates a `productTitle` at the em dash; use ":", "·" or the comma there. The rule targets U+2014 "—" and U+2013 "–", never the ASCII hyphen of a compound word (« ci-dessus », « c'est-à-dire »).
 - The client's copy stays exactly as they wrote it: legal texts, T&Cs, documents, deck copy. Flag a typo, never silently rewrite it.
-- Real logo files (official SVG/PNG), never a brand name typed as styled text; do not stretch, distort, recolor or rotate it.
+- Real logo files (official SVG/PNG) first. When there is no logo file, the brand name set as a text wordmark (in the brand's font, bold) is a good alternative; never a redrawn or invented logo. Do not stretch, distort, recolor or rotate a logo.
 - A real photo of the sales rep (square portrait centered on the face) in the sender card; an initials monogram as a last resort, never a fabricated face.
 - No `{{...}}` placeholder and no unreplaced generic content on the client page.
 - ⚠️ Accented characters as literal UTF-8 everywhere; never HTML entities in a plain text field (an `&eacute;` shows up literally).
@@ -154,7 +154,7 @@ The native table exposes only ONE total and the platform can rescale amounts thr
 
 The server state is authoritative; writes are partial or destructive.
 
-- ⚠️ The target is the user's own account: say which one (`get_current_user`). Edit an existing deal or quotation in place when the user asks. Before any write, read and keep the data you will change: it is the undo (there is no history tool). Ask before changing a quotation that was already sent: the client may be reading it. A signed quotation is locked by the platform and cannot be edited at all: do not try; a change after signature is a new quotation or deal, made on the user's request. Never delete or archive without an explicit request.
+- ⚠️ The target is the user's own account: say which one (`get_current_user`). Edit an existing deal or quotation in place when the user asks. Before any write, read and keep the data you will change: it is the undo (there is no history tool). Ask before changing a quotation that was already sent: the client may be reading it. Never edit a signed quotation: the editor locks it, but the API and the connector still accept changes to its title, lines and blocks (tested November 2026), so the rule is yours to keep; a change after signature is a new quotation or deal, made on the user's request. Never delete or archive without an explicit request.
 - The account's global settings (name, currency, logo, banner, taxes, numbering: the `update_company` and `update_numbering_setting` territory) apply to every quote of every rep: change them only on the user's explicit request, current value and new value shown first (currency and numbering are frozen once a deal exists). Styling one quote goes into its deal, never into the account.
 - Have the design (structure, data, colors, font, tone) validated by the human BEFORE generating any HTML.
 - Server state (the quotation JSON) = the only source of truth: re-read it before any edit (`get_quotation` for the inventory of `blocks[]`, `get_quotation_block` for one block), re-check after every write.

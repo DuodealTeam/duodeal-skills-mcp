@@ -75,9 +75,9 @@ quote to change a section, and never re-post the full `blocks` array.
 **Before touching anything**: the target is the user's own account, say which one
 (`get_current_user`). Edit in place when the user asks, and keep the data you read before any
 write: it is the undo (there is no history tool). Ask before changing a quotation that was already
-sent: the client may be reading it. A signed quotation is locked by the platform and cannot be
-edited at all: do not try; a change after signature is a new quotation or deal, made on the
-user's request. Never delete or archive without an explicit request. The Duodeal editor tab must
+sent: the client may be reading it. Never edit a signed quotation: the editor locks it,
+but the API and the connector still accept changes (tested November 2026), so the rule is yours
+to keep; a change after signature is a new quotation or deal, made on the user's request. Never delete or archive without an explicit request. The Duodeal editor tab must
 be closed on that deal (auto-save overwrites API writes with its in-memory copy), and the changes
 are re-checked on the live page afterwards (Step 4).
 
@@ -129,7 +129,7 @@ pricing, signature, legal notice) with little or no html around them.
    price table** and display its real amounts live — offer it, see the rule below. When the
    native table is then hidden, set its `data.countWhenHidden: true`, or the quote signs €0
 8. **html SOCIAL PROOF** — real testimonials, otherwise a logo wall (real logo
-   files, never names typed as text). **If neither exists, there is a third rung before
+   files; a name with no logo file can stand as a text wordmark). **If neither exists, there is a third rung before
    dropping the block: quote the sender itself.** Reproduce sentences they publish on their
    own site, WORD FOR WORD and attributed, plus figures drawn only from those sentences —
    never a testimonial you wrote. If two of their own pages disagree, the
@@ -161,7 +161,7 @@ HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-
 
 ## Step 3 — Golden rules for the HTML (non-negotiable)
 
-1. **INLINE-FIRST**: **no `<style>` at all** in a delivered block, and no `@font-face` exception: the brand font comes in through a `<link>` (see the font rule in `references/design-system.md`).
+1. **INLINE-FIRST**: **no `<style>` at all** in a delivered block, and no `@font-face` exception: the brand font comes in through a `<link>` (see the font rule in `references/design-system.md`). One exception: a **print-only** `<style>` (`@media print{…}`), such as the shadow rule of step 7bis or the deck's row-gap rule: the screen never reads it, so if the editor strips it the page is unchanged and only the PDF loses that tweak.
    The Duodeal visual editor **strips `<style>` tags** as soon as the sales rep edits the
    block → the whole design breaks. So: everything in `style="…"` on each element.
 2. **Responsive without media queries**: never `grid`, never `@media` — use containers
@@ -236,8 +236,8 @@ Check on the LIVE quotation before delivering — one failing item = not done:
 3. Product lines carry an image when the client has product images (recommended, not
    blocking: a service business often has none): `media_ids` on the line tools, or a catalog
    line (`product_id`) that inherits the product's photos.
-4. No leftover `<style>` at all (mental test: if you strip all
-   `<style>` tags, the block still looks presentable).
+4. No leftover `<style>` at all, apart from the one print-only `<style>` (mental test: if you
+   strip all `<style>` tags, the block still looks presentable).
 5. `DuoDeal.autoResize()` at the end of every html block.
 6. Recurring in the html recap, not in the native table.
 6bis. Every amount duplicated from the price table is bound to `DuoDeal`, not retyped —
@@ -253,9 +253,12 @@ Check on the LIVE quotation before delivering — one failing item = not done:
    button at the top right of this page"): it is false on paper.
    **No shadow on paper**: Apple's PDF viewer (Preview, Quick Look) draws every blurred
    `box-shadow` as a flat tinted rectangle, darker where two overlap, while Chrome shows the
-   same PDF correctly. Keep screen shadows discreet and switch them off for print: add
-   `@media print{*{box-shadow:none !important}}` inside the `<style>` that carries each html
-   block's `@font-face` (an html block prints in its own root, out of reach of a page-level rule).
+   same PDF correctly. Keep screen shadows discreet and switch them off for print: the page's print rule already does it for the native
+   blocks; an html block prints in its own root, out of that rule's reach, so a block that has a
+   shadow carries the same declaration itself, at its top: `<style>@media print{*{box-shadow:none !important}}</style>`.
+   It is the one print-only `<style>` a block may carry (step 1): the screen never reads it
+   (measured: captures identical to the pixel), and if the editor strips it the PDF only goes back
+   to showing the shadows.
    Check one exported page on a Mac (or with `sips -s format png page.pdf`) before delivering.
 8. **Real visual verification**: check the rendering, then deliver both links (client + edition).
    ⚠️ **Opening the CLIENT link is recorded as a prospect visit**: the client view posts a `visit`

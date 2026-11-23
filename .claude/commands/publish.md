@@ -14,6 +14,9 @@ current, the whole team was still on 0.4.2. The internal repo does not have this
 prevents it.
 
 Steps:
+0. Pull first: `git pull --rebase --autostash`, then read `version` from the file, never from
+   memory. Several people publish to this repo in a day, and a commit another session left
+   unpushed in this clone goes out with yours: name it in step 2.
 1. `git status --short` and `git diff --stat` to see what changed since the last push. If
    nothing changed, say so and stop.
 2. Show me a one-line summary of what will be published and which skills it touches.
@@ -29,17 +32,15 @@ Steps:
    key, client name or account id may enter this repo — these skills install on client machines.
 4bis. Print rules: `python3 ~/Projects/Duodeal/demo-kit-automated-v3/renderer/demo-kit-v2/print_rules_check.py`
    must print `OK`. `skills/duodeal-mcp-best-practices/assets/print-rules.css` is the ONE source of the PDF
-   print rule (Maxime, 2026-10-28): the inline copy in `references/pdf-export.md` and the demo kit's and
+   print rule (since 2026-10-28): the inline copy in `references/pdf-export.md` and the demo kit's and
    internal skill's embedded copies must equal it. The check WARNS that GitHub differs when this publish
    changes the file: expected, that is what you are publishing. A change to the rule bumps the marker on the
-   file's first line (`/*dd-print-vN*/`) and the plugin version (step 3), and Maxence resyncs the API bundle.
+   file's first line (`/*dd-print-vN*/`) and the plugin version (step 3), and the developer resyncs the API bundle.
 5. `git add -A`, then commit with a message describing what got BETTER for whoever uses the
    skills (not "update files"). End it with the Co-Authored-By trailer for the Claude model you
    are currently running as (e.g. `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`) —
    never hardcode an older model name.
 6. `git push`.
-7. Regenerate the zip attached to the team's Notion install page: clients who do not install
-   from GitHub download that zip, so a push without it leaves them on the old skills.
 7. Confirm the short hash and the new version, then hand me this, ready to paste to the team:
 
    > Update my Duodeal plugins to the latest published version.

@@ -157,7 +157,7 @@ connector tool validates the code you send.
 
 ## Checklist before writing blocks
 
-1. The target is the user's own account: say which one (`get_current_user`). Edit an existing deal or quotation in place when the user asks. Before any write, read and keep the data you will change: it is the undo (there is no history tool). Ask before changing a quotation that was already sent: the client may be reading it. A signed quotation is locked by the platform and cannot be edited at all: do not try; a change after signature is a new quotation or deal, made on the user's request. Never delete or archive without an explicit request.
+1. The target is the user's own account: say which one (`get_current_user`). Edit an existing deal or quotation in place when the user asks. Before any write, read and keep the data you will change: it is the undo (there is no history tool). Ask before changing a quotation that was already sent: the client may be reading it. Never edit a signed quotation: the editor locks it, but the API and the connector still accept changes to its title, lines and blocks (tested November 2026), so the rule is yours to keep; a change after signature is a new quotation or deal, made on the user's request. Never delete or archive without an explicit request.
 2. Read the existing blocks first — understand what exists before touching anything
    (connector: `get_quotation` → `blocks[]`, then `get_quotation_block` for the ones you edit).
    A block with `locked: true` in a deal is read only: say so, do not try to edit or unlock it.

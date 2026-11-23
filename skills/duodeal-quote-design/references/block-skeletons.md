@@ -3,7 +3,7 @@
 Replace the tokens `{{ACCENT}}`, `{{INK}}`, `{{MUTED}}`, `{{PAPER}}`, `{{LINE}}`,
 `{{DARK}}`, `{{FONT}}` with the values of the approved DS, and the `{{contents}}` with
 the real context. Everything is inline `style="…"` (no `<style>`: the editor strips
-them). Every html block ends with the autoResize script and opens/closes with the same
+them; the one exception is a print-only `<style>`, see the checklist). Every html block ends with the autoResize script and opens/closes with the same
 responsive spacer, `clamp(39px,7vw,71px)`: 39 px on a phone, 71 px on a wide screen (unless
 stated otherwise; the client's own spacing wins).
 
@@ -230,7 +230,7 @@ data; the space neutralizes it. **All the design lives in `legalText`**
 number) → centered "Terms and conditions of sale" title + small accent rule (48×3 px) →
 white card with the articles in ONE column by default (two columns, `flex:1 1 340px`, only
 when the client's own T&Cs are laid out in two columns), each article:
-12.5 px ACCENT title + 11.5 px MUTED body. The wording of every article is the client's,
+13.5 px ACCENT title + 12.5 px MUTED body (the legal size of the type scale). The wording of every article is the client's,
 reproduced verbatim: only the layout is restyled. Leading spacer ~12 px only (the native zone
 already takes up height), final spacer **≤ 16 px** (a large spacer creates a nearly
 empty PDF page). Official certification (Qualiopi, ISO…): official file in its original
