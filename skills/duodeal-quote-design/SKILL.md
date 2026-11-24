@@ -110,7 +110,11 @@ or the one their existing quotes follow. With none, the order below is the recom
 If the user asks for a plain quote, build a plain quote: the native blocks (header, contacts,
 pricing, signature, legal notice) with little or no html around them.
 
-1. **native `header`** — sender logo (a cover is recommended), filled in, never hidden nor recoded in HTML
+1. **native `header`** — sender logo (a cover is recommended), filled in, never hidden nor recoded in HTML.
+   The cover frame's height is the header's own setting `coverHeight` (px, 120 to 640, default 264); the
+   picture fills the frame and is cropped (`object-fit: cover`), so pick the height for the picture and,
+   to keep the whole picture, compose it on a canvas shaped for the frame before uploading it. Details and
+   the phone cap in **duodeal-v2-blocks** (header row); never resize the cover in CSS.
 2. **`contacts`** — native
 3. **html INTRO** — a hook, for example: a 2-logo lockup (sender · separator · prospect),
    an eyebrow, an H1, a personalized hook (contact name, their context), what the current

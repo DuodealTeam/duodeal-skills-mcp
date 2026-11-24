@@ -47,6 +47,7 @@ One failed item = redo the quote.
 Native blocks carry the sender's identity, the signature and the legal notices: keep them filled in and properly populated.
 
 - ⚠️ **Native header**: the sender's logo (a cover is recommended), never empty nor recoded in HTML (emptying it or rebuilding it breaks the rendering and forces a rework).
+- **Cover too cropped or too low**: make the frame taller with the header's `coverHeight` (`data.coverHeight`, px, 120 to 640, default 264, the same key as the editor's resize handle), never with CSS. On a phone the frame is capped at 60% of the screen width whatever the setting, and the picture is always cropped to fill it: keep logos and words in its middle, or compose it on a canvas shaped for the frame (**duodeal-v2-blocks**, header row).
 - ⚠️ **Native contacts block** (sender + recipient), never rebuilt in HTML; check that the recipient is present (otherwise the information is out of sync and the delivery is non-compliant).
 - Give every block a non-empty `title`; if the visible title lives in the HTML, keep the `title` and set `showTitle:false`.
 - Recommended when the client has product images: an image on each product line, on the media of the LINE, square, centered on the subject (`object-fit: cover`); a catalog line (`product_id`) inherits the product's photos, otherwise set `media_ids` on the line tools (upload first with `create_media`). A line without an image is fine.
