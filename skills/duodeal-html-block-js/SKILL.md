@@ -171,6 +171,7 @@ already translated for the person in front of the page. Show it; never swallow i
 | Call | What | Where |
 |---|---|---|
 | `DuoDeal.selectOption(lineId, selected, quotation?)` | Take or drop an **option** line (the rep marked it « option »; a plain line is refused) | editor and client page |
+| `DuoDeal.setQuantity(lineId, quantity, quotation?)` | Set the **quantity** of a line marked « The client can change the quantity » (`clientQuantity`), within its `quantityMin` / `quantityMax` / `quantityStep` (step counted from the min); any other line or value is refused | editor and client page |
 | `DuoDeal.setCustomField(name, value, quotation?)` | Set a **quotation** custom field (text, number, boolean, null or a list of those) | editor and client page, **only the fields ticked in the block's settings** |
 | `DuoDeal.addProduct(productId, { quantity, quotation, pricingBlock })` | Add a **catalogue product** to a price table (price of the quote's price category, tax and photos from the catalogue), in `pricingBlock` or the first visible table | **editor only**: refused on the client page |
 
@@ -191,6 +192,12 @@ Rules (the server checks them again on the client page):
   (a list of quotation custom-field names).
 - **Products** only from the editor. On the client page, offer the products as **option
   lines** the rep put in the table, and take them with `selectOption`.
+- **Quantities** only on lines marked « The client can change the quantity »: set
+  `clientQuantity: 1` (and `quantityMin` / `quantityMax` / `quantityStep` when the menu has
+  limits) on those lines with the line tools **before** wiring the block. A configurator
+  that lets the client pick « how many » calls `setQuantity` on them; the native table
+  (even hidden and kept in the total), the totals and the signature amount follow. The
+  client page also shows a − / + control on such a line in the native table.
 - A **signed** quotation is never changed. A **share link** changes only its own quotation;
   the deal link changes any visible quotation of the deal. Nothing is written from the PDF or
   the builder's « Client » preview.
@@ -436,7 +443,7 @@ media library through the relay.
 
 **Quote data (read-only)** — `deal` · `quotation` · `lines` · `customFields`
 **The deal's quotations (read-only)** — `quotations` · `getQuotation(id | 'primary' | 'current' | title)`
-**Writing to them (Promises)** — `selectOption(lineId, selected, q?)` · `setCustomField(name, value, q?)` (declared fields only) · `addProduct(productId, opts)` (editor only)
+**Writing to them (Promises)** — `selectOption(lineId, selected, q?)` · `setQuantity(lineId, quantity, q?)` (lines marked « client can change the quantity ») · `setCustomField(name, value, q?)` (declared fields only) · `addProduct(productId, opts)` (editor only)
 **State (read/write, auto-persisted)** — `get(k)` · `set(k,v)` · `update(obj|fn)` · `getData()` · `setData(obj)`
 **Files** — `uploadFile(file)` → descriptor · `removeFile(x)` · `isFile(v)`
 **Context (read-only)** — `storage` (`'encrypted'`|`'plain'`) · `locale`
