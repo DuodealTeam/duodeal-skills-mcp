@@ -202,6 +202,7 @@ Rules (the server checks them again on the client page):
   the deal link changes any visible quotation of the deal. Nothing is written from the PDF or
   the builder's « Client » preview.
 - After a write, the data comes back through `onUpdate`: repaint there rather than by hand.
+- An amount you write yourself must not break across lines on a phone: thousands separator `\u202f` (narrow no-break space) and `\u00a0` before `€` and before `HT`, or « +22 005,00 € HT » wraps after « +22 » at 360 px.
 
 ### `onUpdate` — following live edits
 

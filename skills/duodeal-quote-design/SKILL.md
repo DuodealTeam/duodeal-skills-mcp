@@ -159,6 +159,21 @@ pricing, signature, legal notice) with little or no html around them.
 12. **`legalnotice`** — designed legal pack (T&Cs as cards, one column by default; the
     client's wording stays verbatim)
 
+**A catalogue of optional products around a base order** (several products the client may add): present each product
+as its own product page inside an `html` block per family (picture large; name, description and specs; then a
+full-width price card: unit price first, quantity and total, marking or options, lead time, and one clear « Add to my
+selection » button inside it, wired to the option line with `DuoDeal.selectOption`, **duodeal-html-block-js**). The
+client chooses while looking at the product; the native `pricing` table stays as the recap (boxed lines with pictures),
+and its totals and the signature follow the buttons. Keep the price card quiet: spacing rather than rules between its
+details, no running total next to the button.
+
+**When the material is the client's own deck or quote**, keep their content, their order, their vocabulary (product
+names, descriptions, specs, price notes word for word) and their brand marks (logo, monogram, recurring artwork); copy
+their layout when it is designed, improve it when it is plain office slides. The words you ADD (section titles,
+buttons, statuses, steps) come from their documents too: one term they never use is what makes them say the page is
+not theirs. Check it mechanically: extract the source text slide by slide and count how much of it appears on the
+served page.
+
 Adapt (remove/add sections depending on the offer and the client's preference); as a default,
 the logic is: hook → problem → solution → proof → price → reassurance → action.
 HTML skeletons ready to adapt: [references/block-skeletons.md](references/block-skeletons.md).
